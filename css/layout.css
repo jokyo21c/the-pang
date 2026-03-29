@@ -1,0 +1,137 @@
+/* ══════════════════════════════════════════════════════════
+   THE PANG — Layout Utilities
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Container ─────────────────────────────────────────── */
+.container {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.container--wide {
+    max-width: 1440px;
+}
+
+/* ── Section ───────────────────────────────────────────── */
+.section {
+    padding: var(--section-pad-pc);
+}
+
+.section--alt {
+    background-color: var(--color-bg-section-alt);
+}
+
+.section--card {
+    background-color: var(--color-bg-primary);
+}
+
+/* ── Section Header ────────────────────────────────────── */
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.section-header__title {
+    font-size: 48px;
+    font-weight: var(--fw-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: 16px;
+    font-family: var(--font-kr);
+}
+
+.section-header__subtitle {
+    font-size: 18px;
+    color: var(--color-text-secondary);
+    font-weight: var(--fw-regular);
+}
+
+/* ── Grid System ───────────────────────────────────────── */
+.grid {
+    display: grid;
+    gap: 24px;
+}
+
+.grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid--4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* ── Flex Helpers ──────────────────────────────────────── */
+.flex {
+    display: flex;
+}
+
+.flex--center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex--between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.flex--column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex--gap-sm {
+    gap: 8px;
+}
+
+.flex--gap-md {
+    gap: 16px;
+}
+
+.flex--gap-lg {
+    gap: 24px;
+}
+
+.flex--gap-xl {
+    gap: 32px;
+}
+
+/* ── Text Utilities ────────────────────────────────────── */
+.text-center {
+    text-align: center;
+}
+
+.text-purple {
+    color: var(--color-brand-purple);
+}
+
+.text-orange {
+    color: var(--color-brand-orange);
+}
+
+.text-red {
+    color: var(--color-brand-red);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+/* ── Scroll Animation Base ─────────────────────────────── */
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}

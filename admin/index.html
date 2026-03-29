@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE PANG Admin — 로그인</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+</head>
+<body>
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-logo__mark">⚡</div>
+            <div>
+                <div class="login-logo__text">THE PANG</div>
+                <div class="login-logo__sub">Admin Panel</div>
+            </div>
+        </div>
+
+        <h1>관리자 로그인</h1>
+        <p>콘텐츠 관리를 위해 로그인하세요.</p>
+
+        <div class="login-error" id="loginError">
+            <i class="ri-error-warning-line"></i> 비밀번호가 올바르지 않습니다.
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="adminId">관리자 ID</label>
+                <input type="text" id="adminId" class="form-control" placeholder="admin" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="adminPw">비밀번호</label>
+                <input type="password" id="adminPw" class="form-control" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class="ri-login-box-line"></i> 로그인
+            </button>
+        </form>
+
+        <p style="margin-top:24px;font-size:11px;color:var(--text-muted);text-align:center;">
+            © 2025 THE PANG. 관리자 전용 페이지입니다.
+        </p>
+    </div>
+</div>
+
+<script>
+    // Default credentials (change after first login)
+    const ADMIN_ID = 'admin';
+    const ADMIN_PW = 'thepang2025!';
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('adminId').value;
+        const pw = document.getElementById('adminPw').value;
+
+        if (id === ADMIN_ID && pw === ADMIN_PW) {
+            sessionStorage.setItem('pang_admin_auth', 'true');
+            window.location.href = 'dashboard.html';
+        } else {
+            document.getElementById('loginError').classList.add('show');
+        }
+    });
+
+    // Redirect if already logged in
+    if (sessionStorage.getItem('pang_admin_auth') === 'true') {
+        window.location.href = 'dashboard.html';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,931 @@
+/* ══════════════════════════════════════════════════════════
+   THE PANG — Responsive Styles
+   Mobile First: 375px → 768px → 1280px+
+   ══════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════
+   PANG SECTION SLIDER — Global (outside media query)
+   ══════════════════════════════════════════════════════════ */
+
+
+/* 다음 팡 미리보기 컴포넌트 — 기본 숨김 */
+.pang-next-preview.mobile-only {
+    display: none;
+}
+
+/* ── Max 768px (Mobile) ────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* ══ PANG SECTION SLIDER ══════════════════════════════ */
+    
+    /* 슬라이더 래퍼: 뷰포트 너비 전체 사용, overflow hidden */
+    .pang-section-slider {
+        overflow: hidden;
+        width: 100%;
+        position: relative;
+    }
+
+    /* 슬라이더 트랙: 5개 슬라이드를 나란히 배치 (500% 너비) */
+    .pang-slider-track {
+        display: flex;
+        flex-direction: row;
+        width: 500%;
+        transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+        will-change: transform;
+    }
+
+    /* 모바일 플렉스 슬라이더 환경에선 스크롤 기반 애니메이션(Observer, GSAP) 비활성화 
+       (화면 밖 요소들이 계속 opacity: 0으로 남거나 transform 되는 현상 방지) */
+    .pang-section-slider .pang-slide {
+        display: block !important;
+        min-height: 100vh !important;
+        height: auto !important;
+    }
+    
+    .pang-section-slider .category-content,
+    .pang-section-slider .category-info,
+    .pang-section-slider .category-thumbnails {
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+        transition: none !important;
+    }
+
+    /* 각 팡 슬라이드: 트랙 너비(500%)의 20% 이므로 화면(100vw)에 꽉 참 */
+    .pang-slide {
+        flex: 0 0 20%;
+        width: 20%;
+        box-sizing: border-box;
+    }
+
+
+    /* ── 다음 팡 미리보기 카드 (우상단 축소 배치) ──────────────────────────── */
+    .pang-section-slider .section {
+        position: relative; /* 섹션을 절대 배치 기준으로 삼음 */
+    }
+
+    .category-content {
+        position: relative; 
+    }
+
+    .pang-next-preview.mobile-only {
+        position: absolute !important;
+        top: 20px !important;     /* 제목 라인과 얼추 맞도록 화면 상단 여백 */
+        right: 20px !important;   /* 우측 여백 확보 */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        background: rgba(255,255,255,0.08) !important; /* 좀 더 잘 보이게 배경색 강화 */
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 12px !important;
+        padding: 10px 8px !important;
+        margin-top: 0 !important; 
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+        z-index: 100 !important; /* 모든 요소의 위로 올라오도록 설정 */
+        width: 76px !important; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+
+    .pang-next-preview.mobile-only:hover,
+    .pang-next-preview.mobile-only:active {
+        background: rgba(255,107,53,0.15);
+        border-color: rgba(255,107,53,0.4);
+        transform: translateY(-1px);
+    }
+
+    .pang-next-preview__thumb {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .pang-next-preview__info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 2px;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .pang-next-preview__label {
+        font-size: 9px;
+        font-weight: 500;
+        color: var(--color-brand-orange, #ff6b35);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .pang-next-preview__name {
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        width: 100%; /* 길면 ...으로 생략 */
+    }
+
+    .pang-next-preview__btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--color-brand-orange, #ff6b35);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+        margin-top: 2px;
+    }
+
+    .pang-next-preview__btn:hover {
+        transform: scale(1.1);
+    }
+
+
+    .nav {
+        height: var(--nav-height-mobile);
+    }
+
+    .nav__inner {
+        padding: 0 16px;
+    }
+
+    .nav__menu,
+    .nav__cta {
+        display: none;
+    }
+
+    .nav__hamburger {
+        display: flex;
+        transform: scale(0.85); /* Slightly enlarged to accommodate the new padding nicely */
+        transform-origin: left center;
+        order: -1;
+        background: rgba(0, 0, 0, 0.5); /* Dark background for visibility */
+        padding: 8px;
+        border-radius: 6px;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-sizing: content-box; /* Maintain inner geometry for animation */
+    }
+
+    .nav__logo {
+        font-size: 20px;
+        order: 2;
+    }
+    
+    .nav__auth {
+        order: 0;
+        margin: 0 auto; /* Center perfectly between hamburger and logo */
+        gap: 6px; /* Bring buttons slightly closer */
+    }
+
+    .nav__auth-btn {
+        font-size: 10px; /* Reduced by ~30% */
+        padding: 4px 10px; /* Reduced padding */
+    }
+
+    .mobile-break {
+        display: block;
+    }
+
+    /* Hero */
+    .hero__title {
+        font-size: 38px;
+    }
+
+    .hero__tag {
+        font-size: 12px;
+    }
+
+    .hero__desc {
+        font-size: 15px;
+    }
+
+    .hero__buttons {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .hero__buttons .btn {
+        width: 100%;
+    }
+
+    .btn--small {
+        font-size: 16px;
+        padding: 12px 24px;
+    }
+
+    /* Slogan Banner */
+    .slogan-banner {
+        padding: 48px 0;
+        overflow: visible;
+    }
+
+    .slogan-banner__inner {
+        flex-direction: column;
+        gap: 32px;
+        padding: 0 24px;
+        text-align: center;
+    }
+
+    .slogan-banner__divider {
+        width: 60px;
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--color-brand-purple), transparent);
+    }
+
+    .slogan-roller {
+        width: 100vw;
+        height: 70px;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+
+    .slogan-banner__kr {
+        font-size: 16px;
+        white-space: nowrap;
+        line-height: 1.65;
+    }
+
+    /* Stats */
+    .stats__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 16px 0;
+    }
+
+    .stats__item:not(:last-child)::after {
+        display: none;
+    }
+
+    .stats__number {
+        font-size: 28px;
+    }
+
+    /* Section */
+    .section {
+        padding: var(--section-pad-mobile);
+    }
+
+    .section-header {
+        margin-bottom: 40px;
+    }
+
+    .section-header__title {
+        font-size: 26px;
+    }
+
+    .section-header__subtitle {
+        font-size: 15px;
+    }
+
+    /* Grid overrides */
+    .grid--3,
+    .grid--4 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid--2 {
+        grid-template-columns: 1fr;
+    }
+
+    /* Service Cards */
+    .service-card--featured {
+        transform: none;
+    }
+
+    .service-card--featured:hover {
+        transform: translateY(-8px);
+    }
+
+    .service-card__title {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    .service-card__list li {
+        font-size: 16px;
+        padding: 8px 0;
+    }
+
+    /* ── Mobile Service Slider ─────────────────────── */
+    .grid--3#serviceGrid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 16px;
+        grid-template-columns: unset;
+        padding-bottom: 24px;
+        margin-top: -8px;
+    }
+    
+    .grid--3#serviceGrid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .grid--3#serviceGrid .service-card {
+        flex: 0 0 calc(100% - 14px);
+        max-width: 100%;
+        scroll-snap-align: center;
+        /* prevent clipping on scale */
+        transform: scale(1) !important;
+    }
+    
+    .grid--3#serviceGrid .service-card:hover {
+        transform: translateY(-4px) !important;
+    }
+
+    .service-nav, .service-dots {
+        display: flex;
+    }
+
+    .service-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px; 
+        height: 40px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        align-items: center; 
+        justify-content: center;
+        color: white; 
+        font-size: 24px;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .service-nav--prev { left: -10px; }
+    .service-nav--next { right: -10px; }
+    .service-nav.hidden { opacity: 0; pointer-events: none; }
+
+    .service-dots {
+        justify-content: center; 
+        gap: 8px; 
+        margin-top: -4px;
+        margin-bottom: 20px;
+    }
+
+    .service-dot {
+        width: 8px; 
+        height: 8px; 
+        border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .service-dot.active {
+        background: var(--color-brand-purple); 
+        transform: scale(1.2);
+    }
+
+    /* Category Content */
+    .category-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .category-tabs {
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .category-tabs__btn {
+        flex-shrink: 0;
+        font-size: 14px;
+        padding: 10px 18px;
+    }
+
+    .category-info__title {
+        font-size: 24px;
+    }
+
+    .category-info p {
+        font-size: 14px !important;
+    }
+
+    .category-info__targets {
+        margin: 32px 0 24px;
+    }
+
+    .category-info__targets li {
+        font-size: 16px;
+        padding: 8px 0;
+    }
+
+    .category-info__targets li i {
+        font-size: 18px;
+    }
+
+    /* ── Mobile Thumbnail Slider ─────────────────────── */
+
+    /* 슬라이더 래퍼: 가로 overflow hidden */
+    .thumb-slider-wrap {
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* 슬라이더 트랙: 가로로 flex 나열, 스와이프 가능 */
+    .thumb-slider-track {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        will-change: transform;
+        /* 그리드 아닌 flex로 오버라이드 */
+        grid-template-columns: unset;
+    }
+
+    /* 각 슬라이드 아이템: 한 번에 한 장씩 보이게 */
+    .thumb-slider-track .category-thumb {
+        flex: 0 0 calc(50% - 6px);
+        /* 2장 동시에 보이기: 슬라이드 1개당 2장 */
+    }
+
+    /* ── thumb-all 2열 숏츠 높이 제한 (portfolio 섹션만) ── */
+    /* 먹팡~멋팡은 aspect-ratio:9/16 원래 스타일 유지 */
+    /* portfolio 섹션("실제 결과물")은 먹팡~멋팡과 동일한 크기로 통일 */
+    #portfolio .thumb-all-page .category-thumb {
+        aspect-ratio: 9/16 !important;
+        height: auto !important;
+        max-height: unset !important;
+    }
+
+    /* Dot indicators — 모바일에서만 보임 */
+    .thumb-dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        padding: 4px 0 0;
+    }
+
+    .thumb-dots .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: background 0.2s ease, transform 0.2s ease;
+        cursor: pointer;
+    }
+
+    .thumb-dots .dot.active {
+        background: var(--color-brand-orange);
+        transform: scale(1.3);
+    }
+
+    /* Process Steps */
+    .process-steps {
+        grid-template-columns: 1fr;
+    }
+
+    /* ── Mobile Pricing Slider ─────────────────────── */
+    .pricing-grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 16px;
+        padding-top: 24px;
+        padding-bottom: 32px;
+        margin-top: -16px; 
+    }
+    
+    .pricing-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .pricing-card {
+        flex: 0 0 calc(100% - 10px);
+        max-width: 100%;
+        scroll-snap-align: center;
+    }
+
+    .pricing-card--standard {
+        transform: scale(1) !important;
+    }
+    
+    .pricing-card--standard:hover {
+        transform: translateY(-4px) !important;
+    }
+
+    .pricing-nav, .pricing-dots {
+        display: flex;
+    }
+
+    .pricing-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px; 
+        height: 40px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        align-items: center; 
+        justify-content: center;
+        color: white; 
+        font-size: 24px;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .pricing-nav--prev { left: -10px; }
+    .pricing-nav--next { right: -10px; }
+    .pricing-nav.hidden { opacity: 0; pointer-events: none; }
+
+    .pricing-dots {
+        justify-content: center; 
+        gap: 8px; 
+        margin-top: 16px;
+    }
+
+    .pricing-dot {
+        width: 8px; 
+        height: 8px; 
+        border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .pricing-dot.active {
+        background: var(--color-brand-purple); 
+        transform: scale(1.2);
+    }
+
+    /* ── Mobile Process Slider ─────────────────────── */
+    .process-steps {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 16px;
+        grid-template-columns: unset;
+        padding-bottom: 24px;
+    }
+    
+    .process-steps::-webkit-scrollbar {
+        display: none;
+    }
+
+    .process-step {
+        flex: 0 0 calc(100% - 20px);
+        max-width: 100%;
+        scroll-snap-align: center;
+    }
+
+    .process-step__title {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    .process-step__desc {
+        font-size: 14px !important;
+    }
+
+    /* 슬라이더로 변경되면서 세로 연결선은 모바일에서 숨김 (혹은 제거) */
+    .process-step:not(:last-child)::after {
+        display: none;
+    }
+
+    .process-nav, .process-dots {
+        display: flex;
+    }
+
+    .process-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px; 
+        height: 40px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        align-items: center; 
+        justify-content: center;
+        color: white; 
+        font-size: 24px;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .process-nav--prev { left: -10px; }
+    .process-nav--next { right: -10px; }
+    .process-nav.hidden { opacity: 0; pointer-events: none; }
+
+    .process-dots {
+        justify-content: center; 
+        gap: 8px; 
+        margin-top: -8px;
+        margin-bottom: 20px;
+    }
+
+    .process-dot {
+        width: 8px; 
+        height: 8px; 
+        border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .process-dot.active {
+        background: var(--color-brand-purple); 
+        transform: scale(1.2);
+    }
+    /* Portfolio */
+    .portfolio-page {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: auto !important;
+    }
+
+    .portfolio-filter {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .portfolio-filter__btn {
+        padding: 10px 0;
+        font-size: 15px; /* 모바일에서 텍스트 크기 축소 */
+        width: 100%;
+        text-align: center;
+    }
+
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Pricing */
+    .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .pricing-card--standard {
+        transform: none;
+    }
+
+    .pricing-card--standard:hover {
+        transform: translateY(-8px);
+    }
+
+    /* CTA Banner */
+    .cta-banner__title {
+        font-size: 32px;
+    }
+
+    /* ── Mobile News Slider ─────────────────────── */
+    .grid--3#newsGrid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 16px;
+        grid-template-columns: unset;
+        padding-bottom: 24px;
+        margin-top: -8px;
+    }
+    
+    .grid--3#newsGrid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .grid--3#newsGrid .news-card {
+        flex: 0 0 calc(100% - 20px);
+        max-width: 100%;
+        scroll-snap-align: center;
+        transform: scale(1) !important;
+    }
+    
+    .grid--3#newsGrid .news-card:hover {
+        transform: translateY(-4px) !important;
+    }
+
+    .news-nav, .news-dots {
+        display: flex;
+    }
+
+    .news-nav {
+        position: absolute;
+        top: 40%;
+        transform: translateY(-50%);
+        width: 40px; 
+        height: 40px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        align-items: center; 
+        justify-content: center;
+        color: white; 
+        font-size: 24px;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .news-nav--prev { left: -10px; }
+    .news-nav--next { right: -10px; }
+    .news-nav.hidden { opacity: 0; pointer-events: none; }
+
+    .news-dots {
+        justify-content: center; 
+        gap: 8px; 
+        margin-top: -8px;
+        margin-bottom: 20px;
+    }
+
+    .news-dot {
+        width: 8px; 
+        height: 8px; 
+        border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .news-dot.active {
+        background: var(--color-brand-purple); 
+        transform: scale(1.2);
+    }
+
+    .cta-banner__buttons {
+        flex-direction: column;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .cta-banner__buttons .btn {
+        width: 100%;
+    }
+
+    /* Floating Buttons */
+    .floating-btns {
+        bottom: 24px;
+        right: 16px;
+    }
+
+    .floating-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    /* Footer */
+    .footer__grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+    }
+
+    /* Slider */
+    .testimonial-slider {
+        padding: 0 16px;
+    }
+
+    .testimonial-card__inner {
+        padding: 28px 20px;
+        flex-direction: column;
+        text-align: center;
+        gap: 24px;
+    }
+
+    .testimonial-card__content {
+        align-items: center;
+    }
+
+    .testimonial-card__photo {
+        width: 160px;
+        height: 160px;
+    }
+
+    .testimonial-card__footer {
+        align-items: center;
+    }
+
+    .testimonial-card__info {
+        align-items: center;
+    }
+
+    .testimonial-card__text {
+        font-size: 16px;
+    }
+
+    /* Floating Sidebar - Bottom Horizontal */
+    .floating-sidebar {
+        left: 50% !important;
+        top: auto !important;
+        bottom: 24px !important;
+        transform: translateX(-50%) !important;
+        width: calc(100% - 40px) !important;
+        max-width: 450px !important;
+        flex-direction: row;
+    }
+
+    .floating-sidebar__menu {
+        flex-direction: row !important;
+        justify-content: center !important;
+        padding: 8px 16px !important;
+        border-radius: 40px !important;
+        gap: 12px !important;
+        width: 100%;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .floating-sidebar__item {
+        flex-shrink: 0;
+    }
+
+    /* Hide Home and Top buttons on mobile */
+    .floating-sidebar__item:first-child,
+    .floating-sidebar__item--top {
+        display: none !important;
+    }
+
+    .floating-sidebar__link {
+        width: 42px !important;
+        height: 42px !important;
+    }
+
+    .floating-sidebar__link i {
+        font-size: 20px !important;
+        color: var(--color-brand-orange) !important;
+    }
+
+    .floating-sidebar__label {
+        display: none !important;
+    }
+
+    /* Kakao button style adjustment */
+    .floating-sidebar__item--kakao {
+        margin-left: 0; /* Reset margin since top button is removed */
+    }
+}
+
+
+/* ── Tablet (769px - 1279px) ───────────────────────────── */
+@media (min-width: 769px) and (max-width: 1279px) {
+    .hero__title {
+        font-size: 52px;
+    }
+
+    .portfolio-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer__grid {
+        grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    }
+
+    .process-steps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
+
+    .process-step:not(:last-child)::after {
+        display: none;
+    }
+}
+
+
+/* ── Large Desktop (1280px+) ───────────────────────────── */
+@media (min-width: 1280px) {
+    .container {
+        padding: 0 40px;
+    }
+}

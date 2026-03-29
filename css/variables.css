@@ -1,0 +1,66 @@
+/* ══════════════════════════════════════════════════════════
+   THE PANG — Design Tokens (variables.css)
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+    /* ── Color System ────────────────────────────────────── */
+    --color-bg-primary: #0D0D0D;
+    --color-bg-card: #1A1A1A;
+    --color-bg-subtle: #222222;
+    --color-bg-footer: #0A0A0A;
+    --color-bg-section-alt: #111111;
+
+    --color-brand-purple: #7B2FFF;
+    --color-brand-red: #E63946;
+    --color-brand-orange: #FF5E00;
+
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #CCCCCC;
+    --color-text-muted: #888888;
+    --color-border: #2A2A2A;
+
+    --color-kakao: #FEE500;
+
+    /* ── Typography ──────────────────────────────────────── */
+    --font-kr: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-en: 'Poppins', var(--font-kr);
+
+    --fs-h1: 56px;
+    --fs-h2: 36px;
+    --fs-h3: 24px;
+    --fs-body: 16px;
+    --fs-caption: 13px;
+    --fs-cta: 16px;
+
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+
+    --lh-body: 1.7;
+    --ls-h1: -1px;
+    --ls-tag: 3px;
+
+    /* ── Spacing ─────────────────────────────────────────── */
+    --section-pad-pc: 100px 0;
+    --section-pad-mobile: 60px 0;
+    --max-width: 1200px;
+    --nav-height-pc: 72px;
+    --nav-height-mobile: 42px;
+
+    /* ── UI Tokens ───────────────────────────────────────── */
+    --radius-card: 12px;
+    --radius-btn: 8px;
+    --radius-badge: 50px;
+
+    --shadow-purple: 0 4px 24px rgba(123, 47, 255, 0.15);
+    --shadow-heavy: 0 8px 40px rgba(123, 47, 255, 0.25);
+    --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.3);
+
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ── Overlay ─────────────────────────────────────────── */
+    --overlay-dark: rgba(13, 13, 13, 0.05);
+    --nav-bg: rgba(13, 13, 13, 0.92);
+}

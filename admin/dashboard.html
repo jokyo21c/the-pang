@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE PANG Admin — 대시보드</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    <style>
+        .section-card {
+            position: relative;
+        }
+        .section-card__count {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: rgba(123, 47, 255, 0.08);
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-layout">
+
+    <!-- ── Mobile Overlay ── -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo__mark">⚡</div>
+            <div>
+                <div class="sidebar-logo__name">THE PANG</div>
+                <div class="sidebar-logo__admin">Admin CMS</div>
+            </div>
+            <!-- 모바일 닫기 버튼 -->
+            <button class="sidebar-close" id="sidebarClose" aria-label="메뉴 닫기">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- 메인 섹션 (어코디언) -->
+            <div class="nav-section accordion-section" data-accordion="main">
+                <div class="nav-section-label accordion-trigger" data-target="main">
+                    메인 <i class="ri-arrow-down-s-line accordion-arrow"></i>
+                </div>
+                <div class="accordion-body" id="accordion-main">
+                    <div class="nav-item active" data-panel="dashboard">
+                        <i class="ri-dashboard-line"></i> 대시보드
+                    </div>
+                </div>
+            </div>
+
+            <!-- 섹션 관리 (어코디언) -->
+            <div class="nav-section accordion-section" data-accordion="sections">
+                <div class="nav-section-label accordion-trigger" data-target="sections">
+                    섹션 관리 <i class="ri-arrow-down-s-line accordion-arrow"></i>
+                </div>
+                <div class="accordion-body" id="accordion-sections">
+                    <div class="nav-item" data-panel="hero">
+                        <i class="ri-image-line"></i> 히어로
+                    </div>
+                    <div class="nav-item" data-panel="portfolio">
+                        <i class="ri-gallery-line"></i> 포트폴리오
+                    </div>
+                    <div class="nav-item" data-panel="testimonial">
+                        <i class="ri-chat-quote-line"></i> 사장님 후기
+                    </div>
+                    <div class="nav-item" data-panel="pricing">
+                        <i class="ri-price-tag-3-line"></i> 가격표
+                    </div>
+                    <div class="nav-item" data-panel="footer">
+                        <i class="ri-computer-line"></i> 푸터 관리
+                    </div>
+                </div>
+            </div>
+
+            <!-- 회원 관리 (어코디언) -->
+            <div class="nav-section accordion-section" data-accordion="members">
+                <div class="nav-section-label accordion-trigger" data-target="members">
+                    회원 관리 <i class="ri-arrow-down-s-line accordion-arrow"></i>
+                </div>
+                <div class="accordion-body" id="accordion-members">
+                    <div class="nav-item" data-panel="members">
+                        <i class="ri-group-line"></i> 회원 목록
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="../index.html" target="_blank" class="nav-item">
+                <i class="ri-external-link-line"></i> 메인사이트 보기
+            </a>
+            <div class="nav-item" id="logoutBtn">
+                <i class="ri-logout-box-line"></i> 로그아웃
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── Main Area ── -->
+    <main class="admin-main">
+        <div class="admin-topbar">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <!-- 모바일 햄버거 버튼 -->
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="메뉴 열기">
+                    <i class="ri-menu-line"></i>
+                </button>
+                <div class="topbar-title" id="topbarTitle">대시보드</div>
+            </div>
+            <div class="topbar-actions">
+                <a href="../index.html" target="_blank" class="btn-preview">
+                    <i class="ri-eye-line"></i> 미리보기
+                </a>
+                <button class="btn-save" id="saveBtn">
+                    <i class="ri-save-line"></i> 저장
+                </button>
+            </div>
+        </div>
+
+        <div class="admin-content">
+
+            <!-- ─── DASHBOARD HOME ─── -->
+            <div class="editor-panel active" id="panel-dashboard">
+                <div class="section-grid">
+                    <div class="section-card" onclick="showPanel('hero')">
+                        <div class="section-card__icon" style="background:rgba(123,47,255,0.15);">🎬</div>
+                        <div class="section-card__title">히어로 섹션</div>
+                        <div class="section-card__desc">메인 타이틀, 서브타이틀, CTA 버튼 문구 수정</div>
+                    </div>
+                    <div class="section-card" onclick="showPanel('portfolio')">
+                        <div class="section-card__icon" style="background:rgba(255,94,0,0.12);">🖼️</div>
+                        <div class="section-card__title">포트폴리오 관리</div>
+                        <div class="section-card__desc">카테고리별 썸네일 이미지 URL 등록 및 관리</div>
+                        <div class="section-card__count" id="stat-portfolio">0</div>
+                    </div>
+                    <div class="section-card" onclick="showPanel('testimonial')">
+                        <div class="section-card__icon" style="background:rgba(34,197,94,0.12);">💬</div>
+                        <div class="section-card__title">사장님 후기</div>
+                        <div class="section-card__desc">후기 텍스트, 사진, 이름, 배지 수정</div>
+                        <div class="section-card__count" id="stat-testimonials">4</div>
+                    </div>
+                    <div class="section-card" onclick="showPanel('pricing')">
+                        <div class="section-card__icon" style="background:rgba(255,94,0,0.12);">💰</div>
+                        <div class="section-card__title">가격표 관리</div>
+                        <div class="section-card__desc">플랜별 금액, 기능 항목, 버튼 텍스트 수정</div>
+                        <div class="section-card__count">4</div>
+                    </div>
+                    <div class="section-card" onclick="showPanel('footer')">
+                        <div class="section-card__icon" style="background:rgba(123,47,255,0.12);">🖥️</div>
+                        <div class="section-card__title">푸터 관리</div>
+                        <div class="section-card__desc">하단 로고, 슬로건, SNS 링크, 회사/문의처 수정</div>
+                    </div>
+                    <div class="section-card" onclick="showPanel('members')">
+                        <div class="section-card__icon" style="background:rgba(22,163,74,0.12);">👤</div>
+                        <div class="section-card__title">회원 관리</div>
+                        <div class="section-card__desc">메인사이트 가입 회원 조회 및 관리</div>
+                        <div class="section-card__count" id="stat-members">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── HERO EDITOR ─── -->
+            <div class="editor-panel" id="panel-hero">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>🎬 히어로 섹션</h2>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-text"></i> 텍스트 편집</div>
+                    <div class="editor-row">
+                        <label>메인 타이틀 (줄바꿈 \n 입력)</label>
+                        <textarea class="form-control" id="hero-title" rows="3"></textarea>
+                    </div>
+                    <div class="editor-row">
+                        <label>서브타이틀</label>
+                        <textarea class="form-control" id="hero-subtitle" rows="2"></textarea>
+                    </div>
+                    <div class="editor-row">
+                        <label>CTA 버튼 1 텍스트</label>
+                        <input type="text" class="form-control" id="hero-cta">
+                    </div>
+                    <div class="editor-row">
+                        <label>CTA 버튼 2 텍스트</label>
+                        <input type="text" class="form-control" id="hero-cta-sub">
+                    </div>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-image-line"></i> 백그라운드 미디어 (이미지 / 비디오)</div>
+                    <div class="editor-row">
+                        <div class="upload-zone" id="hero-upload-zone">
+                            <i class="ri-upload-cloud-2-line"></i>
+                            <p>클릭하거나 파일을 이곳으로 드래그 앤 드롭하세요</p>
+                            <input type="file" id="hero-media-input" accept="image/*,video/*" hidden>
+                        </div>
+                        <div class="media-preview-wrap" id="hero-preview-wrap" style="display:none;">
+                            <div class="media-preview" id="hero-media-preview"></div>
+                            <button class="btn-remove-media" id="hero-media-remove" aria-label="미디어 삭제">
+                                <i class="ri-close-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── PORTFOLIO EDITOR ─── -->
+            <div class="editor-panel" id="panel-portfolio">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>🖼️ 포트폴리오 관리</h2>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-information-line"></i> 이미지 URL 등록 방법</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        유튜브/틱톡 썸네일 URL, 직접 업로드한 이미지 URL, 또는 외부 이미지 URL을 입력하세요.<br>
+                        실제 서버 업로드 기능은 추후 백엔드 연동 시 지원됩니다.
+                    </p>
+                </div>
+
+                <div id="portfolio-categories"></div>
+            </div>
+
+            <!-- ─── TESTIMONIAL EDITOR ─── -->
+            <div class="editor-panel" id="panel-testimonial">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>💬 사장님 후기</h2>
+                </div>
+                <div class="testimonial-editor" id="testimonial-editor"></div>
+            </div>
+
+            <!-- ─── PRICING EDITOR ─── -->
+            <div class="editor-panel" id="panel-pricing">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>💰 가격표 관리</h2>
+                </div>
+                <div class="pricing-editor-grid" id="pricing-editor"></div>
+            </div>
+
+            <!-- ─── FOOTER EDITOR ─── -->
+            <div class="editor-panel" id="panel-footer">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>🖥️ 푸터 관리</h2>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-text-wrap"></i> 브랜드 & 슬로건</div>
+                    <div class="editor-row">
+                        <label>로고 및 브랜드명 (THE PANG)</label>
+                        <input type="text" class="form-control" id="footer-brand" placeholder="THE PANG">
+                    </div>
+                    <div class="editor-row">
+                        <label>푸터 슬로건 (엔터 키로 줄바꿈 가능)</label>
+                        <textarea class="form-control" id="footer-slogan" rows="3" placeholder="숏츠 광고, 한방으로 바이럴"></textarea>
+                    </div>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-links-line"></i> SNS 링크</div>
+                    <div class="editor-row">
+                        <label>인스타그램 URL</label>
+                        <input type="url" class="form-control" id="footer-sns-insta" placeholder="https://instagram.com/...">
+                    </div>
+                    <div class="editor-row">
+                        <label>유튜브 URL</label>
+                        <input type="url" class="form-control" id="footer-sns-youtube" placeholder="https://youtube.com/...">
+                    </div>
+                    <div class="editor-row">
+                        <label>틱톡 URL</label>
+                        <input type="url" class="form-control" id="footer-sns-tiktok" placeholder="https://tiktok.com/...">
+                    </div>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-building-line"></i> 회사 정보 링크</div>
+                    <div class="editor-row">
+                        <label>회사 링크 (메뉴명, URL 형식으로 한 줄씩 입력)</label>
+                        <textarea class="form-control" id="footer-company-links" rows="5" placeholder="회사소개, #&#10;이용약관, /terms&#10;..."></textarea>
+                    </div>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-customer-service-2-line"></i> 문의처 및 운영시간</div>
+                    <div class="editor-row">
+                        <label>카카오톡 텍스트 (채널 이름 등)</label>
+                        <input type="text" class="form-control" id="footer-contact-kakao" placeholder="카카오톡 채널">
+                    </div>
+                    <div class="editor-row">
+                        <label>문의 이메일</label>
+                        <input type="email" class="form-control" id="footer-contact-email" placeholder="hello@thepang.kr">
+                    </div>
+                    <div class="editor-row">
+                        <label>운영시간</label>
+                        <input type="text" class="form-control" id="footer-contact-time" placeholder="평일 09:00-18:00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── MEMBERS PANEL ─── -->
+            <div class="editor-panel" id="panel-members">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>👤 회원 관리</h2>
+                </div>
+
+                <!-- 검색 + 통계 바 -->
+                <div class="members-toolbar">
+                    <div class="members-search">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="memberSearchInput" placeholder="이름 또는 이메일 검색..." oninput="filterMembers()">
+                    </div>
+                    <div class="members-stats">
+                        <span>전체 <strong id="memberTotalCount">0</strong>명</span>
+                        <button class="btn-member-refresh" onclick="initMembersPanel()" title="새로고침">
+                            <i class="ri-refresh-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 회원 테이블 -->
+                <div class="editor-card" style="padding:0;overflow:hidden;">
+                    <div class="members-table-wrap">
+                        <table class="members-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>이름</th>
+                                    <th>이메일</th>
+                                    <th>상태</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 빈 상태 -->
+                    <div class="members-empty" id="membersEmpty" style="display:none;">
+                        <i class="ri-user-search-line"></i>
+                        <p>가입된 회원이 없습니다</p>
+                        <span>메인 사이트에서 회원가입하면 여기에 표시됩니다.</span>
+                    </div>
+                </div>
+
+                <!-- 삭제 확인 모달 -->
+                <div class="member-delete-modal" id="memberDeleteModal" style="display:none;">
+                    <div class="member-delete-modal__box">
+                        <div class="member-delete-modal__icon">⚠️</div>
+                        <h3>회원 삭제</h3>
+                        <p id="memberDeleteMsg">이 회원을 삭제하시겠습니까?</p>
+                        <div class="member-delete-modal__actions">
+                            <button class="btn-cancel" onclick="closeMemberDeleteModal()">취소</button>
+                            <button class="btn-delete-confirm" id="memberDeleteConfirm">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.admin-content -->
+    </main>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <i class="ri-checkbox-circle-line"></i> <span id="toast-msg">저장되었습니다!</span>
+</div>
+
+<script src="js/content-store.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta -->
+    <title>숏츠 광고 한 방으로 바이럴 | THE PANG</title>
+    <meta name="description"
+        content="THE PANG은 F&B 전문 숏폼 광고 대행 플랫폼입니다. 실제 촬영 + AI 기술 + 전담 담당자로 TikTok, YouTube Shorts, Instagram Reels 숏츠 광고를 제작합니다.">
+    <meta name="keywords" content="숏츠 광고, 숏폼 광고 대행, 유튜브 숏츠 광고, 릴스 광고 제작, 틱톡 광고 대행, 음식점 SNS 광고, 식당 바이럴 마케팅">
+
+    <!-- OG Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="숏츠 광고 한 방으로 바이럴 | THE PANG">
+    <meta property="og:description" content="먹팡부터 멋팡까지, 30초로 브랜드를 터뜨립니다. F&B 전문 숏폼 광고 대행 플랫폼 THE PANG">
+    <meta property="og:url" content="https://thepang.kr">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "THE PANG",
+    "description": "F&B 전문 숏폼 광고 대행 플랫폼",
+    "url": "https://thepang.kr",
+    "sameAs": [],
+    "service": {
+      "@type": "Service",
+      "name": "숏츠 광고 제작",
+      "description": "30초 숏폼 광고 촬영, 편집, AI 후보정, 플랫폼 최적화 납품"
+    }
+  }
+  </script>
+</head>
+
+<body>
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 01] NAVIGATION
+       ════════════════════════════════════════════════════════ -->
+    <nav class="nav" id="navbar">
+        <div class="nav__inner">
+            <a href="/" class="nav__logo">THE PANG</a>
+
+            <ul class="nav__menu">
+                <li><a href="#hero" class="nav__link active">홈</a></li>
+                <li><a href="#services" class="nav__link">제공 서비스</a></li>
+                <li><a href="#pricing" class="nav__link">요금 안내</a></li>
+                <li><a href="#news" class="nav__link">팡 뉴스</a></li>
+                <li><a href="#order" class="nav__link">문의하기</a></li>
+            </ul>
+
+            <!-- Auth Buttons (PC) -->
+            <div class="nav__auth" id="navAuth">
+                <button class="nav__auth-btn nav__auth-btn--login" id="navLoginBtn">로그인</button>
+                <button class="nav__auth-btn nav__auth-btn--signup" id="navSignupBtn">회원가입</button>
+                <!-- 로그인 후 표시 -->
+                <div class="nav__user" id="navUser" style="display:none;">
+                    <span class="nav__user-name" id="navUserName"></span>
+                    <button class="nav__auth-btn nav__auth-btn--logout" id="navLogoutBtn">로그아웃</button>
+                </div>
+            </div>
+
+            <button class="nav__hamburger" id="hamburger" aria-label="메뉴 열기">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#hero" class="mobile-menu__link">홈</a>
+        <a href="#services" class="mobile-menu__link">제공 서비스</a>
+        <a href="#portfolio" class="mobile-menu__link">포트폴리오</a>
+        <a href="#pricing" class="mobile-menu__link">요금 안내</a>
+        <a href="#news" class="mobile-menu__link">팡 뉴스</a>
+        <a href="#order" class="mobile-menu__link">문의하기</a>
+        <a href="#order" class="mobile-menu__cta">견적 받기</a>
+        <!-- Mobile Auth -->
+        <div class="mobile-menu__auth" id="mobileAuth">
+            <button class="mobile-menu__auth-login" id="mobileLoginBtn">로그인</button>
+            <button class="mobile-menu__auth-signup" id="mobileSignupBtn">회원가입</button>
+        </div>
+        <div class="mobile-menu__user" id="mobileUser" style="display:none;">
+            <span id="mobileUserName"></span>
+            <button class="mobile-menu__auth-logout" id="mobileLogoutBtn">로그아웃</button>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 02] HERO SECTION
+       ════════════════════════════════════════════════════════ -->
+    <section class="hero" id="hero">
+        <div class="hero__bg">
+            <video autoplay muted loop playsinline>
+                <source src="images/hero-video.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="hero__overlay"></div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 02-B] SLOGAN BANNER
+       ════════════════════════════════════════════════════════ -->
+    <section class="slogan-banner">
+        <div class="slogan-banner__inner">
+            <div class="slogan-banner__left">
+                <span class="slogan-banner__en stamp-text">SHORTS THAT<br>EXPLODE</span>
+            </div>
+            <div class="slogan-banner__divider"></div>
+            <div class="slogan-banner__right">
+                <div class="slogan-roller">
+                    <p class="slogan-banner__kr slogan-item stamp-text" id="firstSlogan">먹팡부터 멋팡까지<br><em>30초로 브랜드를
+                            터뜨립니다.</em></p>
+                    <p class="slogan-banner__kr slogan-item">전문 PD의 눈과 AI의 손으로,<br><em>완벽한 숏폼이 완성됩니다.</em></p>
+                    <p class="slogan-banner__kr slogan-item">외식업부터 뷰티까지,<br><em>모든 업종의 숏폼을 터뜨립니다.</em></p>
+                </div>
+                <span class="slogan-banner__brand">THE PANG</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 05] CATEGORIES - PANG SECTION SLIDER
+       ════════════════════════════════════════════════════════ -->
+
+
+    <div class="pang-section-slider" id="pangSectionSlider">
+        <div class="pang-slider-track" id="pangSliderTrack">
+
+    <!-- ═══════════════ SLIDE 1: MEOKPANG ═══════════════ -->
+    <section class="section section--alt pang-slide" id="meokpang">
+        <div class="container">
+
+                    <div class="category-content fade-in">
+                        <div class="category-info">
+                            <span class="category-info__icon">🍖</span>
+                            <h3 class="category-info__title">먹팡 SHORTS</h3>
+                            <p style="color: var(--color-text-secondary);">
+                                음식점·카페·베이커리를 위한 특급 숏츠 광고.<br class="mobile-break"> 침 넘어가는 영상으로 고객을 끌어모읍니다.
+                            </p>
+                            <ul class="category-info__targets">
+                                <li><i class="ri-restaurant-2-line"></i> 음식점·레스토랑</li>
+                                <li><i class="ri-cup-line"></i> 카페·베이커리</li>
+                                <li><i class="ri-store-2-line"></i> 식품 브랜드</li>
+                                <li><i class="ri-e-bike-line"></i> 배달 전문점</li>
+                            </ul>
+                            <a href="#order" class="btn btn--primary btn--small">지금 견적 받기</a>
+                        </div>
+                        <!-- 모바일: 다음 팡 미리보기 카드 (먹팡 → 놀팡) -->
+                        <div class="pang-next-preview mobile-only" data-next="1">
+                            <div class="pang-next-preview__thumb">
+                                <span class="pang-next-preview__icon">🎮</span>
+                            </div>
+                            <div class="pang-next-preview__info">
+                                <span class="pang-next-preview__label">다음</span>
+                                <span class="pang-next-preview__name">놀팡</span>
+                            </div>
+                            <button class="pang-next-preview__btn" aria-label="놀팡으로 이동">
+                                <i class="ri-arrow-right-s-line"></i>
+                            </button>
+                        </div>
+                        <div class="category-thumbnails">
+                            <!-- 통합 슬라이드: 모바일에서 1행 + 좌우 스와이프 -->
+                            <div class="thumb-all-wrap" data-slide-index="0">
+                                <div class="thumb-all-nav thumb-all-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                                <div class="thumb-all-nav thumb-all-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+                                <div class="thumb-all-viewport">
+                                    <div class="thumb-all-track">
+                                        <div class="thumb-all-page">
+                                            <div class="category-thumb category-thumb--1" data-label="먹팡 #1" data-color="linear-gradient(135deg,#2a1a3a,#1a2a3a)">
+                                                <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                            </div>
+                                            <div class="category-thumb category-thumb--2" data-label="먹팡 #2" data-color="linear-gradient(135deg,#3a1a2a,#1a3a2a)">
+                                                <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                            </div>
+                                        </div>
+                                        <div class="thumb-all-page">
+                                            <div class="category-thumb category-thumb--3" data-label="먹팡 #3" data-color="linear-gradient(135deg,#1a3a3a,#2a2a1a)">
+                                                <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                            </div>
+                                            <div class="category-thumb category-thumb--4" data-label="먹팡 #4" data-color="linear-gradient(135deg,#3a2a1a,#1a2a3a)">
+                                                <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                            </div>
+                                        </div>
+                                        <div class="thumb-all-page">
+                                            <div class="category-thumb category-thumb--1" data-label="먹팡 #5" data-color="linear-gradient(135deg,#1a2a4a,#3a1a1a)">
+                                                <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                            </div>
+                                            <div class="category-thumb category-thumb--2" data-label="먹팡 #6" data-color="linear-gradient(135deg,#2a3a1a,#1a1a3a)">
+                                                <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-dots">
+                                    <span class="thumb-all-dot active"></span>
+                                    <span class="thumb-all-dot"></span>
+                                    <span class="thumb-all-dot"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════ SLIDE 2: NOLPANG ═══════════════ -->
+    <section class="section pang-slide" id="nolpang">
+        <div class="container">
+            <div class="category-content fade-in">
+                <div class="category-info">
+                    <span class="category-info__icon">🎮</span>
+                    <h3 class="category-info__title">놀팡 SHORTS</h3>
+                    <p style="color: var(--color-text-secondary); margin-bottom: 16px;">
+                        키즈카페·방탈출·오락시설의 짜릿한 재미를<br class="mobile-break"> 30초에 담습니다.
+                    </p>
+                    <ul class="category-info__targets">
+                        <li><i class="ri-gamepad-line"></i> 키즈카페·놀이시설</li>
+                        <li><i class="ri-door-lock-line"></i> 방탈출·체험공간</li>
+                        <li><i class="ri-basketball-line"></i> 스포츠·볼링장</li>
+                        <li><i class="ri-glasses-line"></i> VR체험·오락시설</li>
+                    </ul>
+                    <a href="#order" class="btn btn--primary btn--small">지금 견적 받기</a>
+                </div>
+                <!-- 모바일: 다음 팡 미리보기 카드 (놀팡 → 쉼팡) -->
+                <div class="pang-next-preview mobile-only" data-next="2">
+                    <div class="pang-next-preview__thumb">
+                        <span class="pang-next-preview__icon">🛌</span>
+                    </div>
+                    <div class="pang-next-preview__info">
+                        <span class="pang-next-preview__label">다음</span>
+                        <span class="pang-next-preview__name">쉼팡</span>
+                    </div>
+                    <button class="pang-next-preview__btn" aria-label="쉼팡으로 이동">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+                <div class="category-thumbnails">
+                    <div class="thumb-all-wrap" data-slide-index="0">
+                        <div class="thumb-all-nav thumb-all-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                        <div class="thumb-all-nav thumb-all-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+                        <div class="thumb-all-viewport">
+                            <div class="thumb-all-track">
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--2" data-label="놀팡 #1" data-color="linear-gradient(135deg,#3a1a2a,#1a3a2a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--3" data-label="놀팡 #2" data-color="linear-gradient(135deg,#1a3a3a,#2a2a1a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--4" data-label="놀팡 #3" data-color="linear-gradient(135deg,#3a2a1a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--1" data-label="놀팡 #4" data-color="linear-gradient(135deg,#2a1a3a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--2" data-label="놀팡 #5" data-color="linear-gradient(135deg,#1a2a4a,#2a3a1a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--3" data-label="놀팡 #6" data-color="linear-gradient(135deg,#3a1a1a,#1a1a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="thumb-all-dots">
+                            <span class="thumb-all-dot active"></span>
+                            <span class="thumb-all-dot"></span>
+                            <span class="thumb-all-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══════════════ SLIDE 3: SWIMPANG ═══════════════ -->
+    <section class="section section--alt pang-slide" id="swimpang">
+        <div class="container">
+            <div class="category-content fade-in">
+                <div class="category-info">
+                    <span class="category-info__icon">🛌</span>
+                    <h3 class="category-info__title">쉼팡 SHORTS</h3>
+                    <p style="color: var(--color-text-secondary); margin-bottom: 16px;">
+                        호텔·스파·힐링공간의 고급스러운 분위기를<br class="mobile-break"> 영상으로 전달합니다.
+                    </p>
+                    <ul class="category-info__targets">
+                        <li><i class="ri-hotel-line"></i> 호텔·펜션</li>
+                        <li><i class="ri-leaf-line"></i> 스파·마사지</li>
+                        <li><i class="ri-mental-health-line"></i> 요가·명상</li>
+                        <li><i class="ri-heart-pulse-line"></i> 힐링공간</li>
+                    </ul>
+                    <a href="#order" class="btn btn--primary btn--small">지금 견적 받기</a>
+                </div>
+                <!-- 모바일: 다음 팡 미리보기 카드 (쉼팡 → 살팡) -->
+                <div class="pang-next-preview mobile-only" data-next="3">
+                    <div class="pang-next-preview__thumb">
+                        <span class="pang-next-preview__icon">🛍️</span>
+                    </div>
+                    <div class="pang-next-preview__info">
+                        <span class="pang-next-preview__label">다음</span>
+                        <span class="pang-next-preview__name">살팡</span>
+                    </div>
+                    <button class="pang-next-preview__btn" aria-label="살팡으로 이동">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+                <div class="category-thumbnails">
+                    <div class="thumb-all-wrap" data-slide-index="0">
+                        <div class="thumb-all-nav thumb-all-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                        <div class="thumb-all-nav thumb-all-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+                        <div class="thumb-all-viewport">
+                            <div class="thumb-all-track">
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--3" data-label="쉼팡 #1" data-color="linear-gradient(135deg,#1a3a3a,#2a2a1a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--1" data-label="쉼팡 #2" data-color="linear-gradient(135deg,#2a1a3a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--2" data-label="쉼팡 #3" data-color="linear-gradient(135deg,#3a1a2a,#1a3a2a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--4" data-label="쉼팡 #4" data-color="linear-gradient(135deg,#3a2a1a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--3" data-label="쉼팡 #5" data-color="linear-gradient(135deg,#1a3a2a,#2a1a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--1" data-label="쉼팡 #6" data-color="linear-gradient(135deg,#3a3a1a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="thumb-all-dots">
+                            <span class="thumb-all-dot active"></span>
+                            <span class="thumb-all-dot"></span>
+                            <span class="thumb-all-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══════════════ SLIDE 4: SALPANG ═══════════════ -->
+    <section class="section pang-slide" id="salpang">
+        <div class="container">
+            <div class="category-content fade-in">
+                <div class="category-info">
+                    <span class="category-info__icon">🛍️</span>
+                    <h3 class="category-info__title">살팡 SHORTS</h3>
+                    <p style="color: var(--color-text-secondary); margin-bottom: 16px;">
+                        온라인 쇼핑몰·스마트스토어의 상품을<br class="mobile-break"> 매력적으로 보여줍니다.
+                    </p>
+                    <ul class="category-info__targets">
+                        <li><i class="ri-shopping-bag-line"></i> 온라인 쇼핑몰</li>
+                        <li><i class="ri-store-line"></i> 스마트스토어</li>
+                        <li><i class="ri-shirt-line"></i> 편집샵·소매점</li>
+                        <li><i class="ri-truck-line"></i> 쿠팡 셀러</li>
+                    </ul>
+                    <a href="#order" class="btn btn--primary btn--small">지금 견적 받기</a>
+                </div>
+                <!-- 모바일: 다음 팡 미리보기 카드 (살팡 → 멋팡) -->
+                <div class="pang-next-preview mobile-only" data-next="4">
+                    <div class="pang-next-preview__thumb">
+                        <span class="pang-next-preview__icon">💄</span>
+                    </div>
+                    <div class="pang-next-preview__info">
+                        <span class="pang-next-preview__label">다음</span>
+                        <span class="pang-next-preview__name">멋팡</span>
+                    </div>
+                    <button class="pang-next-preview__btn" aria-label="멋팡으로 이동">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+                <div class="category-thumbnails">
+                    <div class="thumb-all-wrap" data-slide-index="0">
+                        <div class="thumb-all-nav thumb-all-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                        <div class="thumb-all-nav thumb-all-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+                        <div class="thumb-all-viewport">
+                            <div class="thumb-all-track">
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--4" data-label="살팡 #1" data-color="linear-gradient(135deg,#3a2a1a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--2" data-label="살팡 #2" data-color="linear-gradient(135deg,#3a1a2a,#1a3a2a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--1" data-label="살팡 #3" data-color="linear-gradient(135deg,#2a1a3a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--3" data-label="살팡 #4" data-color="linear-gradient(135deg,#1a3a3a,#2a2a1a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--4" data-label="살팡 #5" data-color="linear-gradient(135deg,#2a3a1a,#1a1a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--2" data-label="살팡 #6" data-color="linear-gradient(135deg,#1a2a4a,#3a1a2a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="thumb-all-dots">
+                            <span class="thumb-all-dot active"></span>
+                            <span class="thumb-all-dot"></span>
+                            <span class="thumb-all-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ═══════════════ SLIDE 5: MEOTPANG ═══════════════ -->
+    <section class="section section--alt pang-slide" id="meotpang">
+        <div class="container">
+            <div class="category-content fade-in">
+                <div class="category-info">
+                    <span class="category-info__icon">💄</span>
+                    <h3 class="category-info__title">멋팡 SHORTS</h3>
+                    <p style="color: var(--color-text-secondary); margin-bottom: 16px;">
+                        뷰티·패션·헬스 브랜드의 스타일을<br class="mobile-break"> 감각적인 영상으로 표현합니다.
+                    </p>
+                    <ul class="category-info__targets">
+                        <li><i class="ri-scissors-line"></i> 뷰티샵·헤어샵</li>
+                        <li><i class="ri-paint-brush-line"></i> 네일샵</li>
+                        <li><i class="ri-t-shirt-line"></i> 패션 브랜드</li>
+                        <li><i class="ri-boxing-line"></i> 헬스장·PT샵</li>
+                    </ul>
+                    <a href="#order" class="btn btn--primary btn--small">지금 견적 받기</a>
+                </div>
+                <!-- 모바일: 다음 팡 미리보기 카드 (멋팡 → 먹팡 / 처음으로) -->
+                <div class="pang-next-preview mobile-only" data-next="0">
+                    <div class="pang-next-preview__thumb">
+                        <span class="pang-next-preview__icon">🍖</span>
+                    </div>
+                    <div class="pang-next-preview__info">
+                        <span class="pang-next-preview__label">처음으로</span>
+                        <span class="pang-next-preview__name">먹팡</span>
+                    </div>
+                    <button class="pang-next-preview__btn" aria-label="먹팡으로 이동">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+                <div class="category-thumbnails">
+                    <div class="thumb-all-wrap" data-slide-index="0">
+                        <div class="thumb-all-nav thumb-all-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                        <div class="thumb-all-nav thumb-all-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+                        <div class="thumb-all-viewport">
+                            <div class="thumb-all-track">
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--1" data-label="멋팡 #1" data-color="linear-gradient(135deg,#2a1a3a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--4" data-label="멋팡 #2" data-color="linear-gradient(135deg,#3a2a1a,#1a2a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--3" data-label="멋팡 #3" data-color="linear-gradient(135deg,#1a3a3a,#2a2a1a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--2" data-label="멋팡 #4" data-color="linear-gradient(135deg,#3a1a2a,#1a3a2a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                                <div class="thumb-all-page">
+                                    <div class="category-thumb category-thumb--1" data-label="멋팡 #5" data-color="linear-gradient(135deg,#1a2a4a,#3a2a1a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                    <div class="category-thumb category-thumb--4" data-label="멋팡 #6" data-color="linear-gradient(135deg,#2a3a2a,#1a1a3a)">
+                                        <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="thumb-all-dots">
+                            <span class="thumb-all-dot active"></span>
+                            <span class="thumb-all-dot"></span>
+                            <span class="thumb-all-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        </div><!-- /.pang-slider-track -->
+    </div><!-- /.pang-section-slider -->
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 03] PLATFORM BANNER (Sliding)
+       ════════════════════════════════════════════════════════ -->
+    <section class="platform-banner">
+        <div class="platform-banner__viewport">
+            <div class="platform-banner__track" id="platformTrack">
+                <!-- TikTok -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--tiktok">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.81a8.18 8.18 0 0 0 4.78 1.52V6.89a4.85 4.85 0 0 1-1.01-.2z" />
+                        </svg>
+                    </div>
+                    <span>TikTok</span>
+                </div>
+                <!-- YouTube Shorts -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--shorts">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M10 14.65v-5.3L15 12l-5 2.65zm7.77-4.33c-.77-.32-1.2-.5-1.2-.5L18 9.06c1.84-.96 2.53-3.23 1.56-5.06s-3.24-2.53-5.07-1.56L6 6.94c-1.29.68-2.07 2.04-2 3.49.07 1.42.93 2.67 2.22 3.25.03.01 1.2.5 1.2.5L6 14.93c-1.83.97-2.53 3.24-1.56 5.07.97 1.83 3.24 2.53 5.07 1.56l8.5-4.5c1.29-.68 2.06-2.04 1.99-3.49-.07-1.42-.94-2.68-2.23-3.25z" />
+                        </svg>
+                    </div>
+                    <span>Shorts</span>
+                </div>
+                <!-- Instagram Reels -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--reels">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+                        </svg>
+                    </div>
+                    <span>Reels</span>
+                </div>
+                <!-- YouTube -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--youtube">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M21.593 7.203a2.506 2.506 0 0 0-1.762-1.766C18.265 5.007 12 5 12 5s-6.264-.007-7.831.404a2.56 2.56 0 0 0-1.766 1.778C2 8.742 2 12.001 2 12.001s0 3.26.403 4.819a2.507 2.507 0 0 0 1.762 1.766C5.736 19 12 19 12 19s6.264 0 7.831-.404a2.51 2.51 0 0 0 1.762-1.766C22 15.26 22 12.001 22 12.001s0-3.259-.407-4.798zM9.996 15.005V9.009l5.207 3L9.996 15.005z" />
+                        </svg>
+                    </div>
+                    <span>YouTube</span>
+                </div>
+                <!-- Facebook -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--facebook">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                        </svg>
+                    </div>
+                    <span>Facebook</span>
+                </div>
+                <!-- KakaoTalk -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--kakao">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 3C6.475 3 2 6.71 2 11.275c0 2.98 1.95 5.61 4.9 7.1l-.97 3.54c-.08.31.27.56.54.38l4.43-2.96c.36.04.72.06 1.1.06 5.525 0 10-3.71 10-8.275C22 6.71 17.525 3 12 3z" />
+                        </svg>
+                    </div>
+                    <span>KakaoTalk</span>
+                </div>
+                <!-- Naver -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--naver">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z" />
+                        </svg>
+                    </div>
+                    <span>Naver</span>
+                </div>
+                <!-- Naver TV -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--navertv">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.5 14V8l7 4-7 4z" />
+                        </svg>
+                    </div>
+                    <span>Naver TV</span>
+                </div>
+                <!-- Karrot (당근마켓) -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--karrot">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2C8.5 2 5.5 4.5 5.5 7.5c0 1.5.6 2.9 1.7 3.9L12 22l4.8-10.6c1.1-1 1.7-2.4 1.7-3.9C18.5 4.5 15.5 2 12 2zm0 7.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+                        </svg>
+                    </div>
+                    <span>당근마켓</span>
+                </div>
+                <!-- Bunjang (번개장터) -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--bunjang">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <span>번개장터</span>
+                </div>
+                <!-- Twitter / X -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--twitter">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </div>
+                    <span>X (Twitter)</span>
+                </div>
+                <!-- Pinterest -->
+                <div class="platform-banner__item">
+                    <div class="platform-banner__icon platform-banner__icon--pinterest">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z" />
+                        </svg>
+                    </div>
+                    <span>Pinterest</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 04] SERVICES SECTION
+       ════════════════════════════════════════════════════════ -->
+    <section class="section section--card" id="services">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-header__title">당신의 비즈니스를 30초로 폭발시킵니다</h2>
+                <p class="section-header__subtitle">실제 촬영 + AI 기술 + 전담 담당자 = THE PANG</p>
+            </div>
+
+            <div class="service-slider-container" style="position: relative;">
+                <div class="service-nav service-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                <div class="service-nav service-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+
+                <div class="grid grid--3 fade-in" id="serviceGrid">
+                    <div class="service-card service-card--red">
+                        <span class="service-card__icon">📹</span>
+                        <h3 class="service-card__title">실제 현장 촬영</h3>
+                        <ul class="service-card__list">
+                            <li><i class="ri-check-line"></i> 30초 숏츠 최적화 구도</li>
+                            <li><i class="ri-check-line"></i> 전문 장비 촬영</li>
+                            <li><i class="ri-check-line"></i> 현장 분위기 완벽 포착</li>
+                        </ul>
+                    </div>
+
+                    <div class="service-card service-card--purple service-card--featured">
+                        <span class="service-card__icon">🤖</span>
+                        <h3 class="service-card__title">AI 스마트 생성</h3>
+                        <ul class="service-card__list">
+                            <li><i class="ri-check-line"></i> 자막 자동 생성</li>
+                            <li><i class="ri-check-line"></i> 색보정 (Color Grading)</li>
+                            <li><i class="ri-check-line"></i> BGM 추천 & CG 효과</li>
+                            <li><i class="ri-check-line"></i> 썸네일 자동 생성</li>
+                        </ul>
+                    </div>
+
+                    <div class="service-card service-card--orange">
+                        <span class="service-card__icon">👤</span>
+                        <h3 class="service-card__title">전담 담당자 배정</h3>
+                        <ul class="service-card__list">
+                            <li><i class="ri-check-line"></i> 패키지별 전담 인력</li>
+                            <li><i class="ri-check-line"></i> 카카오톡/슬랙 실시간 소통</li>
+                            <li><i class="ri-check-line"></i> 월간 전략 리포트</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="service-dots" id="serviceDots">
+                    <span class="service-dot active" data-index="0"></span>
+                    <span class="service-dot" data-index="1"></span>
+                    <span class="service-dot" data-index="2"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 06] PROCESS STEPS
+       ════════════════════════════════════════════════════════ -->
+    <section class="section section--card" id="process">
+        <div class="container container--wide">
+            <div class="section-header fade-in">
+                <h2 class="section-header__title">이렇게 진행됩니다</h2>
+            </div>
+
+            <div class="process-slider-container" style="position: relative;">
+                <div class="process-nav process-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                <div class="process-nav process-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+
+                <div class="process-steps fade-in" id="processGrid">
+                    <div class="process-step">
+                        <div class="process-step__number process-step__number--purple">
+                            01</div>
+                        <span class="process-step__icon">📞</span>
+                        <h3 class="process-step__title">온라인 견적 신청</h3>
+                        <p class="process-step__desc">카카오톡 또는 폼 작성으로<br>5분 만에 상담 시작</p>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="process-step__number process-step__number--red">
+                            02</div>
+                        <span class="process-step__icon">📹</span>
+                        <h3 class="process-step__title">전문 PD 현장 방문</h3>
+                        <p class="process-step__desc">전담 PD가 직접 방문해<br>음식·공간·분위기 촬영</p>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="process-step__number process-step__number--purple">
+                            03</div>
+                        <span class="process-step__icon">🤖</span>
+                        <h3 class="process-step__title">AI 편집 & 후보정</h3>
+                        <p class="process-step__desc">AI 자막·색보정·BGM·썸네일 자동 생성</p>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="process-step__number process-step__number--orange">
+                            04</div>
+                        <span class="process-step__icon">🚀</span>
+                        <h3 class="process-step__title">플랫폼별 최적화</h3>
+                        <p class="process-step__desc">틱톡·숏츠·릴스 포맷으로 최적화 후 납품</p>
+                    </div>
+                </div>
+
+                <div class="process-dots" id="processDots">
+                    <span class="process-dot active" data-index="0"></span>
+                    <span class="process-dot" data-index="1"></span>
+                    <span class="process-dot" data-index="2"></span>
+                    <span class="process-dot" data-index="3"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 07] PORTFOLIO
+       ════════════════════════════════════════════════════════ -->
+    <section class="section section--alt" id="portfolio">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-header__title">실제 결과물을 확인하세요</h2>
+                <p class="section-header__subtitle">THE PANG이 제작한 바이럴 숏츠 모음</p>
+            </div>
+
+            <div class="portfolio-filter fade-in">
+                <button class="portfolio-filter__btn active" data-filter="all">전체</button>
+                <button class="portfolio-filter__btn" data-filter="meokpang">먹팡</button>
+                <button class="portfolio-filter__btn" data-filter="nolpang">놀팡</button>
+                <button class="portfolio-filter__btn" data-filter="swimpang">쉼팡</button>
+                <button class="portfolio-filter__btn" data-filter="salpang">살팡</button>
+                <button class="portfolio-filter__btn" data-filter="meotpang">멋팡</button>
+            </div>
+
+            <div class="category-thumbnails fade-in" id="portfolio-slider-container">
+                <div class="thumb-all-wrap" data-slide-index="0" id="portfolioSlideWrap">
+                    <div class="thumb-all-nav thumb-all-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                    <div class="thumb-all-nav thumb-all-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+                    <div class="thumb-all-viewport">
+                        <div class="thumb-all-track" id="portfolioTrack">
+                            <!-- JS에서 필터 시 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                    <div class="thumb-all-dots" id="portfolioDots">
+                        <!-- JS에서 필터 시 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center" style="margin-top:40px;">
+                <a href="#portfolio" class="btn btn--purple-outline btn--small">더보기 <i
+                        class="ri-arrow-right-line"></i></a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 08] PRICING
+       ════════════════════════════════════════════════════════ -->
+    <section class="section section--card" id="pricing">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-header__title">투명한 가격, 확실한 결과</h2>
+            </div>
+
+
+            <div class="pricing-slider-container" style="position: relative;">
+                <div class="pricing-nav pricing-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                <div class="pricing-nav pricing-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+                
+                <div class="pricing-grid fade-in" id="pricingGrid">
+                    <!-- PANG-S -->
+                    <div class="pricing-card pricing-card--starter">
+                        <div class="pricing-card__name">PANG-S</div>
+                        <div class="pricing-card__tier">STARTER</div>
+                        <div class="pricing-card__price">190,000<span style="font-size:16px;font-weight:400">원</span>
+                        </div>
+                        <div class="pricing-card__period">1회 기준</div>
+                        <ul class="pricing-card__features">
+                            <li><i class="ri-check-line"></i> 현장 1회 2시간 촬영</li>
+                            <li><i class="ri-check-line"></i> 30초 숏츠 1편</li>
+                            <li><i class="ri-check-line"></i> AI 자막 + 색보정</li>
+                            <li><i class="ri-check-line"></i> 수정 1회</li>
+                            <li><i class="ri-check-line"></i> 납기 5영업일</li>
+                            <li><i class="ri-check-line"></i> 3플랫폼 공통 1포맷</li>
+                        </ul>
+                        <a href="#order" class="pricing-card__btn btn--purple">시작하기</a>
+                    </div>
+
+                    <!-- PANG-M (MOST POPULAR) -->
+                    <div class="pricing-card pricing-card--standard">
+                        <span class="pricing-card__badge pricing-card__badge--popular">MOST
+                            POPULAR</span>
+                        <div class="pricing-card__name">PANG-M</div>
+                        <div class="pricing-card__tier">STANDARD</div>
+                        <div class="pricing-card__price">490,000<span style="font-size:16px;font-weight:400">원</span>
+                        </div>
+                        <div class="pricing-card__period">1회 기준</div>
+                        <ul class="pricing-card__features">
+                            <li><i class="ri-check-line"></i> 현장 1회 3시간 촬영</li>
+                            <li><i class="ri-check-line"></i> 30초 숏츠 3편</li>
+                            <li><i class="ri-check-line"></i> AI 자막 + 색보정 + BGM</li>
+                            <li><i class="ri-check-line"></i> 수정 편당 2회</li>
+                            <li><i class="ri-check-line"></i> 납기 4영업일</li>
+                            <li><i class="ri-check-line"></i> 플랫폼별 최적화 3포맷</li>
+                            <li><i class="ri-check-line"></i> 전담 PD 1인</li>
+                            <li><i class="ri-check-line"></i> SNS 썸네일 3장</li>
+                        </ul>
+                        <a href="#order" class="pricing-card__btn btn--purple">지금
+                            시작</a>
+                    </div>
+
+                    <!-- PANG-L -->
+                    <div class="pricing-card pricing-card--premium">
+                        <div class="pricing-card__name">PANG-L</div>
+                        <div class="pricing-card__tier">PREMIUM</div>
+                        <div class="pricing-card__price">890,000<span style="font-size:16px;font-weight:400">원</span>
+                        </div>
+                        <div class="pricing-card__period">1회 기준</div>
+                        <ul class="pricing-card__features">
+                            <li><i class="ri-check-line"></i> 현장 2회 (회당 4시간) 촬영</li>
+                            <li><i class="ri-check-line"></i> 30초 숏츠 5편 (A/B테스트)
+                            </li>
+                            <li><i class="ri-check-line"></i> AI 자막 + 색보정 + CG + 썸네일
+                            </li>
+                            <li><i class="ri-check-line"></i> 수정 편당 3회 + 최종확인</li>
+                            <li><i class="ri-check-line"></i> 납기 3영업일</li>
+                            <li><i class="ri-check-line"></i> 전플랫폼 + 가로형(16:9)</li>
+                            <li><i class="ri-check-line"></i> 전담 PD + 마케터 2인</li>
+                            <li><i class="ri-check-line"></i> 해시태그/캡션 + 성과 리포트</li>
+                        </ul>
+                        <a href="#order" class="pricing-card__btn btn--purple">프리미엄
+                            시작</a>
+                    </div>
+
+                    <!-- PANG-X -->
+                    <div class="pricing-card pricing-card--enterprise">
+                        <span class="pricing-card__badge pricing-card__badge--best">BEST
+                            VALUE</span>
+                        <div class="pricing-card__name">PANG-X</div>
+                        <div class="pricing-card__tier">BRAND SUBSCRIPTION</div>
+                        <div class="pricing-card__price">1,490,000<span style="font-size:16px;font-weight:400">원/월</span>
+                        </div>
+                        <div class="pricing-card__period">월 정기 구독</div>
+                        <ul class="pricing-card__features">
+                            <li><i class="ri-check-line"></i> 월 2회 정기 현장촬영</li>
+                            <li><i class="ri-check-line"></i> 월 8편 숏츠 제작</li>
+                            <li><i class="ri-check-line"></i> 풀 AI 후보정 + 브랜드 AI모델
+                            </li>
+                            <li><i class="ri-check-line"></i> 수정 무제한</li>
+                            <li><i class="ri-check-line"></i> 편당 2영업일 납기</li>
+                            <li><i class="ri-check-line"></i> PD + 마케터 + 기획자 3인</li>
+                            <li><i class="ri-check-line"></i> 월간 콘텐츠 전략 리포트</li>
+                            <li><i class="ri-check-line"></i> SNS 채널 운영 컨설팅</li>
+                        </ul>
+                        <a href="#order" class="pricing-card__btn btn--primary">구독 시작하기</a>
+                    </div>
+                </div>
+                
+                <div class="pricing-dots" id="pricingDots">
+                    <span class="pricing-dot active" data-index="0"></span>
+                    <span class="pricing-dot" data-index="1"></span>
+                    <span class="pricing-dot" data-index="2"></span>
+                    <span class="pricing-dot" data-index="3"></span>
+                </div>
+            </div>
+
+            <!-- Add-on Accordion -->
+            <div class="addon-section fade-in">
+                <button class="addon-toggle" id="addonToggle">
+                    추가 옵션 보기 <i class="ri-arrow-down-s-line"></i>
+                </button>
+                <div class="addon-content" id="addonContent">
+                    <div class="addon-table">
+                        <div class="addon-table__row">
+                            <span class="addon-table__name">드론 촬영 추가</span>
+                            <span class="addon-table__price">+150,000원/회</span>
+                        </div>
+                        <div class="addon-table__row">
+                            <span class="addon-table__name">다국어 자막 (영어)</span>
+                            <span class="addon-table__price">+50,000원/편</span>
+                        </div>
+                        <div class="addon-table__row">
+                            <span class="addon-table__name">AI 가상 모델 생성</span>
+                            <span class="addon-table__price">+80,000원/편</span>
+                        </div>
+                        <div class="addon-table__row">
+                            <span class="addon-table__name">SNS 직접 업로드 대행</span>
+                            <span class="addon-table__price">+100,000원/월</span>
+                        </div>
+                        <div class="addon-table__row">
+                            <span class="addon-table__name">광고 집행 세팅 대행</span>
+                            <span class="addon-table__price">+200,000원/회</span>
+                        </div>
+                        <div class="addon-table__row">
+                            <span class="addon-table__name">모델 섭외 (일반)</span>
+                            <span class="addon-table__price">+300,000원~</span>
+                        </div>
+                        <div class="addon-table__row">
+                            <span class="addon-table__name">모델 섭외 (인플루언서)</span>
+                            <span class="addon-table__price">별도 견적</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 09] TESTIMONIALS
+       ════════════════════════════════════════════════════════ -->
+    <section class="section section--alt" id="testimonials">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-header__title">사장님들의 실제 후기</h2>
+            </div>
+
+            <div class="testimonial-slider fade-in">
+                <div class="testimonial-track" id="testimonialTrack">
+                    <div class="testimonial-card">
+                        <div class="testimonial-card__inner">
+                            <div class="testimonial-card__photo">
+                                <img src="https://picsum.photos/seed/pang1/200/200" alt="사장님 후기 사진">
+                            </div>
+                            <div class="testimonial-card__content">
+                                <div class="testimonial-card__stars">★★★★★</div>
+                                <p class="testimonial-card__text">
+                                    "먹팡 촬영 후 매출이 30% 올랐어요. 영상 퀄리티가 정말 미쳤습니다. 강력 추천합니다!"
+                                </p>
+                                <div class="testimonial-card__footer">
+                                    <div class="testimonial-card__info">
+                                        <p class="testimonial-card__author">강남 OO 레스토랑 사장님</p>
+                                        <span class="testimonial-card__badge">먹팡</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <div class="testimonial-card__inner">
+                            <div class="testimonial-card__photo">
+                                <img src="https://picsum.photos/seed/pang2/200/200" alt="사장님 후기 사진">
+                            </div>
+                            <div class="testimonial-card__content">
+                                <div class="testimonial-card__stars">★★★★★</div>
+                                <p class="testimonial-card__text">
+                                    "이렇게 결과물이 좋을 줄 몰랐어요. 틱톡에서 조회수 50만 찍었습니다. 가성비 최고!"
+                                </p>
+                                <div class="testimonial-card__footer">
+                                    <div class="testimonial-card__info">
+                                        <p class="testimonial-card__author">홍대 OO 카페 대표님</p>
+                                        <span class="testimonial-card__badge">먹팡</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <div class="testimonial-card__inner">
+                            <div class="testimonial-card__photo">
+                                <img src="https://picsum.photos/seed/pang3/200/200" alt="사장님 후기 사진">
+                            </div>
+                            <div class="testimonial-card__content">
+                                <div class="testimonial-card__stars">★★★★★</div>
+                                <p class="testimonial-card__text">
+                                    "전담 PD가 친절하고 빠르게 납품해줘서 대만족입니다. 다음 달도 또 맡기려고요!"
+                                </p>
+                                <div class="testimonial-card__footer">
+                                    <div class="testimonial-card__info">
+                                        <p class="testimonial-card__author">판교 OO 네일샵 원장님</p>
+                                        <span class="testimonial-card__badge">멋팡</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <div class="testimonial-card__inner">
+                            <div class="testimonial-card__photo">
+                                <img src="https://picsum.photos/seed/pang4/200/200" alt="사장님 후기 사진">
+                            </div>
+                            <div class="testimonial-card__content">
+                                <div class="testimonial-card__stars">★★★★★</div>
+                                <p class="testimonial-card__text">
+                                    "VR체험 영상이 숏츠에서 터지면서 주말 예약이 3배나 늘었어요. THE PANG 없이는 못합니다!"
+                                </p>
+                                <div class="testimonial-card__footer">
+                                    <div class="testimonial-card__info">
+                                        <p class="testimonial-card__author">잠실 OO 체험관 대표님</p>
+                                        <span class="testimonial-card__badge" style="background:var(--color-brand-red)">놀팡</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slider-controls fade-in">
+                <button class="slider-arrow" id="sliderPrev" aria-label="이전">
+                    <i class="ri-arrow-left-s-line"></i>
+                </button>
+                <div class="slider-dots" id="sliderDots">
+                    <span class="slider-dot active" data-index="0"></span>
+                    <span class="slider-dot" data-index="1"></span>
+                    <span class="slider-dot" data-index="2"></span>
+                    <span class="slider-dot" data-index="3"></span>
+                </div>
+                <button class="slider-arrow" id="sliderNext" aria-label="다음">
+                    <i class="ri-arrow-right-s-line"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 10] PANG NEWS
+       ════════════════════════════════════════════════════════ -->
+    <section class="section section--card" id="news">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-header__title">PANG NEWS</h2>
+                <p class="section-header__subtitle">숏폼 마케팅 트렌드와 THE PANG 소식</p>
+            </div>
+
+            <div class="news-slider-container" style="position: relative;">
+                <div class="news-nav news-nav--prev" aria-label="이전"><i class="ri-arrow-left-s-line"></i></div>
+                <div class="news-nav news-nav--next" aria-label="다음"><i class="ri-arrow-right-s-line"></i></div>
+
+                <div class="grid grid--3 fade-in" id="newsGrid">
+                    <article class="news-card">
+                        <div class="news-card__thumb">
+                            <div class="news-card__img" style="background:linear-gradient(135deg,#7b2fff,#1a0a2e)">
+                            </div>
+                            <span class="news-card__badge news-card__badge--purple">마케팅
+                                인사이트</span>
+                        </div>
+                        <div class="news-card__body">
+                            <h3 class="news-card__title">2026 숏폼 광고 트렌드 TOP 5</h3>
+                            <p class="news-card__meta">2026.02.20 · 5분 읽기</p>
+                        </div>
+                    </article>
+
+                    <article class="news-card">
+                        <div class="news-card__thumb">
+                            <div class="news-card__img" style="background:linear-gradient(135deg,#e63946,#1a1a2e)">
+                            </div>
+                            <span class="news-card__badge news-card__badge--red">성공사례</span>
+                        </div>
+                        <div class="news-card__body">
+                            <h3 class="news-card__title">먹팡 숏츠로 월 매출 2배 올린 카페 사례
+                            </h3>
+                            <p class="news-card__meta">2026.02.15 · 7분 읽기</p>
+                        </div>
+                    </article>
+
+                    <article class="news-card">
+                        <div class="news-card__thumb">
+                            <div class="news-card__img" style="background:linear-gradient(135deg,#ff5e00,#2a1a3a)">
+                            </div>
+                            <span class="news-card__badge news-card__badge--purple">플랫폼
+                                비교</span>
+                        </div>
+                        <div class="news-card__body">
+                            <h3 class="news-card__title">틱톡 vs 유튜브 숏츠, 어떤 플랫폼이 효과적?
+                            </h3>
+                            <p class="news-card__meta">2026.02.10 · 6분 읽기</p>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="news-dots" id="newsDots">
+                    <span class="news-dot active" data-index="0"></span>
+                    <span class="news-dot" data-index="1"></span>
+                    <span class="news-dot" data-index="2"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 11] CTA BANNER
+       ════════════════════════════════════════════════════════ -->
+    <section class="cta-banner" id="order">
+        <div class="cta-banner__glow--left"></div>
+        <div class="cta-banner__glow--right"></div>
+
+        <h2 class="cta-banner__title fade-in">지금 한 방 내볼까요?</h2>
+        <p class="cta-banner__subtitle fade-in">지금 바로 무료 견적을 신청하세요</p>
+
+        <div class="cta-banner__buttons fade-in">
+            <a href="#" class="btn btn--primary" style="padding:18px 48px;font-size:18px;">
+                <i class="ri-rocket-line"></i> 무료 견적 신청하기
+            </a>
+            <a href="#" class="btn btn--kakao">
+                <i class="ri-kakao-talk-fill"></i> 카카오톡으로 문의
+            </a>
+        </div>
+    </section>
+
+
+    <!-- [COMPONENT 12] REMOVED (Moved to Sidebar) -->
+
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 13] FOOTER
+       ════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <!-- Brand -->
+                <div>
+                    <div class="footer__logo">THE PANG</div>
+                    <p class="footer__slogan">숏츠 광고, <br class="mobile-break">한방으로 바이럴</p>
+                    <div class="footer__social">
+                        <a href="#" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div>
+                    <h4 class="footer__heading">서비스</h4>
+                    <ul class="footer__links">
+                        <li><a href="#">먹팡</a></li>
+                        <li><a href="#">놀팡</a></li>
+                        <li><a href="#">쉼팡</a></li>
+                        <li><a href="#">살팡</a></li>
+                        <li><a href="#">멋팡</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div>
+                    <h4 class="footer__heading">회사</h4>
+                    <ul class="footer__links">
+                        <li><a href="#">회사소개</a></li>
+                        <li><a href="#">이용약관</a></li>
+                        <li><a href="#">개인정보처리방침</a></li>
+                        <li><a href="#">공지사항</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="footer__heading">문의</h4>
+                    <ul class="footer__contact">
+                        <li><i class="ri-kakao-talk-fill"></i> 카카오톡 채널</li>
+                        <li><i class="ri-mail-line"></i> hello@thepang.kr</li>
+                        <li><i class="ri-time-line"></i> 평일 09:00-18:00</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer__bottom">
+                © 2026 THE PANG. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="js/nav.js"></script>
+    <script src="js/counter.js"></script>
+    <script src="js/portfolio-filter.js"></script>
+    <script src="js/main.js"></script>
+
+    <!-- ════════════════════════════════════════════════════════
+       [COMPONENT 13] FLOATING SIDEBAR
+       ════════════════════════════════════════════════════════ -->
+    <aside class="floating-sidebar">
+        <ul class="floating-sidebar__menu">
+            <li class="floating-sidebar__item">
+                <a href="#hero" class="floating-sidebar__link" title="홈">
+                    <i class="ri-home-line"></i>
+                    <span class="floating-sidebar__label">홈</span>
+                </a>
+            </li>
+            <li class="floating-sidebar__item">
+                <a href="#meokpang" class="floating-sidebar__link" title="먹팡">
+                    <i class="ri-restaurant-line"></i>
+                    <span class="floating-sidebar__label">먹팡</span>
+                </a>
+            </li>
+            <li class="floating-sidebar__item">
+                <a href="#nolpang" class="floating-sidebar__link" title="놀팡">
+                    <i class="ri-gamepad-line"></i>
+                    <span class="floating-sidebar__label">놀팡</span>
+                </a>
+            </li>
+            <li class="floating-sidebar__item">
+                <a href="#swimpang" class="floating-sidebar__link" title="쉼팡">
+                    <i class="ri-hotel-bed-line"></i>
+                    <span class="floating-sidebar__label">쉼팡</span>
+                </a>
+            </li>
+            <li class="floating-sidebar__item">
+                <a href="#salpang" class="floating-sidebar__link" title="살팡">
+                    <i class="ri-shopping-bag-line"></i>
+                    <span class="floating-sidebar__label">살팡</span>
+                </a>
+            </li>
+            <li class="floating-sidebar__item">
+                <a href="#meotpang" class="floating-sidebar__link" title="멋팡">
+                    <i class="ri-magic-line"></i>
+                    <span class="floating-sidebar__label">멋팡</span>
+                </a>
+            </li>
+            <li class="floating-sidebar__item floating-sidebar__item--kakao">
+                <a href="https://pf.kakao.com/" target="_blank" class="floating-sidebar__link" title="카카오톡 상담">
+                    <i class="ri-chat-smile-3-line"></i>
+                    <span class="floating-sidebar__label">상담</span>
+                </a>
+            </li>
+            <li class="floating-sidebar__item floating-sidebar__item--top">
+                <button class="floating-sidebar__link" id="scrollTopBtn" title="상단으로 이동">
+                    <i class="ri-arrow-up-line"></i>
+                    <span class="floating-sidebar__label">TOP</span>
+                </button>
+            </li>
+        </ul>
+    </aside>
+
+</body>
+
+<!-- ── Fullscreen Thumbnail Modal ── -->
+<div class="thumb-modal" id="thumbModal" role="dialog" aria-modal="true">
+    <div class="thumb-modal__inner">
+        <div class="thumb-modal__content" id="thumbModalContent"></div>
+        <button class="thumb-modal__close" id="thumbModalClose" aria-label="닫기">
+            <i class="ri-close-line"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   Thumbnail Slide + Fullscreen Modal Logic
+   ════════════════════════════════════════════ */
+(function () {
+
+
+    /* ── 2. Fullscreen Modal ─────────────────── */
+    const modal = document.getElementById('thumbModal');
+    const modalContent = document.getElementById('thumbModalContent');
+    const modalClose = document.getElementById('thumbModalClose');
+
+    function openModal(thumb) {
+        const bg = thumb.dataset.color || window.getComputedStyle(thumb).background;
+        const label = thumb.getAttribute('data-label') || '';
+        modalContent.style.background = bg;
+        modalContent.innerHTML = `
+            <div style="
+                position: absolute; inset: 0;
+                display: flex; align-items: center; justify-content: center;
+                flex-direction: column; gap: 16px;
+            ">
+                <i class="ri-play-circle-line" style="font-size: 72px; color: rgba(255,255,255,0.9);"></i>
+                <span style="color: rgba(255,255,255,0.7); font-size: 15px; letter-spacing: 1px;">${label}</span>
+            </div>`;
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+        setTimeout(() => { modalContent.innerHTML = ''; }, 300);
+    }
+
+    // 모든 썸네일 터치/클릭 → 모달 열기 (이벤트 위임)
+    document.addEventListener('click', (e) => {
+        const thumb = e.target.closest('.category-thumb');
+        if (thumb) openModal(thumb);
+    });
+
+    // 외부 스크립트에서 재사용 가능하도록 전역 노출
+    window.openModal = openModal;
+
+    // 닫기 버튼
+    modalClose.addEventListener('click', closeModal);
+
+    // 모달 배경 클릭 → 닫기
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // ESC 키
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+   AUTH MODAL
+   ════════════════════════════════════════════════════════ -->
+<div class="auth-overlay" id="authOverlay"></div>
+<div class="auth-modal" id="authModal" role="dialog" aria-modal="true">
+    <button class="auth-modal__close" id="authModalClose" aria-label="닫기">
+        <i class="ri-close-line"></i>
+    </button>
+
+    <!-- 탭 -->
+    <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" id="tabLogin">로그인</button>
+        <button class="auth-tab" data-tab="signup" id="tabSignup">회원가입</button>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <form class="auth-form" id="loginForm">
+        <div class="auth-form__group">
+            <label for="loginEmail">이메일</label>
+            <input type="email" id="loginEmail" placeholder="이메일을 입력하세요" autocomplete="email" required>
+        </div>
+        <div class="auth-form__group">
+            <label for="loginPassword">비밀번호</label>
+            <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" autocomplete="current-password" required>
+        </div>
+        <p class="auth-form__error" id="loginError"></p>
+        <button type="submit" class="auth-form__submit">로그인</button>
+        <div class="auth-divider"><span>또는</span></div>
+        <button type="button" class="auth-social auth-social--kakao">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 3C6.475 3 2 6.71 2 11.275c0 2.98 1.95 5.61 4.9 7.1l-.97 3.54c-.08.31.27.56.54.38l4.43-2.96c.36.04.72.06 1.1.06 5.525 0 10-3.71 10-8.275C22 6.71 17.525 3 12 3z"/></svg>
+            카카오로 시작하기
+        </button>
+        <button type="button" class="auth-social auth-social--google">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google로 시작하기
+        </button>
+        <p class="auth-form__switch">계정이 없으신가요? <button type="button" id="goToSignup">회원가입</button></p>
+    </form>
+
+    <!-- 회원가입 폼 -->
+    <form class="auth-form" id="signupForm" style="display:none;">
+        <div class="auth-form__group">
+            <label for="signupName">이름</label>
+            <input type="text" id="signupName" placeholder="이름을 입력하세요" required>
+        </div>
+        <div class="auth-form__group">
+            <label for="signupEmail">이메일</label>
+            <input type="email" id="signupEmail" placeholder="이메일을 입력하세요" autocomplete="email" required>
+        </div>
+        <div class="auth-form__group">
+            <label for="signupPassword">비밀번호</label>
+            <input type="password" id="signupPassword" placeholder="6자 이상 입력하세요" required>
+        </div>
+        <div class="auth-form__group">
+            <label for="signupPasswordConfirm">비밀번호 확인</label>
+            <input type="password" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+        </div>
+        <p class="auth-form__error" id="signupError"></p>
+        <button type="submit" class="auth-form__submit">회원가입</button>
+        <div class="auth-divider"><span>또는</span></div>
+        <button type="button" class="auth-social auth-social--kakao">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 3C6.475 3 2 6.71 2 11.275c0 2.98 1.95 5.61 4.9 7.1l-.97 3.54c-.08.31.27.56.54.38l4.43-2.96c.36.04.72.06 1.1.06 5.525 0 10-3.71 10-8.275C22 6.71 17.525 3 12 3z"/></svg>
+            카카오로 시작하기
+        </button>
+        <button type="button" class="auth-social auth-social--google">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google로 시작하기
+        </button>
+        <p class="auth-form__switch">이미 계정이 있으신가요? <button type="button" id="goToLogin">로그인</button></p>
+    </form>
+</div>
+
+</html>
