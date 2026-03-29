@@ -286,7 +286,7 @@ function renderTestimonialEditor() {
                 <input type="url" class="form-control" id="testi-photo-${i}" value="${t.photo}">
             </div>
             <div style="margin-bottom:16px;">
-                <img src="${t.photo}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid var(--border);"
+                <img src="${t.photo}" style="width:224px;height:224px;border-radius:10px;object-fit:cover;border:1px solid var(--border);"
                      id="testi-preview-${i}" onerror="this.style.display='none'">
             </div>
             <div class="editor-row">

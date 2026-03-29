@@ -342,7 +342,7 @@ input, textarea, select { font-family: inherit; }
     align-items: center;
     justify-content: center;
     gap: 4px;
-    width: 68px;
+    width: 86px;
     height: 30px;
     padding: 0;
     background: var(--bg-panel);
@@ -364,7 +364,7 @@ input, textarea, select { font-family: inherit; }
     align-items: center;
     justify-content: center;
     gap: 4px;
-    width: 68px;
+    width: 86px;
     height: 30px;
     padding: 0;
     background: var(--purple);
@@ -902,14 +902,7 @@ textarea.form-control {
         padding: 16px;
     }
 
-    /* 誘몃━蹂닿린 踰꾪듉 ?띿뒪???④린湲?*/
-    .btn-preview {
-        width: 30px;
-    }
-    .btn-preview span,
-    .btn-preview i ~ * {
-        display: none;
-    }
+    /* 미리보기 버튼은 모바일에서도 동일한 사이즈(86px)를 유지하도록 오버라이드 제거 */
 }
 
 
