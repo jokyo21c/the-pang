@@ -2,7 +2,7 @@
    THE PANG — Portfolio Filter (portfolio-filter.js)
    ══════════════════════════════════════════════════════════ */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const filterBtns = document.querySelectorAll('.portfolio-filter__btn');
 
     // ── 1. Load Dynamic Portfolio Items from CMS ──
@@ -14,31 +14,40 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let portfolioItems = [];
+    const categories = {
+        meokpang: '먹팡',
+        nolpang: '놀팡',
+        swimpang: '쉼팡',
+        salpang: '살팡',
+        meotpang: '멋팡'
+    };
+
     try {
-        const raw = localStorage.getItem('pang_cms_content');
-        if (raw) {
-            const cmsContent = JSON.parse(raw);
-            const categories = {
-                meokpang: '먹팡',
-                nolpang: '놀팡',
-                swimpang: '쉼팡',
-                salpang: '살팡',
-                meotpang: '멋팡'
-            };
-            
-            Object.entries(categories).forEach(([catKey, catName]) => {
-                const items = cmsContent.portfolio && cmsContent.portfolio[catKey];
-                if (items && items.length > 0) {
-                    items.forEach((url, idx) => {
-                        portfolioItems.push({
-                            category: catKey,
-                            badge: catName,
-                            url: url,
-                            label: `${catName} #${idx + 1}`
-                        });
+        if (window.PangData) {
+            const items = await PangData.getPortfolio();
+            if (items && items.length > 0) {
+                // Group by category to count indexes
+                const catCounts = { meokpang: 0, nolpang: 0, swimpang: 0, salpang: 0, meotpang: 0 };
+                items.forEach(item => {
+                    const catName = categories[item.category] || '';
+                    if (!catName) return;
+                    catCounts[item.category]++;
+                    
+                    let url = item.media_url;
+                    // Use #t=0.001 to render thumbnail for videos
+                    if (item.media_type === 'video' || isVideoUrl(url)) {
+                        if (!url.includes('#t=')) url += '#t=0.001';
+                    }
+
+                    portfolioItems.push({
+                        category: item.category,
+                        badge: catName,
+                        url: url,
+                        label: `${catName} #${catCounts[item.category]}`,
+                        type: item.media_type
                     });
-                }
-            });
+                });
+            }
         }
     } catch (err) {
         console.error('포트폴리오 필터 데이터 로드 실패:', err);
@@ -83,9 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     let mediaTag = '';
                     
                     if (item.url) {
-                        const isVid = isVideoUrl(item.url);
+                        const isVid = item.type === 'video' || isVideoUrl(item.url);
                         mediaTag = isVid 
-                            ? `<video src="${item.url}" autoplay loop muted playsinline style="${mediaStyle}"></video>`
+                            ? `<video src="${item.url}" muted playsinline loop onmouseenter="this.play()" onmouseleave="this.pause()" preload="metadata" style="${mediaStyle}"></video>`
                             : `<img src="${item.url}" alt="${item.label}" style="${mediaStyle}">`;
                     }
                     
@@ -123,8 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 슬라이드 기능 재초기화 (전역에 노출된 initThumbAllSlide 호출)
         let currentWrap = document.getElementById('portfolioSlideWrap');
         if (window.initThumbAllSlide && currentWrap) {
-            // 이전에 등록된 이벤트 리스너가 중복되지 않도록 새 wrapper 요소로 교체하거나 이벤트 정리 필요
-            // DOM 복제로 이벤트 제거 후 재초기화
             const newWrap = currentWrap.cloneNode(true);
             currentWrap.parentNode.replaceChild(newWrap, currentWrap);
             window.initThumbAllSlide(newWrap);
