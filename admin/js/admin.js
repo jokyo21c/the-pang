@@ -198,7 +198,8 @@ function renderHeroMediaPreview(media) {
     if (media.type === 'image') {
         heroMediaPreview.innerHTML = `<img src="${media.url}" alt="Hero Media bg">`;
     } else if (media.type === 'video') {
-        heroMediaPreview.innerHTML = `<video src="${media.url}" autoplay loop muted playsinline></video>`;
+        const vidUrl = media.url.includes('#') ? media.url : media.url + '#t=0.001';
+        heroMediaPreview.innerHTML = `<video src="${vidUrl}" loop muted playsinline onmouseenter="this.play()" onmouseleave="this.pause()" style="width:100%;height:100%;object-fit:cover;"></video>`;
     }
 }
 
@@ -249,8 +250,9 @@ function renderPortfolioEditor() {
                     const url = typeof item === 'string' ? item : item.url;
                     const itemId = typeof item === 'object' ? item.id : null;
                     const isVid = isVideoUrl(url) || (typeof item === 'object' && item.type === 'video');
+                    const vidUrl = isVid && !url.includes('#') ? url + '#t=0.001' : url;
                     const mediaTag = isVid 
-                        ? `<video src="${url}" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`
+                        ? `<video src="${vidUrl}" loop muted playsinline style="width:100%;height:100%;object-fit:cover; transition: transform 0.3s;" onmouseenter="this.play()" onmouseleave="this.pause()"></video>`
                         : `<img src="${url}" alt="${meta.name} ${i+1}" onerror="this.src='https://picsum.photos/seed/${key}${i}/200/355'">`;
                     return `
                         <div class="image-card">
