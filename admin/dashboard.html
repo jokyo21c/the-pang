@@ -82,14 +82,17 @@
                 </div>
             </div>
 
-            <!-- 회원 관리 (어코디언) -->
+            <!-- 회원/설정 관리 (어코디언) -->
             <div class="nav-section accordion-section" data-accordion="members">
                 <div class="nav-section-label accordion-trigger" data-target="members">
-                    회원 관리 <i class="ri-arrow-down-s-line accordion-arrow"></i>
+                    관리 <i class="ri-arrow-down-s-line accordion-arrow"></i>
                 </div>
                 <div class="accordion-body" id="accordion-members">
                     <div class="nav-item" data-panel="members">
                         <i class="ri-group-line"></i> 회원 목록
+                    </div>
+                    <div class="nav-item" data-panel="settings">
+                        <i class="ri-settings-4-line"></i> 계정 설정
                     </div>
                 </div>
             </div>
@@ -163,6 +166,11 @@
                         <div class="section-card__title">회원 관리</div>
                         <div class="section-card__desc">메인사이트 가입 회원 조회 및 관리</div>
                         <div class="section-card__count" id="stat-members">0</div>
+                    </div>
+                    <div class="section-card" onclick="showPanel('settings')">
+                        <div class="section-card__icon" style="background:rgba(71,85,105,0.12);">⚙️</div>
+                        <div class="section-card__title">계정 설정</div>
+                        <div class="section-card__desc">관리자 이메일 및 비밀번호 변경</div>
                     </div>
                 </div>
             </div>
@@ -368,6 +376,42 @@
                 </div>
             </div>
 
+            <!-- ─── SETTINGS PANEL ─── -->
+            <div class="editor-panel" id="panel-settings">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>⚙️ 계정 설정</h2>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-mail-line"></i> 이메일(아이디) 변경</div>
+                    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">새로운 이메일로 인증 메일이 발송될 수 있습니다.</p>
+                    <div class="editor-row">
+                        <label>현재 이메일</label>
+                        <input type="email" class="form-control" id="settings-current-email" disabled style="background-color: var(--bg-secondary);">
+                    </div>
+                    <div class="editor-row">
+                        <label>새 이메일 주소</label>
+                        <input type="email" class="form-control" id="settings-new-email" placeholder="new-admin@thepang.kr">
+                    </div>
+                    <button class="btn-save" id="btn-update-email" style="width: auto; margin-top: 8px;">이메일 업데이트</button>
+                </div>
+
+                <div class="editor-card">
+                    <div class="editor-card__title"><i class="ri-lock-password-line"></i> 비밀번호 변경</div>
+                    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">비밀번호는 최소 6자리 이상이어야 합니다. 변경 시 즉시適用됩니다.</p>
+                    <div class="editor-row">
+                        <label>새로운 비밀번호</label>
+                        <input type="password" class="form-control" id="settings-new-password" placeholder="새 비밀번호 입력">
+                    </div>
+                    <div class="editor-row">
+                        <label>비밀번호 확인</label>
+                        <input type="password" class="form-control" id="settings-confirm-password" placeholder="새 비밀번호 다시 입력">
+                    </div>
+                    <button class="btn-save" id="btn-update-password" style="width: auto; margin-top: 8px;">비밀번호 변경</button>
+                </div>
+            </div>
+
         </div><!-- /.admin-content -->
     </main>
 </div>
@@ -377,6 +421,12 @@
     <i class="ri-checkbox-circle-line"></i> <span id="toast-msg">저장되었습니다!</span>
 </div>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/config.js"></script>
+<script src="js/supabase-admin.js"></script>
+
+<!-- Admin CMS -->
 <script src="js/content-store.js"></script>
 <script src="js/admin.js"></script>
 </body>

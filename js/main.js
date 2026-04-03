@@ -677,6 +677,85 @@ document.addEventListener('DOMContentLoaded', () => {
         touchTarget.addEventListener('mouseup', touchEnd);
     };
 
+    // ── Dynamic Portfolio Categories from Supabase ─────────────────
+    const _isVideoUrl = (url) => {
+        if (!url) return false;
+        if (url.startsWith('data:video/')) return true;
+        if (/\.(mp4|webm|ogg|mov|avi)(\?.*)?$/i.test(url)) return true;
+        return false;
+    };
+
+    async function loadPortfolioFromSupabase() {
+        try {
+            const categories = {
+                meokpang: '먹팡', nolpang: '놀팡',
+                swimpang: '쉼팡', salpang: '살팡', meotpang: '멋팡'
+            };
+
+            const items = await PangData.getPortfolio();
+            if (!items || items.length === 0) return;
+
+            // 카테고리별로 그룹화
+            const grouped = {};
+            items.forEach(item => {
+                if (!grouped[item.category]) grouped[item.category] = [];
+                grouped[item.category].push(item);
+            });
+
+            Object.entries(categories).forEach(([catKey, catName]) => {
+                const catItems = grouped[catKey];
+                if (!catItems || catItems.length === 0) return;
+
+                const section = document.getElementById(catKey);
+                if (!section) return;
+                const track = section.querySelector('.thumb-all-track');
+                const dotsContainer = section.querySelector('.thumb-all-dots');
+                if (!track || !dotsContainer) return;
+
+                let trackHtml = '';
+                let dotsHtml = '';
+                const itemsPerPage = 2;
+                const totalPages = Math.ceil(catItems.length / itemsPerPage);
+
+                for (let i = 0; i < totalPages; i++) {
+                    let pageHtml = '<div class="thumb-all-page">';
+                    for (let j = 0; j < itemsPerPage; j++) {
+                        const idx = i * itemsPerPage + j;
+                        if (idx < catItems.length) {
+                            const url = catItems[idx].media_url;
+                            const isVid = catItems[idx].media_type === 'video' || _isVideoUrl(url);
+                            const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
+                            const mediaTag = isVid
+                                ? `<video src="${url}" autoplay loop muted playsinline style="${mediaStyle}"></video>`
+                                : `<img src="${url}" alt="${catName} #${idx+1}" style="${mediaStyle}">`;
+                            pageHtml += `
+                                <div class="category-thumb" data-label="${catName} #${idx+1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">
+                                    ${mediaTag}
+                                    <div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>
+                                </div>
+                            `;
+                        }
+                    }
+                    pageHtml += '</div>';
+                    trackHtml += pageHtml;
+                    dotsHtml += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
+                }
+                track.innerHTML = trackHtml;
+                dotsContainer.innerHTML = dotsHtml;
+            });
+
+            // 슬라이더 재초기화
+            document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
+                window.initThumbAllSlide(wrap);
+            });
+        } catch (err) {
+            console.error('Supabase 포트폴리오 로드 실패:', err);
+        }
+    }
+
+    // Supabase에서 비동기 로드 (기본 썸네일은 HTML에 유지)
+    loadPortfolioFromSupabase();
+
     // Initialize all existing sliders
     document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
         window.initThumbAllSlide(wrap);
@@ -852,7 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ══════════════════════════════════════════════════════════
-   AUTH MODULE — 로그인 / 회원가입
+   AUTH MODULE — Supabase Auth 연동
    ══════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function initAuth() {
 
@@ -866,17 +945,17 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     const loginError  = document.getElementById('loginError');
     const signupError = document.getElementById('signupError');
 
-    if (!overlay || !modal) return; // 모달 없으면 중단
+    if (!overlay || !modal) return;
 
     /* ── 모달 열기/닫기 ─────────────────────────── */
-    function openModal(tab) {
+    function openAuthModal(tab) {
         overlay.classList.add('open');
         modal.classList.add('open');
         document.body.style.overflow = 'hidden';
         switchTab(tab === 'signup' ? 'signup' : 'login');
     }
 
-    function closeModal() {
+    function closeAuthModal() {
         overlay.classList.remove('open');
         modal.classList.remove('open');
         document.body.style.overflow = '';
@@ -884,9 +963,9 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         if (signupError) signupError.textContent = '';
     }
 
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', closeModal);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    closeBtn.addEventListener('click', closeAuthModal);
+    overlay.addEventListener('click', closeAuthModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAuthModal(); });
 
     /* ── 탭 전환 ─────────────────────────────────── */
     function switchTab(tab) {
@@ -911,31 +990,23 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     /* ── 버튼으로 모달 열기 ──────────────────────── */
     ['navLoginBtn', 'mobileLoginBtn'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.addEventListener('click', () => openModal('login'));
+        if (btn) btn.addEventListener('click', () => openAuthModal('login'));
     });
     ['navSignupBtn', 'mobileSignupBtn'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.addEventListener('click', () => openModal('signup'));
+        if (btn) btn.addEventListener('click', () => openAuthModal('signup'));
     });
-
-    /* ── localStorage 유틸 ──────────────────────── */
-    const USERS_KEY   = 'pang_users';
-    const SESSION_KEY = 'pang_session';
-    const getUsers    = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch { return []; } };
-    const saveUsers   = u => localStorage.setItem(USERS_KEY, JSON.stringify(u));
-    const getSession  = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } };
-    const saveSession = u => localStorage.setItem(SESSION_KEY, JSON.stringify(u));
-    const clearSession = () => localStorage.removeItem(SESSION_KEY);
 
     /* ── UI 반영 ────────────────────────────────── */
     function applyLoggedInUI(user) {
+        const name = user.user_metadata?.name || user.email?.split('@')[0] || '사용자';
         document.getElementById('navLoginBtn').style.display  = 'none';
         document.getElementById('navSignupBtn').style.display = 'none';
         document.getElementById('navUser').style.display      = 'flex';
-        document.getElementById('navUserName').textContent    = `${user.name}님`;
+        document.getElementById('navUserName').textContent    = `${name}님`;
         document.getElementById('mobileAuth').style.display   = 'none';
         document.getElementById('mobileUser').style.display   = 'flex';
-        document.getElementById('mobileUserName').textContent = `👋 ${user.name}님`;
+        document.getElementById('mobileUserName').textContent = `👋 ${name}님`;
     }
 
     function applyLoggedOutUI() {
@@ -946,63 +1017,82 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         document.getElementById('mobileUser').style.display   = 'none';
     }
 
-    /* ── 회원가입 ───────────────────────────────── */
-    signupForm.addEventListener('submit', (e) => {
+    /* ── 회원가입 (Supabase Auth) ──────────────── */
+    signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const name = document.getElementById('signupName').value.trim();
+        signupError.textContent = '';
+        const name  = document.getElementById('signupName').value.trim();
         const email = document.getElementById('signupEmail').value.trim().toLowerCase();
-        const pw  = document.getElementById('signupPassword').value;
-        const pw2 = document.getElementById('signupPasswordConfirm').value;
+        const pw    = document.getElementById('signupPassword').value;
+        const pw2   = document.getElementById('signupPasswordConfirm').value;
 
         if (pw.length < 6) { signupError.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
         if (pw !== pw2)    { signupError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
 
-        const users = getUsers();
-        if (users.find(u => u.email === email)) { signupError.textContent = '이미 사용 중인 이메일입니다.'; return; }
-
-        users.push({ name, email, pw });
-        saveUsers(users);
-        saveSession({ name, email });
-        applyLoggedInUI({ name, email });
-        closeModal();
+        try {
+            const data = await PangAuth.signUp(email, pw, name);
+            if (data.user) {
+                applyLoggedInUI(data.user);
+                closeAuthModal();
+            }
+        } catch (err) {
+            signupError.textContent = err.message || '회원가입에 실패했습니다.';
+        }
     });
 
-    /* ── 로그인 ─────────────────────────────────── */
-    loginForm.addEventListener('submit', (e) => {
+    /* ── 로그인 (Supabase Auth) ────────────────── */
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        loginError.textContent = '';
         const email = document.getElementById('loginEmail').value.trim().toLowerCase();
         const pw    = document.getElementById('loginPassword').value;
-        const user  = getUsers().find(u => u.email === email && u.pw === pw);
 
-        if (!user) { loginError.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.'; return; }
-
-        saveSession({ name: user.name, email: user.email });
-        applyLoggedInUI({ name: user.name, email: user.email });
-        closeModal();
+        try {
+            const data = await PangAuth.signIn(email, pw);
+            if (data.user) {
+                applyLoggedInUI(data.user);
+                closeAuthModal();
+            }
+        } catch (err) {
+            loginError.textContent = err.message || '이메일 또는 비밀번호가 올바르지 않습니다.';
+        }
     });
 
-    /* ── 로그아웃 ───────────────────────────────── */
+    /* ── 로그아웃 (Supabase Auth) ──────────────── */
     ['navLogoutBtn', 'mobileLogoutBtn'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.addEventListener('click', () => { clearSession(); applyLoggedOutUI(); });
+        if (btn) btn.addEventListener('click', async () => {
+            try { await PangAuth.signOut(); } catch(e) {}
+            applyLoggedOutUI();
+        });
     });
 
-    /* ── 세션 복원 ──────────────────────────────── */
-    const session = getSession();
-    if (session) applyLoggedInUI(session);
-    else         applyLoggedOutUI();
-
-    /* ── 동적 푸터 렌더링 ──────────────────────── */
-    function renderDynamicFooter() {
+    /* ── 세션 복원 (Supabase) ─────────────────── */
+    (async () => {
         try {
-            const raw = localStorage.getItem('pang_cms_content');
-            if (!raw) return;
-            const content = JSON.parse(raw);
-            if (!content.footer) return;
+            const user = await PangAuth.getUser();
+            if (user) applyLoggedInUI(user);
+            else      applyLoggedOutUI();
+        } catch {
+            applyLoggedOutUI();
+        }
+    })();
 
-            const f = content.footer;
+    /* ── 인증 상태 변화 리스너 ────────────────── */
+    PangAuth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+            applyLoggedInUI(session.user);
+        } else if (event === 'SIGNED_OUT') {
+            applyLoggedOutUI();
+        }
+    });
 
-            // Brand & Slogan
+    /* ── 동적 푸터 렌더링 (Supabase) ─────────── */
+    async function renderDynamicFooter() {
+        try {
+            const f = await PangData.getSection('footer');
+            if (!f) return;
+
             const logoEl = document.querySelector('.footer__logo');
             if (logoEl && f.brandName) logoEl.textContent = f.brandName;
 
@@ -1011,7 +1101,6 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 sloganEl.innerHTML = f.slogan.replace(/\n/g, '<br class="mobile-break">');
             }
 
-            // SNS Links
             const snsLinks = document.querySelectorAll('.footer__social a');
             if (snsLinks.length >= 3) {
                 if (f.sns?.instagram) snsLinks[0].href = f.sns.instagram;
@@ -1019,18 +1108,16 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 if (f.sns?.tiktok)    snsLinks[2].href = f.sns.tiktok;
             }
 
-            // Company Links (3번째 컬럼 .footer__links)
             const gridDivs = document.querySelectorAll('.footer__grid > div');
             if (gridDivs.length >= 3 && f.companyLinks && f.companyLinks.length > 0) {
                 const companyUl = gridDivs[2].querySelector('.footer__links');
                 if (companyUl) {
-                    companyUl.innerHTML = f.companyLinks.map(link => 
+                    companyUl.innerHTML = f.companyLinks.map(link =>
                         `<li><a href="${link.url}">${link.label}</a></li>`
                     ).join('');
                 }
             }
 
-            // Contact Info
             const contactUl = document.querySelector('.footer__contact');
             if (contactUl && f.contact) {
                 contactUl.innerHTML = `
@@ -1043,7 +1130,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             console.error('푸터 데이터 렌더링 실패:', err);
         }
     }
-    
+
     renderDynamicFooter();
 });
 

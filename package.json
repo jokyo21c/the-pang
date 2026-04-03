@@ -1,0 +1,14 @@
+{
+  "name": "the-pang",
+  "version": "1.0.0",
+  "description": "THE PANG - 숏폼 광고 플랫폼 (더팡.store)",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve . -l 3000 --cors",
+    "build": "echo 'Static site — no build step needed'"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

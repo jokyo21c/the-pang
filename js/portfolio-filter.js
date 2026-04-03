@@ -5,18 +5,56 @@
 document.addEventListener('DOMContentLoaded', () => {
     const filterBtns = document.querySelectorAll('.portfolio-filter__btn');
 
-    const portfolioItems = [
-        { category: 'meokpang', badge: '먹팡', bg: 'linear-gradient(135deg,#e63946 0%,#1a1a2e 100%)', label: '강남 파스타 레스토랑' },
-        { category: 'meokpang', badge: '먹팡', bg: 'linear-gradient(135deg,#ff5e00 0%,#2a1a3a 100%)', label: '홍대 수제버거 맛집' },
-        { category: 'nolpang',  badge: '놀팡', bg: 'linear-gradient(135deg,#7b2fff 0%,#1a2a3a 100%)', label: '강남 VR테마파크 체험' },
-        { category: 'swimpang', badge: '쉼팡', bg: 'linear-gradient(135deg,#1a3a3a 0%,#2a1a3a 100%)', label: '제주 풀빌라 힐링 리조트' },
-        { category: 'salpang',  badge: '살팡', bg: 'linear-gradient(135deg,#3a2a1a 0%,#1a1a3a 100%)', label: '스마트스토어 신상품 언박싱' },
-        { category: 'meotpang', badge: '멋팡', bg: 'linear-gradient(135deg,#3a1a2a 0%,#1a2a3a 100%)', label: '청담 네일샵 아트 시술' },
-        { category: 'meokpang', badge: '먹팡', bg: 'linear-gradient(135deg,#c0392b 0%,#2c3e50 100%)', label: '이태원 멕시코 타코 맛집' },
-        { category: 'nolpang',  badge: '놀팡', bg: 'linear-gradient(135deg,#6c3483 0%,#1a2a4a 100%)', label: '홍대 방탈출 카페 체험' },
-        { category: 'salpang',  badge: '살팡', bg: 'linear-gradient(135deg,#784212 0%,#1a3a2a 100%)', label: '패션 브랜드 신상 룩북' },
-        { category: 'meotpang', badge: '멋팡', bg: 'linear-gradient(135deg,#1a5276 0%,#2a1a3a 100%)', label: '강남 헤어샵 스타일링' },
-    ];
+    // ── 1. Load Dynamic Portfolio Items from CMS ──
+    const isVideoUrl = (url) => {
+        if (!url) return false;
+        if (url.startsWith('data:video/')) return true;
+        if (/\.(mp4|webm|ogg|mov|avi)(\?.*)?$/i.test(url)) return true;
+        return false;
+    };
+
+    let portfolioItems = [];
+    try {
+        const raw = localStorage.getItem('pang_cms_content');
+        if (raw) {
+            const cmsContent = JSON.parse(raw);
+            const categories = {
+                meokpang: '먹팡',
+                nolpang: '놀팡',
+                swimpang: '쉼팡',
+                salpang: '살팡',
+                meotpang: '멋팡'
+            };
+            
+            Object.entries(categories).forEach(([catKey, catName]) => {
+                const items = cmsContent.portfolio && cmsContent.portfolio[catKey];
+                if (items && items.length > 0) {
+                    items.forEach((url, idx) => {
+                        portfolioItems.push({
+                            category: catKey,
+                            badge: catName,
+                            url: url,
+                            label: `${catName} #${idx + 1}`
+                        });
+                    });
+                }
+            });
+        }
+    } catch (err) {
+        console.error('포트폴리오 필터 데이터 로드 실패:', err);
+    }
+
+    // CMS 데이터가 아예 없을 경우를 대비한 Fallback 기본 데이터
+    if (portfolioItems.length === 0) {
+        portfolioItems = [
+            { category: 'meokpang', badge: '먹팡', bg: 'linear-gradient(135deg,#e63946 0%,#1a1a2e 100%)', label: '강남 파스타 레스토랑' },
+            { category: 'meokpang', badge: '먹팡', bg: 'linear-gradient(135deg,#ff5e00 0%,#2a1a3a 100%)', label: '홍대 수제버거 맛집' },
+            { category: 'nolpang',  badge: '놀팡', bg: 'linear-gradient(135deg,#7b2fff 0%,#1a2a3a 100%)', label: '강남 VR테마파크 체험' },
+            { category: 'swimpang', badge: '쉼팡', bg: 'linear-gradient(135deg,#1a3a3a 0%,#2a1a3a 100%)', label: '제주 풀빌라 힐링 리조트' },
+            { category: 'salpang',  badge: '살팡', bg: 'linear-gradient(135deg,#3a2a1a 0%,#1a1a3a 100%)', label: '스마트스토어 신상품 언박싱' },
+            { category: 'meotpang', badge: '멋팡', bg: 'linear-gradient(135deg,#3a1a2a 0%,#1a2a3a 100%)', label: '청담 네일샵 아트 시술' }
+        ];
+    }
 
     function renderPortfolio(filter) {
         const portfolioWrap = document.getElementById('portfolioSlideWrap');
@@ -41,9 +79,22 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let j = 0; j < ITEMS_PER_PAGE; j++) {
                 const item = filtered[i * ITEMS_PER_PAGE + j];
                 if (item) {
+                    const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
+                    let mediaTag = '';
+                    
+                    if (item.url) {
+                        const isVid = isVideoUrl(item.url);
+                        mediaTag = isVid 
+                            ? `<video src="${item.url}" autoplay loop muted playsinline style="${mediaStyle}"></video>`
+                            : `<img src="${item.url}" alt="${item.label}" style="${mediaStyle}">`;
+                    }
+                    
+                    const bgStyle = item.bg ? `background: ${item.bg};` : 'background: var(--bg-surface-elevated);';
+
                     page.innerHTML += `
-                        <div class="category-thumb" data-label="${item.label}" data-color="${item.bg}" style="background: ${item.bg};">
-                            <div class="category-thumb__overlay"><i class="ri-play-circle-line"></i></div>
+                        <div class="category-thumb" data-label="${item.label}" data-color="${item.bg || ''}" style="${bgStyle} position:relative; overflow:hidden;">
+                            ${mediaTag}
+                            <div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>
                         </div>
                     `;
                 }

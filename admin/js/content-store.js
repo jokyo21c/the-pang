@@ -1,8 +1,11 @@
 /* ══════════════════════════════════════════════════════════
-   THE PANG Admin — Content Store (localStorage)
+   THE PANG Admin — Content Store (Supabase 연동)
+   ══════════════════════════════════════════════════════════
+   기존 localStorage 기반에서 Supabase DB 기반으로 마이그레이션.
+   AdminContent / AdminStorage API를 활용합니다.
    ══════════════════════════════════════════════════════════ */
 
-const STORE_KEY = 'pang_cms_content';
+const STORE_KEY = 'pang_cms_content'; // localStorage fallback 용
 
 const DEFAULT_CONTENT = {
     hero: {
@@ -11,74 +14,8 @@ const DEFAULT_CONTENT = {
         ctaText: '무료 상담 신청',
         ctaSubText: '지금 시작하기',
     },
-    testimonials: [
-        {
-            stars: 5,
-            text: '먹팡 촬영 후 매출이 30% 올랐어요. 영상 퀄리티가 정말 미쳤습니다. 강력 추천합니다!',
-            author: '강남 OO 레스토랑 사장님',
-            badge: '먹팡',
-            badgeColor: '#7b2fff',
-            photo: 'https://picsum.photos/seed/pang1/200/200',
-        },
-        {
-            stars: 5,
-            text: '이렇게 결과물이 좋을 줄 몰랐어요. 틱톡에서 조회수 50만 찍었습니다. 가성비 최고!',
-            author: '홍대 OO 카페 대표님',
-            badge: '먹팡',
-            badgeColor: '#7b2fff',
-            photo: 'https://picsum.photos/seed/pang2/200/200',
-        },
-        {
-            stars: 5,
-            text: '전담 PD가 친절하고 빠르게 납품해줘서 대만족입니다. 다음 달도 또 맡기려고요!',
-            author: '판교 OO 네일샵 원장님',
-            badge: '멋팡',
-            badgeColor: '#7b2fff',
-            photo: 'https://picsum.photos/seed/pang3/200/200',
-        },
-        {
-            stars: 5,
-            text: 'VR체험 영상이 숏츠에서 터지면서 주말 예약이 3배나 늘었어요. THE PANG 없이는 못합니다!',
-            author: '잠실 OO 체험관 대표님',
-            badge: '놀팡',
-            badgeColor: '#e63946',
-            photo: 'https://picsum.photos/seed/pang4/200/200',
-        },
-    ],
-    pricing: [
-        {
-            name: 'PANG-S',
-            tier: 'STARTER',
-            price: '190,000',
-            period: '1회 기준',
-            features: ['현장 1회 2시간 촬영', '30초 숏츠 1편', 'AI 자막 + 색보정', '수정 1회', '납기 5영업일', '3플랫폼 공통 1포맷'],
-            btnText: '시작하기',
-        },
-        {
-            name: 'PANG-M',
-            tier: 'STANDARD',
-            price: '490,000',
-            period: '1회 기준',
-            features: ['현장 1회 3시간 촬영', '30초 숏츠 3편', 'AI 자막 + 색보정 + BGM', '수정 편당 2회', '납기 4영업일', '플랫폼별 최적화 3포맷', '전담 PD 1인', 'SNS 썸네일 3장'],
-            btnText: '지금 시작',
-        },
-        {
-            name: 'PANG-L',
-            tier: 'PREMIUM',
-            price: '890,000',
-            period: '1회 기준',
-            features: ['현장 2회 (회당 4시간) 촬영', '30초 숏츠 5편 (A/B테스트)', 'AI 자막 + 색보정 + CG + 썸네일', '수정 편당 3회 + 최종확인', '납기 3영업일', '전플랫폼 + 가로형(16:9)', '전담 PD + 마케터 2인', '해시태그/캡션 + 성과 리포트'],
-            btnText: '프리미엄 시작',
-        },
-        {
-            name: 'PANG-X',
-            tier: 'BRAND SUBSCRIPTION',
-            price: '1,490,000',
-            period: '월 정기 구독',
-            features: ['월 2회 정기 현장촬영', '월 8편 숏츠 제작', '풀 AI 후보정 + 브랜드 AI모델', '수정 무제한', '편당 2영업일 납기', 'PD + 마케터 + 기획자 3인', '월간 콘텐츠 전략 리포트', 'SNS 채널 운영 컨설팅'],
-            btnText: '구독 시작하기',
-        },
-    ],
+    testimonials: [],
+    pricing: [],
     portfolio: {
         meokpang: [],
         nolpang: [],
@@ -89,11 +26,7 @@ const DEFAULT_CONTENT = {
     footer: {
         brandName: 'THE PANG',
         slogan: '숏츠 광고, \n한방으로 바이럴',
-        sns: {
-            instagram: '#',
-            youtube: '#',
-            tiktok: '#'
-        },
+        sns: { instagram: '#', youtube: '#', tiktok: '#' },
         companyLinks: [
             { label: '회사소개', url: '#' },
             { label: '이용약관', url: '#' },
@@ -109,25 +42,125 @@ const DEFAULT_CONTENT = {
 };
 
 const ContentStore = {
-    get() {
+
+    /**
+     * Supabase에서 모든 콘텐츠를 로드하여 통합 객체로 반환
+     * 실패 시 localStorage fallback → 기본값
+     */
+    async get() {
+        try {
+            // 병렬로 모든 데이터 로드
+            const [hero, footer, testimonials, pricing, portfolioItems] = await Promise.all([
+                AdminContent.getSection('hero'),
+                AdminContent.getSection('footer'),
+                AdminContent.getTestimonials(),
+                AdminContent.getPricing(),
+                AdminContent.getPortfolio()
+            ]);
+
+            // 포트폴리오를 카테고리별로 그룹화
+            const portfolio = {
+                meokpang: [], nolpang: [], swimpang: [],
+                salpang: [], meotpang: []
+            };
+            (portfolioItems || []).forEach(item => {
+                if (portfolio[item.category]) {
+                    portfolio[item.category].push({
+                        id: item.id,
+                        url: item.media_url,
+                        type: item.media_type,
+                        order_index: item.order_index
+                    });
+                }
+            });
+
+            // 후기 포맷 통일
+            const formattedTestimonials = (testimonials || []).map(t => ({
+                id: t.id,
+                stars: t.stars,
+                text: t.text,
+                author: t.author,
+                badge: t.badge,
+                badgeColor: t.badge_color,
+                photo: t.photo_url,
+                order_index: t.order_index
+            }));
+
+            // 가격표 포맷 통일
+            const formattedPricing = (pricing || []).map(p => ({
+                id: p.id,
+                name: p.name,
+                tier: p.tier,
+                price: p.price,
+                period: p.period,
+                features: Array.isArray(p.features) ? p.features : [],
+                btnText: p.btn_text,
+                order_index: p.order_index
+            }));
+
+            const content = {
+                hero: hero || DEFAULT_CONTENT.hero,
+                footer: footer || DEFAULT_CONTENT.footer,
+                testimonials: formattedTestimonials.length ? formattedTestimonials : DEFAULT_CONTENT.testimonials,
+                pricing: formattedPricing.length ? formattedPricing : DEFAULT_CONTENT.pricing,
+                portfolio
+            };
+
+            // localStorage에도 캐시 (오프라인 fallback)
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(content)); } catch(e) {}
+
+            return content;
+
+        } catch (err) {
+            console.warn('[ContentStore] Supabase 로드 실패, localStorage fallback:', err.message);
+            return this._getFromLocalStorage();
+        }
+    },
+
+    /**
+     * Supabase에 모든 콘텐츠 저장
+     */
+    async save(data) {
+        try {
+            await Promise.all([
+                AdminContent.saveSection('hero', data.hero),
+                AdminContent.saveSection('footer', data.footer),
+                AdminContent.saveTestimonials(data.testimonials),
+                AdminContent.savePricing(data.pricing)
+            ]);
+            // 포트폴리오는 개별 CRUD로 처리되므로 여기서는 저장하지 않음
+
+            // localStorage 캐시 갱신
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) {}
+
+        } catch (err) {
+            console.error('[ContentStore] Supabase 저장 실패:', err.message);
+            // fallback: localStorage에라도 저장
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) {}
+            throw err; // 상위에서 에러 UI 처리
+        }
+    },
+
+    /**
+     * 기본값으로 리셋
+     */
+    reset() {
+        localStorage.removeItem(STORE_KEY);
+        return JSON.parse(JSON.stringify(DEFAULT_CONTENT));
+    },
+
+    /**
+     * localStorage에서 읽기 (오프라인 fallback)
+     */
+    _getFromLocalStorage() {
         const raw = localStorage.getItem(STORE_KEY);
         if (!raw) return JSON.parse(JSON.stringify(DEFAULT_CONTENT));
         try {
             const stored = JSON.parse(raw);
-            // Deep merge with defaults to handle new fields
             return this._merge(JSON.parse(JSON.stringify(DEFAULT_CONTENT)), stored);
         } catch {
             return JSON.parse(JSON.stringify(DEFAULT_CONTENT));
         }
-    },
-
-    save(data) {
-        localStorage.setItem(STORE_KEY, JSON.stringify(data));
-    },
-
-    reset() {
-        localStorage.removeItem(STORE_KEY);
-        return JSON.parse(JSON.stringify(DEFAULT_CONTENT));
     },
 
     _merge(base, override) {

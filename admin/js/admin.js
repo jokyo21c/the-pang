@@ -1,14 +1,28 @@
 /* ══════════════════════════════════════════════════════════
    THE PANG Admin — Controller (admin.js)
+   Supabase 연동 버전
    ══════════════════════════════════════════════════════════ */
 
 // ── Auth Guard ──────────────────────────────────────────
-if (sessionStorage.getItem('pang_admin_auth') !== 'true') {
-    window.location.href = 'index.html';
-}
+// Supabase 세션 확인 (비동기)
+(async () => {
+    try {
+        const isAdmin = await AdminAuth.isAdmin();
+        if (!isAdmin) {
+            window.location.href = 'index.html';
+            return;
+        }
+        // 인증 성공 후 초기화
+        await initApp();
+    } catch (e) {
+        console.error('Auth check failed:', e);
+        window.location.href = 'index.html';
+    }
+})();
 
 // ── State ───────────────────────────────────────────────
-let content = ContentStore.get();
+let content = null;
+let portfolioData = []; // Supabase에서 로드한 포트폴리오 (id 포함)
 
 const CATEGORY_LABELS = {
     meokpang:  { name: '먹팡',  icon: '🍖', color: 'rgba(230,57,70,0.15)' },
@@ -19,6 +33,33 @@ const CATEGORY_LABELS = {
 };
 
 const PLAN_STYLES = ['starter', 'standard', 'premium', 'enterprise'];
+
+// ── 앱 초기화 (비동기) ───────────────────────────────────
+async function initApp() {
+    // 로딩 표시
+    showToast('데이터 로딩 중...');
+
+    try {
+        content = await ContentStore.get();
+    } catch (e) {
+        console.error('콘텐츠 로드 실패:', e);
+        content = ContentStore.reset();
+    }
+
+    loadHero();
+    renderPortfolioEditor();
+    renderTestimonialEditor();
+    renderPricingEditor();
+    loadFooter();
+    updateStats();
+
+    // 초기 진입 시 해시 확인해서 패널 열어주기
+    const initialPanel = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
+    history.replaceState({ panelId: initialPanel }, '', '#' + initialPanel);
+    showPanel(initialPanel, false);
+
+    showToast('데이터를 불러왔습니다.');
+}
 
 // ── Panel Navigation ─────────────────────────────────────
 function showPanel(panelId, pushState = true) {
@@ -31,7 +72,6 @@ function showPanel(panelId, pushState = true) {
     const navItem = document.querySelector(`[data-panel="${panelId}"]`);
     if (navItem) {
         navItem.classList.add('active');
-        // 모바일: 해당 항목이 속한 어코디언 자동 열기
         if (window.innerWidth <= 768) {
             const parentSection = navItem.closest('.accordion-section');
             if (parentSection) {
@@ -49,16 +89,15 @@ function showPanel(panelId, pushState = true) {
         pricing:     '가격표 관리',
         footer:      '푸터 관리',
         members:     '회원 관리',
+        settings:    '계정 설정',
     };
     const topTitle = document.getElementById('topbarTitle');
     if (topTitle) topTitle.textContent = titles[panelId] || panelId;
 
-    // 회원 패널 진입 시 자동 로드
     if (panelId === 'members') initMembersPanel();
-    // 대시보드 진입 시 회원 수 업데이트
     if (panelId === 'dashboard') updateMemberStat();
+    if (panelId === 'settings') loadAccountSettings();
 
-    // History API 연동
     if (pushState) {
         history.pushState({ panelId: panelId }, '', '#' + panelId);
     }
@@ -83,7 +122,6 @@ function loadHero() {
     document.getElementById('hero-cta').value      = content.hero.ctaText || '';
     document.getElementById('hero-cta-sub').value  = content.hero.ctaSubText || '';
     
-    // 미디어 렌더링
     if (content.hero.media && content.hero.media.url) {
         renderHeroMediaPreview(content.hero.media);
     } else {
@@ -96,21 +134,18 @@ function saveHero() {
     content.hero.subtitle   = document.getElementById('hero-subtitle').value;
     content.hero.ctaText    = document.getElementById('hero-cta').value;
     content.hero.ctaSubText = document.getElementById('hero-cta-sub').value;
-    // media는 업로드 즉시 content.hero.media에 반영되므로 따로 저장 불필요
 }
 
-/* ── Hero Media Upload (Drag & Drop) ── */
+/* ── Hero Media Upload (Drag & Drop + Supabase Storage) ── */
 const heroUploadZone = document.getElementById('hero-upload-zone');
 const heroMediaInput = document.getElementById('hero-media-input');
 const heroPreviewWrap = document.getElementById('hero-preview-wrap');
 const heroMediaPreview = document.getElementById('hero-media-preview');
 const heroMediaRemove = document.getElementById('hero-media-remove');
 
-// 클릭으로 업로드
 if (heroUploadZone) {
     heroUploadZone.addEventListener('click', () => heroMediaInput.click());
 
-    // 드래그 앤 드롭 이벤트
     heroUploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         heroUploadZone.classList.add('dragover');
@@ -127,7 +162,6 @@ if (heroUploadZone) {
         }
     });
 
-    // input change 이벤트
     heroMediaInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files.length > 0) {
             handleHeroMediaFile(e.target.files[0]);
@@ -135,21 +169,26 @@ if (heroUploadZone) {
     });
 }
 
-function handleHeroMediaFile(file) {
+async function handleHeroMediaFile(file) {
     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
         alert('이미지 또는 비디오 파일만 업로드 가능합니다.');
         return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const url = e.target.result;
+    showToast('히어로 미디어 업로드 중...');
+
+    try {
+        // Supabase Storage에 업로드
+        const result = await AdminStorage.uploadFile(file, 'hero');
         const type = file.type.startsWith('image/') ? 'image' : 'video';
-        
-        content.hero.media = { type, url };
+
+        content.hero.media = { type, url: result.url, path: result.path };
         renderHeroMediaPreview(content.hero.media);
-    };
-    reader.readAsDataURL(file);
+        showToast('✅ 히어로 미디어가 업로드되었습니다.');
+    } catch (err) {
+        console.error('히어로 미디어 업로드 실패:', err);
+        showToast('❌ 업로드 실패: ' + err.message);
+    }
 }
 
 function renderHeroMediaPreview(media) {
@@ -157,9 +196,9 @@ function renderHeroMediaPreview(media) {
     heroPreviewWrap.style.display = 'block';
     
     if (media.type === 'image') {
-        heroMediaPreview.innerHTML = `<img src="${media.url}" alt="Hero Media bg"\u003e`;
+        heroMediaPreview.innerHTML = `<img src="${media.url}" alt="Hero Media bg">`;
     } else if (media.type === 'video') {
-        heroMediaPreview.innerHTML = `<video src="${media.url}" autoplay loop muted playsinline\u003e</video\u003e`;
+        heroMediaPreview.innerHTML = `<video src="${media.url}" autoplay loop muted playsinline></video>`;
     }
 }
 
@@ -172,7 +211,17 @@ function clearHeroMediaPreview() {
 }
 
 if (heroMediaRemove) {
-    heroMediaRemove.addEventListener('click', clearHeroMediaPreview);
+    heroMediaRemove.addEventListener('click', async () => {
+        // Storage에서도 삭제
+        if (content.hero.media?.path) {
+            try {
+                await AdminStorage.deleteFile(content.hero.media.path);
+            } catch (e) {
+                console.warn('히어로 미디어 Storage 삭제 실패:', e);
+            }
+        }
+        clearHeroMediaPreview();
+    });
 }
 
 // ── Portfolio ────────────────────────────────────────────
@@ -196,15 +245,17 @@ function renderPortfolioEditor() {
                 ${meta.icon} ${meta.name} <span class="tag tag--purple" style="margin-left:auto;">${items.length}개</span>
             </div>
             <div class="image-grid" id="img-grid-${key}">
-                ${items.map((url, i) => {
-                    const isVid = isVideoUrl(url);
+                ${items.map((item, i) => {
+                    const url = typeof item === 'string' ? item : item.url;
+                    const itemId = typeof item === 'object' ? item.id : null;
+                    const isVid = isVideoUrl(url) || (typeof item === 'object' && item.type === 'video');
                     const mediaTag = isVid 
                         ? `<video src="${url}" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`
                         : `<img src="${url}" alt="${meta.name} ${i+1}" onerror="this.src='https://picsum.photos/seed/${key}${i}/200/355'">`;
                     return `
                         <div class="image-card">
                             ${mediaTag}
-                            <div class="image-card__del" onclick="removePortfolioItem('${key}', ${i})">
+                            <div class="image-card__del" onclick="removePortfolioItem('${key}', ${i}, ${itemId})">
                                 <i class="ri-close-line"></i>
                             </div>
                         </div>
@@ -247,28 +298,65 @@ window.handlePortfolioUpload = function(e, category) {
     if (e.target.files && e.target.files.length > 0) {
         processPortfolioFiles(e.target.files, category);
     }
-    e.target.value = ''; // Reset input
+    e.target.value = '';
 };
 
-function processPortfolioFiles(files, category) {
+async function processPortfolioFiles(files, category) {
     if (!content.portfolio[category]) content.portfolio[category] = [];
-    
-    Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            content.portfolio[category].push(e.target.result);
-            renderPortfolioEditor();
-        };
-        reader.readAsDataURL(file);
-    });
+
+    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    if (fileArray.length === 0) return;
+
+    let uploadedCount = 0;
+    const totalFiles = fileArray.length;
+
+    showToast(`파일 업로드 시작... (0/${totalFiles})`);
+
+    for (const file of fileArray) {
+        try {
+            // Supabase Storage에 업로드
+            const result = await AdminStorage.uploadFile(file, `portfolio/${category}`);
+
+            // DB에 항목 추가
+            const dbItem = await AdminContent.addPortfolioItem(category, result.url, result.type);
+
+            content.portfolio[category].push({
+                id: dbItem.id,
+                url: result.url,
+                type: result.type,
+                order_index: dbItem.order_index
+            });
+
+            uploadedCount++;
+            showToast(`파일 업로드 중... (${uploadedCount}/${totalFiles})`);
+
+        } catch (err) {
+            console.error('포트폴리오 업로드 오류:', err);
+            showToast(`❌ 업로드 실패 (${file.name}): ${err.message}`);
+        }
+    }
+
+    if (uploadedCount > 0) {
+        renderPortfolioEditor();
+        showToast(`✅ ${uploadedCount}/${totalFiles}개 파일이 업로드되었습니다.`);
+    }
 }
 
-
-function removePortfolioItem(category, index) {
+async function removePortfolioItem(category, index, itemId) {
     if (confirm('이 항목을 삭제하시겠습니까?')) {
-        content.portfolio[category].splice(index, 1);
-        renderPortfolioEditor();
+        try {
+            // Supabase DB에서 삭제
+            if (itemId) {
+                await AdminContent.removePortfolioItem(itemId);
+            }
+            
+            content.portfolio[category].splice(index, 1);
+            renderPortfolioEditor();
+            showToast('항목이 삭제되었습니다.');
+        } catch (err) {
+            console.error('삭제 실패:', err);
+            showToast('❌ 삭제 실패: ' + err.message);
+        }
     }
 }
 
@@ -283,10 +371,10 @@ function renderTestimonialEditor() {
             </div>
             <div class="editor-row">
                 <label>사진 URL (1:1 비율 권장)</label>
-                <input type="url" class="form-control" id="testi-photo-${i}" value="${t.photo}">
+                <input type="url" class="form-control" id="testi-photo-${i}" value="${t.photo || t.photo_url || ''}">
             </div>
             <div style="margin-bottom:16px;">
-                <img src="${t.photo}" style="width:224px;height:224px;border-radius:10px;object-fit:cover;border:1px solid var(--border);"
+                <img src="${t.photo || t.photo_url || ''}" style="width:224px;height:224px;border-radius:10px;object-fit:cover;border:1px solid var(--border);"
                      id="testi-preview-${i}" onerror="this.style.display='none'">
             </div>
             <div class="editor-row">
@@ -311,11 +399,13 @@ function renderTestimonialEditor() {
     // Live photo preview
     content.testimonials.forEach((_, i) => {
         const photoInput = document.getElementById(`testi-photo-${i}`);
-        photoInput.addEventListener('input', () => {
-            const preview = document.getElementById(`testi-preview-${i}`);
-            preview.src = photoInput.value;
-            preview.style.display = 'block';
-        });
+        if (photoInput) {
+            photoInput.addEventListener('input', () => {
+                const preview = document.getElementById(`testi-preview-${i}`);
+                preview.src = photoInput.value;
+                preview.style.display = 'block';
+            });
+        }
     });
 }
 
@@ -353,11 +443,11 @@ function renderPricingEditor() {
             </div>
             <div class="editor-row">
                 <label>기능 목록 (한 줄에 하나씩)</label>
-                <textarea class="feature-list-input" id="plan-features-${i}">${plan.features.join('\n')}</textarea>
+                <textarea class="feature-list-input" id="plan-features-${i}">${Array.isArray(plan.features) ? plan.features.join('\n') : ''}</textarea>
             </div>
             <div class="editor-row">
                 <label>버튼 텍스트</label>
-                <input type="text" class="form-control" id="plan-btn-${i}" value="${plan.btnText}">
+                <input type="text" class="form-control" id="plan-btn-${i}" value="${plan.btnText || plan.btn_text || ''}">
             </div>
         </div>
     `).join('');
@@ -369,7 +459,7 @@ function savePricing() {
         name:     document.getElementById(`plan-name-${i}`)?.value     || plan.name,
         price:    document.getElementById(`plan-price-${i}`)?.value    || plan.price,
         period:   document.getElementById(`plan-period-${i}`)?.value   || plan.period,
-        features: (document.getElementById(`plan-features-${i}`)?.value || plan.features.join('\n'))
+        features: (document.getElementById(`plan-features-${i}`)?.value || '')
                     .split('\n').map(s => s.trim()).filter(Boolean),
         btnText:  document.getElementById(`plan-btn-${i}`)?.value      || plan.btnText,
     }));
@@ -377,7 +467,7 @@ function savePricing() {
 
 // ── Footer ──────────────────────────────────────────────
 function loadFooter() {
-    if(!content.footer) content.footer = ContentStore.get().footer;
+    if(!content.footer) content.footer = { sns: {}, contact: {}, companyLinks: [] };
     
     document.getElementById('footer-brand').value = content.footer.brandName || '';
     document.getElementById('footer-slogan').value = content.footer.slogan || '';
@@ -400,6 +490,7 @@ function saveFooter() {
     content.footer.brandName = document.getElementById('footer-brand').value;
     content.footer.slogan = document.getElementById('footer-slogan').value;
     
+    if (!content.footer.sns) content.footer.sns = {};
     content.footer.sns.instagram = document.getElementById('footer-sns-insta').value;
     content.footer.sns.youtube = document.getElementById('footer-sns-youtube').value;
     content.footer.sns.tiktok = document.getElementById('footer-sns-tiktok').value;
@@ -412,7 +503,8 @@ function saveFooter() {
             }
             return null;
         }).filter(Boolean);
-        
+
+    if (!content.footer.contact) content.footer.contact = {};
     content.footer.contact.kakao = document.getElementById('footer-contact-kakao').value;
     content.footer.contact.email = document.getElementById('footer-contact-email').value;
     content.footer.contact.time = document.getElementById('footer-contact-time').value;
@@ -428,28 +520,34 @@ function updateStats() {
     if (tsEl) tsEl.textContent = content.testimonials.length;
 }
 
-// ── Save All ─────────────────────────────────────────────
-function saveAll() {
-    // Hero
+// ── Save All (Supabase) ──────────────────────────────────
+async function saveAll() {
     saveHero();
-    // Testimonials
     saveTestimonials();
-    // Pricing
     savePricing();
-    // Footer
     saveFooter();
-    // Portfolio already live-updated
-
-    ContentStore.save(content);
-    showToast('모든 변경사항이 저장되었습니다!');
 
     const btn = document.getElementById('saveBtn');
-    btn.classList.add('saved');
-    btn.innerHTML = '<i class="ri-checkbox-circle-line"></i> 저장됨';
-    setTimeout(() => {
-        btn.classList.remove('saved');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ri-loader-4-line" style="animation:spin .6s linear infinite;display:inline-block;"></i> 저장 중...';
+
+    try {
+        await ContentStore.save(content);
+        showToast('✅ 모든 변경사항이 저장되었습니다!');
+
+        btn.classList.add('saved');
+        btn.innerHTML = '<i class="ri-checkbox-circle-line"></i> 저장됨';
+        setTimeout(() => {
+            btn.classList.remove('saved');
+            btn.innerHTML = '<i class="ri-save-line"></i> 저장';
+            btn.disabled = false;
+        }, 2000);
+    } catch (e) {
+        console.error('저장 실패:', e);
+        showToast('❌ 저장 실패: ' + e.message);
         btn.innerHTML = '<i class="ri-save-line"></i> 저장';
-    }, 2000);
+        btn.disabled = false;
+    }
 }
 
 // ── Toast ────────────────────────────────────────────────
@@ -468,24 +566,15 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
 // ── Save Button ───────────────────────────────────────────
 document.getElementById('saveBtn').addEventListener('click', saveAll);
 
-// ── Logout ───────────────────────────────────────────────
-document.getElementById('logoutBtn').addEventListener('click', () => {
-    sessionStorage.removeItem('pang_admin_auth');
+// ── Logout (Supabase) ────────────────────────────────────
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try {
+        await AdminAuth.logout();
+    } catch (e) {
+        console.warn('로그아웃 오류:', e);
+    }
     window.location.href = 'index.html';
 });
-
-// ── Init ──────────────────────────────────────────────────
-loadHero();
-renderPortfolioEditor();
-renderTestimonialEditor();
-renderPricingEditor();
-loadFooter();
-updateStats();
-
-// 초기 진입 시 해시 확인해서 패널 열어주기
-const initialPanel = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
-history.replaceState({ panelId: initialPanel }, '', '#' + initialPanel);
-showPanel(initialPanel, false);
 
 // ── Mobile Sidebar ────────────────────────────────────────
 const sidebar        = document.getElementById('sidebar');
@@ -509,7 +598,6 @@ hamburgerBtn.addEventListener('click', openSidebar);
 sidebarClose.addEventListener('click', closeSidebar);
 sidebarOverlay.addEventListener('click', closeSidebar);
 
-// 모바일에서 메뉴 선택 후 사이드바 자동 닫기
 document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
     item.addEventListener('click', () => {
         if (window.innerWidth <= 768) closeSidebar();
@@ -519,22 +607,14 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
 // ── Accordion ─────────────────────────────────────────────
 document.querySelectorAll('.accordion-trigger').forEach(trigger => {
     trigger.addEventListener('click', () => {
-        // 모바일에서만 어코디언 동작
         if (window.innerWidth > 768) return;
-
-        const targetId = trigger.dataset.target;
         const section  = trigger.closest('.accordion-section');
         const isOpen   = section.classList.contains('open');
-
-        // 모든 섹션 닫기
         document.querySelectorAll('.accordion-section').forEach(s => s.classList.remove('open'));
-
-        // 클릭된 섹션이 닫혀 있었으면 열기
         if (!isOpen) section.classList.add('open');
     });
 });
 
-// 페이지 로드 시: 활성 패널이 속한 어코디언 자동 열기 (모바일)
 function openActiveAccordion() {
     if (window.innerWidth > 768) return;
     const activeItem = document.querySelector('.nav-item.active[data-panel]');
@@ -545,58 +625,45 @@ function openActiveAccordion() {
 
 openActiveAccordion();
 
-// 리사이즈 시 사이드바 리셋
 window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-        closeSidebar();
-    }
+    if (window.innerWidth > 768) closeSidebar();
 });
 
 
 /* ════════════════════════════════════════════════════════
-   회원 관리 맴 — localStorage 연동
+   회원 관리 — Supabase 연동
    ════════════════════════════════════════════════════════ */
 
-const PANG_USERS_KEY   = 'pang_users';
-const PANG_SESSION_KEY = 'pang_session';
-
-function getMembers() {
-    try { return JSON.parse(localStorage.getItem(PANG_USERS_KEY)) || []; }
-    catch { return []; }
-}
-
-function saveMembers(users) {
-    localStorage.setItem(PANG_USERS_KEY, JSON.stringify(users));
-}
-
-function getCurrentSession() {
-    try { return JSON.parse(localStorage.getItem(PANG_SESSION_KEY)); }
-    catch { return null; }
-}
-
 // 대시보드 통계 카드 업데이트
-function updateMemberStat() {
-    const el = document.getElementById('stat-members');
-    if (el) el.textContent = getMembers().length;
+async function updateMemberStat() {
+    try {
+        const members = await AdminContent.getMembers();
+        const el = document.getElementById('stat-members');
+        if (el) el.textContent = members.length;
+    } catch (e) {
+        console.warn('회원 통계 로드 실패:', e);
+    }
 }
 
-// 회원 패널 하시범 초기화
-function initMembersPanel() {
-    const members = getMembers();
-    const totalEl = document.getElementById('memberTotalCount');
-    if (totalEl) totalEl.textContent = members.length;
-    // 대시보드 통계도 동시 업데이트
-    const statEl = document.getElementById('stat-members');
-    if (statEl) statEl.textContent = members.length;
-
-    renderMembers(members);
+// 회원 패널 초기화
+async function initMembersPanel() {
+    try {
+        const members = await AdminContent.getMembers();
+        const totalEl = document.getElementById('memberTotalCount');
+        if (totalEl) totalEl.textContent = members.length;
+        const statEl = document.getElementById('stat-members');
+        if (statEl) statEl.textContent = members.length;
+        renderMembers(members);
+    } catch (e) {
+        console.error('회원 목록 로드 실패:', e);
+        showToast('❌ 회원 목록 로드 실패');
+    }
 }
 
 // 테이블 렌더링
 function renderMembers(members) {
     const tbody  = document.getElementById('membersTableBody');
     const empty  = document.getElementById('membersEmpty');
-    const session = getCurrentSession();
 
     if (!members.length) {
         tbody.innerHTML = '';
@@ -606,48 +673,51 @@ function renderMembers(members) {
     empty.style.display = 'none';
 
     tbody.innerHTML = members.map((m, i) => {
-        const isOnline = session && session.email === m.email;
-        const badge = isOnline
-            ? '<span class="member-badge member-badge--online"\u003e로그인 중</span\u003e'
-            : '<span class="member-badge member-badge--normal"\u003e일반</span\u003e';
+        const statusBadge = m.status === 'active'
+            ? '<span class="member-badge member-badge--online">활성</span>'
+            : '<span class="member-badge member-badge--normal">비활성</span>';
 
         return `
-        <tr class="member-row" data-email="${m.email}"\u003e
-            <td class="member-num"\u003e${i + 1}</td\u003e
-            <td\u003e
-                <div class="member-name-cell"\u003e
-                    <div class="member-avatar"\u003e${m.name.charAt(0)}</div\u003e
-                    <span\u003e${m.name}</span\u003e
-                </div\u003e
-            </td\u003e
-            <td class="member-email"\u003e${m.email}</td\u003e
-            <td\u003e${badge}</td\u003e
-            <td\u003e
-                <button class="btn-member-delete" onclick="openMemberDeleteModal('${m.email}', '${m.name}')" title="삭제"\u003e
-                    <i class="ri-delete-bin-6-line"\u003e</i\u003e
-                </button\u003e
-            </td\u003e
-        </tr\u003e`;
+        <tr class="member-row" data-id="${m.id}">
+            <td class="member-num">${i + 1}</td>
+            <td>
+                <div class="member-name-cell">
+                    <div class="member-avatar">${m.name.charAt(0)}</div>
+                    <span>${m.name}</span>
+                </div>
+            </td>
+            <td class="member-email">${m.email}</td>
+            <td>${statusBadge}</td>
+            <td>
+                <button class="btn-member-delete" onclick="openMemberDeleteModal(${m.id}, '${m.name}', '${m.email}')" title="삭제">
+                    <i class="ri-delete-bin-6-line"></i>
+                </button>
+            </td>
+        </tr>`;
     }).join('');
 }
 
 // 검색 필터
-function filterMembers() {
+async function filterMembers() {
     const q = document.getElementById('memberSearchInput').value.trim().toLowerCase();
-    const all = getMembers();
-    const filtered = q
-        ? all.filter(m => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q))
-        : all;
+    try {
+        const all = await AdminContent.getMembers();
+        const filtered = q
+            ? all.filter(m => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q))
+            : all;
 
-    document.getElementById('memberTotalCount').textContent = all.length;
-    renderMembers(filtered);
+        document.getElementById('memberTotalCount').textContent = all.length;
+        renderMembers(filtered);
+    } catch (e) {
+        console.error('회원 검색 실패:', e);
+    }
 }
 
 // 삭제 모달
-let _deleteTargetEmail = null;
+let _deleteTargetId = null;
 
-function openMemberDeleteModal(email, name) {
-    _deleteTargetEmail = email;
+function openMemberDeleteModal(id, name, email) {
+    _deleteTargetId = id;
     document.getElementById('memberDeleteMsg').textContent = `「${name}」 (${email}) 회원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`;
     document.getElementById('memberDeleteModal').style.display = 'flex';
     document.getElementById('memberDeleteConfirm').onclick = confirmDeleteMember;
@@ -655,25 +725,92 @@ function openMemberDeleteModal(email, name) {
 
 function closeMemberDeleteModal() {
     document.getElementById('memberDeleteModal').style.display = 'none';
-    _deleteTargetEmail = null;
+    _deleteTargetId = null;
 }
 
-function confirmDeleteMember() {
-    if (!_deleteTargetEmail) return;
+async function confirmDeleteMember() {
+    if (!_deleteTargetId) return;
 
-    let users = getMembers().filter(u => u.email !== _deleteTargetEmail);
-    saveMembers(users);
-
-    // 삭제된 회원이 현재 로그인 중이면 세션도 제거
-    const session = getCurrentSession();
-    if (session && session.email === _deleteTargetEmail) {
-        localStorage.removeItem(PANG_SESSION_KEY);
+    try {
+        await AdminContent.deleteMember(_deleteTargetId);
+        closeMemberDeleteModal();
+        showToast('회원이 삭제되었습니다.');
+        await initMembersPanel();
+    } catch (e) {
+        console.error('회원 삭제 실패:', e);
+        showToast('❌ 회원 삭제 실패: ' + e.message);
     }
-
-    closeMemberDeleteModal();
-    showToast('회원이 삭제되었습니다.');
-    initMembersPanel();
 }
 
-// 대시보드 로드 시 회원 수 반영
-updateMemberStat();
+// CSS animation for spinner
+const styleEl = document.createElement('style');
+styleEl.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(styleEl);
+
+/* ════════════════════════════════════════════════════════
+   계정 설정 (이메일/비밀번호 변경)
+   ════════════════════════════════════════════════════════ */
+
+// 계정 설정 초기화
+async function loadAccountSettings() {
+    try {
+        const user = await AdminAuth.getCurrentUser();
+        const currentEmailInput = document.getElementById('settings-current-email');
+        if (currentEmailInput && user) {
+            currentEmailInput.value = user.email || '';
+        }
+    } catch (e) {
+        console.error('계정 정보 로드 실패:', e);
+    }
+}
+
+// 이메일 변경
+document.getElementById('btn-update-email')?.addEventListener('click', async () => {
+    const newEmail = document.getElementById('settings-new-email').value.trim();
+    if (!newEmail) return alert('새 이메일 주소를 입력해주세요.');
+
+    const btn = document.getElementById('btn-update-email');
+    try {
+        btn.disabled = true;
+        btn.textContent = '업데이트 중...';
+        
+        await AdminAuth.updateEmail(newEmail);
+        showToast('이메일 변경 요청이 전송되었습니다. 확인 메일을 확인해주세요.');
+        document.getElementById('settings-new-email').value = '';
+        
+    } catch (e) {
+        console.error('이메일 변경 오류:', e);
+        showToast('❌ 이메일 변경 실패: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '이메일 업데이트';
+    }
+});
+
+// 비밀번호 변경
+document.getElementById('btn-update-password')?.addEventListener('click', async () => {
+    const newPassword = document.getElementById('settings-new-password').value;
+    const confirmPassword = document.getElementById('settings-confirm-password').value;
+
+    if (!newPassword) return alert('새 비밀번호를 입력해주세요.');
+    if (newPassword.length < 6) return alert('비밀번호는 최소 6자리 이상이어야 합니다.');
+    if (newPassword !== confirmPassword) return alert('비밀번호 확인이 일치하지 않습니다.');
+
+    const btn = document.getElementById('btn-update-password');
+    try {
+        btn.disabled = true;
+        btn.textContent = '변경 중...';
+        
+        await AdminAuth.updatePassword(newPassword);
+        showToast('비밀번호가 성공적으로 변경되었습니다.');
+        document.getElementById('settings-new-password').value = '';
+        document.getElementById('settings-confirm-password').value = '';
+        
+    } catch (e) {
+        console.error('비밀번호 변경 오류:', e);
+        showToast('❌ 비밀번호 변경 실패: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '비밀번호 변경';
+    }
+});
