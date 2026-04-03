@@ -9,14 +9,14 @@
     try {
         const isAdmin = await AdminAuth.isAdmin();
         if (!isAdmin) {
-            window.location.href = 'index.html';
+            window.location.href = '/admin/index.html';
             return;
         }
         // 인증 성공 후 초기화
         await initApp();
     } catch (e) {
         console.error('Auth check failed:', e);
-        window.location.href = 'index.html';
+        window.location.href = '/admin/index.html';
     }
 })();
 
@@ -573,7 +573,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     } catch (e) {
         console.warn('로그아웃 오류:', e);
     }
-    window.location.href = 'index.html';
+    window.location.href = '/admin/index.html';
 });
 
 // ── Mobile Sidebar ────────────────────────────────────────

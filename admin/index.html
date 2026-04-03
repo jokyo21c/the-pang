@@ -76,7 +76,7 @@
         try {
             const isAdmin = await AdminAuth.isAdmin();
             if (isAdmin) {
-                window.location.href = 'dashboard.html';
+                window.location.href = '/admin/dashboard.html';
                 return;
             }
         } catch (e) {
@@ -102,7 +102,7 @@
 
         try {
             await AdminAuth.login(email, pw);
-            window.location.href = 'dashboard.html';
+            window.location.href = '/admin/dashboard.html';
         } catch (err) {
             loginErrorMsg.textContent = err.message || '로그인에 실패했습니다.';
             loginError.classList.add('show');
