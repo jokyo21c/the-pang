@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Testimonial Slider & Dynamic Content ────────────────
     const track = document.getElementById('testimonialTrack');
     const dotsContainer = document.getElementById('sliderDots');
-    
+
     try {
         const raw = localStorage.getItem('pang_cms_content');
         if (raw) {
@@ -59,11 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `).join('');
-                
+
                 // Update Dots
                 if (dotsContainer) {
                     dotsContainer.innerHTML = parsed.testimonials.map((_, i) => `
-                        <span class="slider-dot ${i===0 ? 'active' : ''}" data-index="${i}"></span>
+                        <span class="slider-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>
                     `).join('');
                 }
             }
@@ -146,11 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardWidth = pricingGrid.clientWidth;
             // index based on scroll position
             const index = Math.round(scrollLeft / cardWidth);
-            
+
             // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
             // if (pricingPrev) pricingPrev.classList.toggle('hidden', index === 0);
             // if (pricingNext) pricingNext.classList.toggle('hidden', index === pricingDots.length - 1);
-            
+
             pricingDots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
             });
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = pricingGrid.scrollLeft;
                 const cardWidth = pricingGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === 0) {
                     pricingGrid.scrollTo({ left: cardWidth * (pricingDots.length - 1), behavior: 'smooth' });
                 } else {
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = pricingGrid.scrollLeft;
                 const cardWidth = pricingGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === pricingDots.length - 1) {
                     pricingGrid.scrollTo({ left: 0, behavior: 'smooth' });
                 } else {
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         pricingDots.forEach((dot, i) => {
             dot.addEventListener('click', () => {
                 pricingGrid.scrollTo({ left: pricingGrid.clientWidth * i, behavior: 'smooth' });
@@ -208,15 +208,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (serviceGrid && serviceDots.length > 0) {
         const updateServiceNav = () => {
-            if (window.innerWidth > 768) return; 
+            if (window.innerWidth > 768) return;
             const scrollLeft = serviceGrid.scrollLeft;
             const cardWidth = serviceGrid.clientWidth;
             const index = Math.round(scrollLeft / cardWidth);
-            
+
             // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
             // if (servicePrev) servicePrev.classList.toggle('hidden', index === 0);
             // if (serviceNext) serviceNext.classList.toggle('hidden', index === serviceDots.length - 1);
-            
+
             serviceDots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
             });
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = serviceGrid.scrollLeft;
                 const cardWidth = serviceGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === 0) {
                     serviceGrid.scrollTo({ left: cardWidth * (serviceDots.length - 1), behavior: 'smooth' });
                 } else {
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = serviceGrid.scrollLeft;
                 const cardWidth = serviceGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === serviceDots.length - 1) {
                     serviceGrid.scrollTo({ left: 0, behavior: 'smooth' });
                 } else {
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         serviceDots.forEach((dot, i) => {
             dot.addEventListener('click', () => {
                 serviceGrid.scrollTo({ left: serviceGrid.clientWidth * i, behavior: 'smooth' });
@@ -272,15 +272,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (processGrid && processDots.length > 0) {
         const updateProcessNav = () => {
-            if (window.innerWidth > 768) return; 
+            if (window.innerWidth > 768) return;
             const scrollLeft = processGrid.scrollLeft;
             const cardWidth = processGrid.clientWidth;
             const index = Math.round(scrollLeft / cardWidth);
-            
+
             // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
             // if (processPrev) processPrev.classList.toggle('hidden', index === 0);
             // if (processNext) processNext.classList.toggle('hidden', index === processDots.length - 1);
-            
+
             processDots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
             });
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = processGrid.scrollLeft;
                 const cardWidth = processGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === 0) {
                     processGrid.scrollTo({ left: cardWidth * (processDots.length - 1), behavior: 'smooth' });
                 } else {
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = processGrid.scrollLeft;
                 const cardWidth = processGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === processDots.length - 1) {
                     processGrid.scrollTo({ left: 0, behavior: 'smooth' });
                 } else {
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         processDots.forEach((dot, i) => {
             dot.addEventListener('click', () => {
                 processGrid.scrollTo({ left: processGrid.clientWidth * i, behavior: 'smooth' });
@@ -336,15 +336,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (newsGrid && newsDots.length > 0) {
         const updateNewsNav = () => {
-            if (window.innerWidth > 768) return; 
+            if (window.innerWidth > 768) return;
             const scrollLeft = newsGrid.scrollLeft;
             const cardWidth = newsGrid.clientWidth;
             const index = Math.round(scrollLeft / cardWidth);
-            
+
             // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
             // if (newsPrev) newsPrev.classList.toggle('hidden', index === 0);
             // if (newsNext) newsNext.classList.toggle('hidden', index === newsDots.length - 1);
-            
+
             newsDots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
             });
@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = newsGrid.scrollLeft;
                 const cardWidth = newsGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === 0) {
                     newsGrid.scrollTo({ left: cardWidth * (newsDots.length - 1), behavior: 'smooth' });
                 } else {
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = newsGrid.scrollLeft;
                 const cardWidth = newsGrid.clientWidth;
                 const index = Math.round(scrollLeft / cardWidth);
-                
+
                 if (index === newsDots.length - 1) {
                     newsGrid.scrollTo({ left: 0, behavior: 'smooth' });
                 } else {
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         newsDots.forEach((dot, i) => {
             dot.addEventListener('click', () => {
                 newsGrid.scrollTo({ left: newsGrid.clientWidth * i, behavior: 'smooth' });
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
         anchor.addEventListener('click', (e) => {
             const targetId = anchor.getAttribute('href');
             if (targetId === '#') return;
-            
+
             const target = document.querySelector(targetId);
             if (target) {
                 e.preventDefault();
@@ -475,8 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sloganItems = document.querySelectorAll('.slogan-item');
         if (sloganItems.length > 0) {
             let currentSlogan = 0;
-
-            // 첫 번째 도장 효과 제거하고 일반 롤링 상태로 전환 (스무스한 퇴장 준비)
+            // 첫 번째 도장 효과 제거하고 일반 롤링 상태로 전환
             document.getElementById('firstSlogan').classList.remove('stamp-text', 'stamped');
             document.getElementById('firstSlogan').classList.add('active');
 
@@ -484,14 +483,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const prevSlogan = currentSlogan;
                 sloganItems[prevSlogan].classList.remove('active');
                 sloganItems[prevSlogan].classList.add('exit');
-
                 currentSlogan = (currentSlogan + 1) % sloganItems.length;
-
                 setTimeout(() => {
                     sloganItems[prevSlogan].classList.remove('exit');
                     sloganItems[currentSlogan].classList.add('active');
                 }, 800);
-
             }, 3500);
         }
     }
@@ -510,42 +506,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Thumb All Slider (Infinite Loop) ─────────────────────
-    window.initThumbAllSlide = function(wrap) {
+    window.initThumbAllSlide = function (wrap) {
         const track = wrap.querySelector('.thumb-all-track');
         let pages = Array.from(wrap.querySelectorAll('.thumb-all-page'));
-        const dots = wrap.querySelectorAll('.thumb-all-dot');
         const prevBtn = wrap.querySelector('.thumb-all-nav--prev');
         const nextBtn = wrap.querySelector('.thumb-all-nav--next');
-        
-        if (!track || pages.length <= 1) return; // No need to slide if 1 or 0 pages
+        const dotsContainer = wrap.querySelector('.thumb-all-dots');
+
+        if (!track || pages.length <= 1) return;
+
+        const MAX_VISIBLE_DOTS = 5; // 화면에 표시할 최대 점 개수
 
         // To prevent multiple initializations
         if (wrap.dataset.initialized === 'true') {
-            // Remove cloned nodes to reset before re-initializing (e.g., from portfolio-filter)
             const clones = track.querySelectorAll('.clone');
             clones.forEach(c => c.remove());
             pages = Array.from(wrap.querySelectorAll('.thumb-all-page:not(.clone)'));
         }
         wrap.dataset.initialized = 'true';
 
-        let currentIndex = 1; // 1-based because of the front clone
         const totalPages = pages.length;
 
-        // Clone first and last pages
+        // dots를 totalPages 수에 따라 동적 렌더링 (최대 MAX_VISIBLE_DOTS개)
+        if (dotsContainer) {
+            const count = Math.min(totalPages, MAX_VISIBLE_DOTS);
+            dotsContainer.innerHTML = Array.from({ length: count }, () =>
+                `<span class="thumb-all-dot"></span>`
+            ).join('');
+        }
+
+        // Clone first and last pages for infinite loop
         const firstClone = pages[0].cloneNode(true);
         const lastClone = pages[totalPages - 1].cloneNode(true);
-        
         firstClone.classList.add('clone');
         lastClone.classList.add('clone');
-
         track.appendChild(firstClone);
         track.insertBefore(lastClone, pages[0]);
 
-        // Updated elements
-        const allPages = Array.from(wrap.querySelectorAll('.thumb-all-page'));
-        
+        let currentIndex = 1; // 1-based (앞에 clone 1개 있음)
         let isTransitioning = false;
-        let slideInterval;
 
         const setTransform = (index, transition = true) => {
             track.style.transition = transition ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
@@ -553,13 +552,23 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const updateDots = (index) => {
-            if (!dots.length) return;
-            dots.forEach(dot => dot.classList.remove('active'));
-            // Map currentIndex back to dot index
-            let dotIndex = index - 1;
-            if (dotIndex < 0) dotIndex = totalPages - 1;
-            if (dotIndex >= totalPages) dotIndex = 0;
-            if (dots[dotIndex]) dots[dotIndex].classList.add('active');
+            if (!dotsContainer) return;
+            const dotEls = dotsContainer.querySelectorAll('.thumb-all-dot');
+            if (!dotEls.length) return;
+
+            let pageIdx = index - 1; // 0-based
+            if (pageIdx < 0) pageIdx = totalPages - 1;
+            if (pageIdx >= totalPages) pageIdx = 0;
+
+            if (totalPages <= MAX_VISIBLE_DOTS) {
+                dotEls.forEach((d, i) => d.classList.toggle('active', i === pageIdx));
+            } else {
+                const half = Math.floor(MAX_VISIBLE_DOTS / 2);
+                let winStart = pageIdx - half;
+                winStart = Math.max(0, Math.min(winStart, totalPages - MAX_VISIBLE_DOTS));
+                const activeDotIdx = pageIdx - winStart;
+                dotEls.forEach((d, i) => d.classList.toggle('active', i === activeDotIdx));
+            }
         };
 
         const goToSlide = (index) => {
@@ -567,7 +576,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isTransitioning = true;
             currentIndex = index;
 
-            // 클릭/방향키 연타 시 범위를 벗어나 빈 공간으로 발산하지 않게 제한
             if (currentIndex > totalPages + 1) currentIndex = totalPages + 1;
             if (currentIndex < 0) currentIndex = 0;
 
@@ -575,8 +583,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDots(currentIndex);
             wrap.dataset.slideIndex = currentIndex - 1;
 
-            // 모바일 환경 등에서 transitionend 이벤트 유실로 무한루프 및 스와이프가 영구 정지되는 현상 방지용 Fallback
-            // (CSS transition 0.4s 이므로, 0.45s 즈음에 확실하게 Seamless jump 실행)
             clearTimeout(wrap._fallbackTimer);
             wrap._fallbackTimer = setTimeout(() => {
                 isTransitioning = false;
@@ -594,32 +600,31 @@ document.addEventListener('DOMContentLoaded', () => {
         setTransform(currentIndex, false);
         updateDots(currentIndex);
 
+        if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
 
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                goToSlide(currentIndex - 1);
+        // Dot 클릭: 동적 렌더링된 dots를 위한 위임 방식
+        if (dotsContainer) {
+            dotsContainer.addEventListener('click', (e) => {
+                const dot = e.target.closest('.thumb-all-dot');
+                if (!dot) return;
+                const idx = Array.from(dotsContainer.querySelectorAll('.thumb-all-dot')).indexOf(dot);
+                if (idx < 0) return;
+                
+                const half = Math.floor(MAX_VISIBLE_DOTS / 2);
+                let pageIdx = (currentIndex - 1);
+                if (pageIdx < 0) pageIdx = totalPages - 1;
+                if (pageIdx >= totalPages) pageIdx = 0;
+                
+                let winStart = pageIdx - half;
+                winStart = Math.max(0, Math.min(winStart, totalPages - Math.min(totalPages, MAX_VISIBLE_DOTS)));
+                const targetPageIdx = winStart + idx;
+                goToSlide(targetPageIdx + 1);
             });
         }
 
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                goToSlide(currentIndex + 1);
-            });
-        }
-
-        dots.forEach((dot, idx) => {
-            dot.addEventListener('click', () => {
-                goToSlide(idx + 1);
-            });
-        });
-
-        // Touch/Swipe functionality
-        let startX = 0;
-        let startY = 0;
-        let currentTranslate = 0;
-        let prevTranslate = 0;
-        let isDragging = false;
-        let animationID;
+        // Touch / Swipe
+        let startX = 0, startY = 0, currentTranslate = 0, prevTranslate = 0, isDragging = false;
 
         const touchStart = (e) => {
             if (isTransitioning) return;
@@ -634,7 +639,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isDragging) return;
             const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
             const diff = currentPosition - startX;
-            // Convert diff to percentage
             const trackWidth = track.clientWidth || wrap.clientWidth;
             const percentageDiff = (diff / trackWidth) * 100;
             currentTranslate = prevTranslate + percentageDiff;
@@ -644,8 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const touchEnd = (e) => {
             if (!isDragging) return;
             isDragging = false;
-            
-            // X, Y 이동량 비교 (수직 스크롤 방어)
+
             if (e && e.changedTouches) {
                 const diffX = e.changedTouches[0].clientX - startX;
                 const diffY = e.changedTouches[0].clientY - startY;
@@ -657,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const movedBy = currentTranslate - prevTranslate;
-            
+
             // Threshold to trigger slide change
             if (movedBy < -15) {
                 goToSlide(currentIndex + 1);
@@ -674,7 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
         touchTarget.addEventListener('touchstart', touchStart, { passive: true });
         touchTarget.addEventListener('touchmove', touchMove, { passive: true });
         touchTarget.addEventListener('touchend', touchEnd);
-        touchTarget.addEventListener('mouseleave', () => { if(isDragging) touchEnd(); });
+        touchTarget.addEventListener('mouseleave', () => { if (isDragging) touchEnd(); });
         touchTarget.addEventListener('mousedown', touchStart);
         touchTarget.addEventListener('mousemove', touchMove);
         touchTarget.addEventListener('mouseup', touchEnd);
@@ -730,9 +733,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
                             const mediaTag = isVid
                                 ? `<video src="${url}" autoplay loop muted playsinline style="${mediaStyle}"></video>`
-                                : `<img src="${url}" alt="${catName} #${idx+1}" style="${mediaStyle}">`;
+                                : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
                             pageHtml += `
-                                <div class="category-thumb" data-label="${catName} #${idx+1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">
+                                <div class="category-thumb" data-label="${catName} #${idx + 1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">
                                     ${mediaTag}
                                     <div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>
                                 </div>
@@ -770,7 +773,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const slider = document.getElementById('pangSectionSlider');
         const track = document.getElementById('pangSliderTrack');
         const slides = slider ? Array.from(slider.querySelectorAll('.pang-slide')) : [];
-        const nextPreviewCards = document.querySelectorAll('.pang-next-preview');
 
         if (!slider || !track || slides.length === 0) return;
 
@@ -782,6 +784,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 슬라이드 인덱스 ↔ 팡 섹션 ID 매핑
         const pangIdMap = ['meokpang', 'nolpang', 'swimpang', 'salpang', 'meotpang'];
+
+        // 모든 슬라이드에 있는 팡 네비게이션 dots 동기화
+        const syncAllPangDots = (index) => {
+            document.querySelectorAll('.pang-nav-dot').forEach(dot => {
+                dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === index);
+            });
+        };
 
         // 사이드바 active 아이콘 동기화
         const syncSidebarActive = (index) => {
@@ -809,6 +818,9 @@ document.addEventListener('DOMContentLoaded', () => {
             track.style.transition = smooth ? 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
             track.style.transform = `translateX(-${currentPang * 20}%)`;
 
+            // dot 표시자 동기화
+            syncAllPangDots(currentPang);
+
             // 사이드바 아이콘 active 상태 동기화 (모바일에서만)
             if (window.matchMedia('(max-width: 768px)').matches) {
                 syncSidebarActive(currentPang);
@@ -831,17 +843,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // 다음 팡 미리보기 카드 클릭 및 호버
-        nextPreviewCards.forEach(card => {
-            card.addEventListener('click', () => {
-                const nextIdx = parseInt(card.dataset.next, 10);
-                manualStop = true; // 유저 조작 발생
+        // 팡 섹션 새 네비게이션 버튼 (< dots >)
+        document.querySelectorAll('.pang-nav-btn--prev').forEach(btn => {
+            btn.addEventListener('click', () => {
+                manualStop = true;
                 stopAuto();
-                goToPang(nextIdx);
+                goToPang(currentPang - 1);
             });
-            // 데스크탑/모바일 호버/조작 시 자동 롤링 정지
-            card.addEventListener('mouseenter', () => { manualStop = true; stopAuto(); });
-            card.addEventListener('mouseleave', startAuto);
+        });
+
+        document.querySelectorAll('.pang-nav-btn--next').forEach(btn => {
+            btn.addEventListener('click', () => {
+                manualStop = true;
+                stopAuto();
+                goToPang(currentPang + 1);
+            });
+        });
+
+        // dot 클릭 이벤트
+        document.querySelectorAll('.pang-nav-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const idx = parseInt(dot.dataset.index, 10);
+                manualStop = true;
+                stopAuto();
+                goToPang(idx);
+            });
         });
 
         // 슬라이더 자체 클릭 시 (썸네일 등) 자동 롤링 영구 정지 (스크롤 이탈 전까지)
@@ -874,13 +900,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const diffX = e.changedTouches[0].clientX - touchStartX;
             const diffY = e.changedTouches[0].clientY - touchStartY;
             const diffTime = Date.now() - touchStartTime;
-            
+
             // Y축 방향(위아래 스크롤) 요동이 X축보다 크다면 좌우 스와이프로 간주하지 않음
             if (Math.abs(diffY) > Math.abs(diffX)) {
                 startAuto();
                 return;
             }
-            
+
             // 빠른 스와이프 (속도 기준) 또는 30px 이상 이동
             if (Math.abs(diffX) > 30 || (Math.abs(diffX) > 15 && diffTime < 250)) {
                 if (diffX < 0) {
@@ -897,41 +923,41 @@ document.addEventListener('DOMContentLoaded', () => {
         bottomNavLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 const targetId = link.getAttribute('href').replace('#', '');
-                
+
                 // 타겟이 먹팡, 놀팡 등 팡 슬라이드 내부 요소인지 확인
                 const slideIndex = slides.findIndex(slide => slide.id === targetId);
-                
+
                 if (slideIndex !== -1) {
                     // 모바일에서만 가로 슬라이더 조작 모드 활성화
                     if (window.matchMedia('(max-width: 768px)').matches) {
                         e.preventDefault(); // 기본 앵커 이동 방지
                         e.stopImmediatePropagation(); // 전역 Smooth Scroll 등 다른 이벤트 중지
-                        
+
                         // 자동 롤링 정지 후 해당 인덱스로 이동
                         manualStop = true;
                         stopAuto();
                         goToPang(slideIndex);
-                        
+
                         // 화면을 해당 컨테이너 뷰포트로 부드럽게 스크롤 (헤더 영역 보정)
                         const headerOffset = 70;
                         const elementPos = slider.getBoundingClientRect().top;
                         const offsetPos = elementPos + window.pageYOffset - headerOffset;
-                        
+
                         window.scrollTo({
                             top: offsetPos,
                             behavior: 'smooth'
                         });
                     } else {
                         // PC 모드: 가로 슬라이더 무시, 정확히 해당 섹터로 수직 스크롤
-                        e.preventDefault(); 
+                        e.preventDefault();
                         e.stopImmediatePropagation();
-                        
+
                         const targetElement = document.getElementById(targetId);
                         if (targetElement) {
                             const headerOffset = 80;
                             const elementPos = targetElement.getBoundingClientRect().top;
                             const offsetPos = elementPos + window.pageYOffset - headerOffset;
-                            
+
                             window.scrollTo({
                                 top: offsetPos,
                                 behavior: 'smooth'
@@ -955,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }, { threshold: 0.1 }); // 10% 이상 보일 때
-        
+
         observer.observe(slider);
 
         // 모바일에서만 동작하도록 (768px 이하)
@@ -966,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.category-content').forEach(content => {
                 const btn = content.querySelector('.btn[href="#order"]');
                 const info = content.querySelector('.category-info');
-                
+
                 if (!btn || !info) return;
 
                 if (isMobile) {
@@ -1005,14 +1031,14 @@ document.addEventListener('DOMContentLoaded', () => {
    ══════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function initAuth() {
 
-    const overlay    = document.getElementById('authOverlay');
-    const modal      = document.getElementById('authModal');
-    const closeBtn   = document.getElementById('authModalClose');
-    const tabLogin   = document.getElementById('tabLogin');
-    const tabSignup  = document.getElementById('tabSignup');
-    const loginForm  = document.getElementById('loginForm');
+    const overlay = document.getElementById('authOverlay');
+    const modal = document.getElementById('authModal');
+    const closeBtn = document.getElementById('authModalClose');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabSignup = document.getElementById('tabSignup');
+    const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
-    const loginError  = document.getElementById('loginError');
+    const loginError = document.getElementById('loginError');
     const signupError = document.getElementById('signupError');
 
     if (!overlay || !modal) return;
@@ -1029,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         overlay.classList.remove('open');
         modal.classList.remove('open');
         document.body.style.overflow = '';
-        if (loginError)  loginError.textContent  = '';
+        if (loginError) loginError.textContent = '';
         if (signupError) signupError.textContent = '';
     }
 
@@ -1042,20 +1068,20 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         if (tab === 'login') {
             tabLogin.classList.add('active');
             tabSignup.classList.remove('active');
-            loginForm.style.display  = 'flex';
+            loginForm.style.display = 'flex';
             signupForm.style.display = 'none';
         } else {
             tabSignup.classList.add('active');
             tabLogin.classList.remove('active');
             signupForm.style.display = 'flex';
-            loginForm.style.display  = 'none';
+            loginForm.style.display = 'none';
         }
     }
 
-    tabLogin.addEventListener('click',  () => switchTab('login'));
+    tabLogin.addEventListener('click', () => switchTab('login'));
     tabSignup.addEventListener('click', () => switchTab('signup'));
     document.getElementById('goToSignup').addEventListener('click', () => switchTab('signup'));
-    document.getElementById('goToLogin').addEventListener('click',  () => switchTab('login'));
+    document.getElementById('goToLogin').addEventListener('click', () => switchTab('login'));
 
     /* ── 버튼으로 모달 열기 ──────────────────────── */
     ['navLoginBtn', 'mobileLoginBtn'].forEach(id => {
@@ -1070,34 +1096,34 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     /* ── UI 반영 ────────────────────────────────── */
     function applyLoggedInUI(user) {
         const name = user.user_metadata?.name || user.email?.split('@')[0] || '사용자';
-        document.getElementById('navLoginBtn').style.display  = 'none';
+        document.getElementById('navLoginBtn').style.display = 'none';
         document.getElementById('navSignupBtn').style.display = 'none';
-        document.getElementById('navUser').style.display      = 'flex';
-        document.getElementById('navUserName').textContent    = `${name}님`;
-        document.getElementById('mobileAuth').style.display   = 'none';
-        document.getElementById('mobileUser').style.display   = 'flex';
+        document.getElementById('navUser').style.display = 'flex';
+        document.getElementById('navUserName').textContent = `${name}님`;
+        document.getElementById('mobileAuth').style.display = 'none';
+        document.getElementById('mobileUser').style.display = 'flex';
         document.getElementById('mobileUserName').textContent = `👋 ${name}님`;
     }
 
     function applyLoggedOutUI() {
-        document.getElementById('navLoginBtn').style.display  = '';
+        document.getElementById('navLoginBtn').style.display = '';
         document.getElementById('navSignupBtn').style.display = '';
-        document.getElementById('navUser').style.display      = 'none';
-        document.getElementById('mobileAuth').style.display   = '';
-        document.getElementById('mobileUser').style.display   = 'none';
+        document.getElementById('navUser').style.display = 'none';
+        document.getElementById('mobileAuth').style.display = '';
+        document.getElementById('mobileUser').style.display = 'none';
     }
 
     /* ── 회원가입 (Supabase Auth) ──────────────── */
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         signupError.textContent = '';
-        const name  = document.getElementById('signupName').value.trim();
+        const name = document.getElementById('signupName').value.trim();
         const email = document.getElementById('signupEmail').value.trim().toLowerCase();
-        const pw    = document.getElementById('signupPassword').value;
-        const pw2   = document.getElementById('signupPasswordConfirm').value;
+        const pw = document.getElementById('signupPassword').value;
+        const pw2 = document.getElementById('signupPasswordConfirm').value;
 
         if (pw.length < 6) { signupError.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
-        if (pw !== pw2)    { signupError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
+        if (pw !== pw2) { signupError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
 
         try {
             const data = await PangAuth.signUp(email, pw, name);
@@ -1115,7 +1141,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         e.preventDefault();
         loginError.textContent = '';
         const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-        const pw    = document.getElementById('loginPassword').value;
+        const pw = document.getElementById('loginPassword').value;
 
         try {
             const data = await PangAuth.signIn(email, pw);
@@ -1132,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     ['navLogoutBtn', 'mobileLogoutBtn'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.addEventListener('click', async () => {
-            try { await PangAuth.signOut(); } catch(e) {}
+            try { await PangAuth.signOut(); } catch (e) { }
             applyLoggedOutUI();
         });
     });
@@ -1142,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         try {
             const user = await PangAuth.getUser();
             if (user) applyLoggedInUI(user);
-            else      applyLoggedOutUI();
+            else applyLoggedOutUI();
         } catch {
             applyLoggedOutUI();
         }
@@ -1174,8 +1200,8 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             const snsLinks = document.querySelectorAll('.footer__social a');
             if (snsLinks.length >= 3) {
                 if (f.sns?.instagram) snsLinks[0].href = f.sns.instagram;
-                if (f.sns?.youtube)   snsLinks[1].href = f.sns.youtube;
-                if (f.sns?.tiktok)    snsLinks[2].href = f.sns.tiktok;
+                if (f.sns?.youtube) snsLinks[1].href = f.sns.youtube;
+                if (f.sns?.tiktok) snsLinks[2].href = f.sns.tiktok;
             }
 
             const gridDivs = document.querySelectorAll('.footer__grid > div');

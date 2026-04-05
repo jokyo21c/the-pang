@@ -1,4 +1,4 @@
-$port = 8081
+$port = 8082
 $root = $PSScriptRoot
 
 # Create uploads directory if it doesn't exist
@@ -8,8 +8,19 @@ if (-not (Test-Path $uploadDir)) {
     Write-Host "Created uploads directory: $uploadDir" -ForegroundColor Cyan
 }
 
+# Kill any existing process using port $port
+$existingPid = (netstat -ano 2>$null | Select-String ":$port\s" | Select-String "LISTENING" | ForEach-Object { ($_ -split '\s+')[-1] } | Select-Object -First 1)
+if ($existingPid -and $existingPid -ne $PID) {
+    try {
+        Stop-Process -Id ([int]$existingPid) -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Milliseconds 500
+        Write-Host "  Stopped existing process on port $port (PID: $existingPid)" -ForegroundColor Yellow
+    } catch {}
+}
+
 $listener = [System.Net.HttpListener]::new()
 $listener.Prefixes.Add("http://localhost:$port/")
+$listener.Prefixes.Add("http://+:$port/")
 
 try {
     $listener.Start()
@@ -18,13 +29,23 @@ try {
     Write-Host "  Upload endpoint: POST http://localhost:$port/upload" -ForegroundColor Cyan
     Write-Host "====================================================" -ForegroundColor Green
 } catch {
-    Write-Host "====================================================" -ForegroundColor Red
-    Write-Host "[ERROR] Server startup failed!"                        -ForegroundColor Red
-    Write-Host "Port $port is already in use by another process."      -ForegroundColor Yellow
-    Write-Host "Please close the existing server or change the port."  -ForegroundColor Yellow
-    Write-Host "====================================================" -ForegroundColor Red
-    Start-Sleep -Seconds 5
-    exit 1
+    # Fallback: try localhost only
+    $listener = [System.Net.HttpListener]::new()
+    $listener.Prefixes.Add("http://localhost:$port/")
+    try {
+        $listener.Start()
+        Write-Host "====================================================" -ForegroundColor Green
+        Write-Host "  Server started at http://localhost:$port/ (localhost only)" -ForegroundColor Green
+        Write-Host "  Upload endpoint: POST http://localhost:$port/upload" -ForegroundColor Cyan
+        Write-Host "====================================================" -ForegroundColor Green
+    } catch {
+        Write-Host "====================================================" -ForegroundColor Red
+        Write-Host "[ERROR] Server startup failed!"                        -ForegroundColor Red
+        Write-Host "Error: $($_.Exception.Message)"                        -ForegroundColor Yellow
+        Write-Host "====================================================" -ForegroundColor Red
+        Start-Sleep -Seconds 5
+        exit 1
+    }
 }
 
 function Get-ContentType($ext) {

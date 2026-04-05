@@ -106,7 +106,15 @@
     gap: 6px;
     width: 28px;
     cursor: pointer;
-    z-index: 1100;
+    z-index: 1200; /* nav(1100)보다 높게 설정 */
+    position: relative; /* z-index 적용을 위해 필수 */
+    flex-shrink: 0;
+    /* 터치 영역 확보 */
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .nav__hamburger span {
@@ -149,10 +157,12 @@
     gap: 24px;
     transform: translateX(-100%);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none; /* 닫혀있을 때 클릭 이벤트 차단 */
 }
 
 .mobile-menu.open {
     transform: translateX(0);
+    pointer-events: all; /* 열려있을 때만 클릭 허용 */
 }
 
 .mobile-menu__link {

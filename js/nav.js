@@ -6,10 +6,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.getElementById('navbar');
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobileMenu');
+
+    // ── 안전 체크 ────────────────────────────────────────────
+    if (!hamburger || !mobileMenu) {
+        console.error('[nav.js] hamburger 또는 mobileMenu 요소를 찾을 수 없습니다.');
+        return;
+    }
+
     const mobileLinks = mobileMenu.querySelectorAll('.mobile-menu__link, .mobile-menu__cta');
 
     // ── Hamburger Toggle ────────────────────────────────────
-    hamburger.addEventListener('click', () => {
+    hamburger.addEventListener('click', (e) => {
+        e.stopPropagation(); // 외부 클릭 감지 이벤트와 충돌 방지
         hamburger.classList.toggle('active');
         mobileMenu.classList.toggle('open');
         document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
@@ -26,10 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Close Mobile Menu on Outside Click ──────────────────
     document.addEventListener('click', (event) => {
+        if (!mobileMenu.classList.contains('open')) return;
         const isClickInsideMenu = mobileMenu.contains(event.target);
         const isClickOnHamburger = hamburger.contains(event.target);
         
-        if (mobileMenu.classList.contains('open') && !isClickInsideMenu && !isClickOnHamburger) {
+        if (!isClickInsideMenu && !isClickOnHamburger) {
             hamburger.classList.remove('active');
             mobileMenu.classList.remove('open');
             document.body.style.overflow = '';
