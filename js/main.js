@@ -427,11 +427,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Smooth Scroll for Anchor Links ──────────────────────
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.querySelector(anchor.getAttribute('href'));
+            const targetId = anchor.getAttribute('href');
+            if (targetId === '#') return;
+            
+            const target = document.querySelector(targetId);
             if (target) {
+                e.preventDefault();
                 const offset = 80;
-                const top = target.offsetTop - offset;
+                const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
                 window.scrollTo({ top, behavior: 'smooth' });
             }
         });
@@ -871,22 +874,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 const slideIndex = slides.findIndex(slide => slide.id === targetId);
                 
                 if (slideIndex !== -1) {
-                    e.preventDefault(); // 기본 앵커 이동 방지 (가로 컨테이너 스크롤 오작동 방지)
-                    
-                    // 자동 롤링 정지 후 해당 인덱스로 이동
-                    manualStop = true;
-                    stopAuto();
-                    goToPang(slideIndex);
-                    
-                    // 화면을 해당 섹터 뷰포트로 부드럽게 스크롤 (헤더 높이 약 60px 보정)
-                    const headerOffset = 70;
-                    const elementPos = slider.getBoundingClientRect().top;
-                    const offsetPos = elementPos + window.pageYOffset - headerOffset;
-                    
-                    window.scrollTo({
-                        top: offsetPos,
-                        behavior: 'smooth'
-                    });
+                    // 모바일에서만 가로 슬라이더 조작 모드 활성화
+                    if (window.matchMedia('(max-width: 768px)').matches) {
+                        e.preventDefault(); // 기본 앵커 이동 방지
+                        e.stopImmediatePropagation(); // 전역 Smooth Scroll 등 다른 이벤트 중지
+                        
+                        // 자동 롤링 정지 후 해당 인덱스로 이동
+                        manualStop = true;
+                        stopAuto();
+                        goToPang(slideIndex);
+                        
+                        // 화면을 해당 컨테이너 뷰포트로 부드럽게 스크롤 (헤더 영역 보정)
+                        const headerOffset = 70;
+                        const elementPos = slider.getBoundingClientRect().top;
+                        const offsetPos = elementPos + window.pageYOffset - headerOffset;
+                        
+                        window.scrollTo({
+                            top: offsetPos,
+                            behavior: 'smooth'
+                        });
+                    } else {
+                        // PC 모드: 가로 슬라이더 무시, 정확히 해당 섹터로 수직 스크롤
+                        e.preventDefault(); 
+                        e.stopImmediatePropagation();
+                        
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            const headerOffset = 80;
+                            const elementPos = targetElement.getBoundingClientRect().top;
+                            const offsetPos = elementPos + window.pageYOffset - headerOffset;
+                            
+                            window.scrollTo({
+                                top: offsetPos,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
                 }
             });
         });
