@@ -518,8 +518,17 @@ function updateStats() {
     const statEl = document.getElementById('stat-portfolio');
     if (statEl) statEl.textContent = total;
 
+    // [FIX] Testimonial 실제 수 Supabase에서 로드
     const tsEl = document.getElementById('stat-testimonials');
-    if (tsEl) tsEl.textContent = content.testimonials.length;
+    if (tsEl && window.AdminContent && AdminContent.getTestimonials) {
+        AdminContent.getTestimonials().then(items => {
+            if (tsEl) tsEl.textContent = items?.length ?? content.testimonials.length;
+        }).catch(() => {
+            tsEl.textContent = content.testimonials.length;
+        });
+    } else if (tsEl) {
+        tsEl.textContent = content.testimonials.length;
+    }
 }
 
 // ── Save All (Supabase) ──────────────────────────────────
@@ -600,6 +609,7 @@ hamburgerBtn.addEventListener('click', openSidebar);
 sidebarClose.addEventListener('click', closeSidebar);
 sidebarOverlay.addEventListener('click', closeSidebar);
 
+// [FIX] 모바일 사이드바 닫기 (중복 등록 제거 → 모바일에서만닫기)
 document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
     item.addEventListener('click', () => {
         if (window.innerWidth <= 768) closeSidebar();
@@ -684,7 +694,7 @@ function renderMembers(members) {
             <td class="member-num">${i + 1}</td>
             <td>
                 <div class="member-name-cell">
-                    <div class="member-avatar">${m.name.charAt(0)}</div>
+                    <div class="member-avatar">${(m.name || '?').charAt(0)}</div>
                     <span>${m.name}</span>
                 </div>
             </td>

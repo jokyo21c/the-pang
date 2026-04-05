@@ -116,13 +116,16 @@ const PangAuth = {
 
         if (error) throw error;
 
-        // members 테이블에도 삽입
+        // members 테이블에도 삽입 (실패해도 회원가입 자체는 성공 처리)
         if (data.user) {
-            await _supabaseClient.from('members').insert({
+            const { error: insertErr } = await _supabaseClient.from('members').insert({
                 user_id: data.user.id,
                 name: name,
                 email: email
             });
+            if (insertErr) {
+                console.warn('[PangAuth] members 테이블 삽입 실패 (auth는 성공):', insertErr.message);
+            }
         }
         return data;
     },

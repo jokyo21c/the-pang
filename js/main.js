@@ -33,92 +33,91 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sections are separated sequentially, no tab logic required.
 
     // ── Testimonial Slider & Dynamic Content ────────────────
-    const track = document.getElementById('testimonialTrack');
+    const testimonialTrack = document.getElementById('testimonialTrack');
     const dotsContainer = document.getElementById('sliderDots');
-
-    try {
-        const raw = localStorage.getItem('pang_cms_content');
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (parsed.testimonials && parsed.testimonials.length > 0) {
-                // Update Track
-                track.innerHTML = parsed.testimonials.map(t => `
-                    <div class="testimonial-card">
-                        <div class="testimonial-card__inner">
-                            <div class="testimonial-card__photo">
-                                <img src="${t.photo}" alt="${t.author}">
-                            </div>
-                            <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:20px;">${'★'.repeat(t.stars || 5)}</div>
-                            <p class="testimonial-card__text">"${t.text}"</p>
-                            <div class="testimonial-card__footer">
-                                <div class="testimonial-card__info">
-                                    <p class="testimonial-card__author">${t.author}</p>
-                                    <span class="testimonial-card__badge" style="background:${t.badgeColor || 'var(--color-brand-purple)'}">${t.badge}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Update Dots
-                if (dotsContainer) {
-                    dotsContainer.innerHTML = parsed.testimonials.map((_, i) => `
-                        <span class="slider-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>
-                    `).join('');
-                }
-            }
-        }
-    } catch (err) {
-        console.error('후기 데이터 로드 실패:', err);
-    }
-
     const prevBtn = document.getElementById('sliderPrev');
     const nextBtn = document.getElementById('sliderNext');
-    let dots = document.querySelectorAll('.slider-dot');
     let currentSlide = 0;
-    let totalSlides = document.querySelectorAll('.testimonial-card').length;
+    let totalSlides = 0;
     let autoSlideInterval;
 
+    // [FIX] dots는 항상 최신 DOM에서 재조회 (stale closure 방지)
+    const getDots = () => document.querySelectorAll('.slider-dot');
+
     const goToSlide = (index) => {
+        const dots = getDots();
+        totalSlides = document.querySelectorAll('.testimonial-card').length;
+        if (totalSlides === 0) return;
         if (index < 0) index = totalSlides - 1;
         if (index >= totalSlides) index = 0;
         currentSlide = index;
-        track.style.transform = `translateX(-${currentSlide * 100}%)`;
-
+        if (testimonialTrack) testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
         dots.forEach(dot => dot.classList.remove('active'));
-        dots[currentSlide].classList.add('active');
+        if (dots[currentSlide]) dots[currentSlide].classList.add('active');
     };
 
     const startAutoSlide = () => {
-        autoSlideInterval = setInterval(() => {
-            goToSlide(currentSlide + 1);
-        }, 3000);
+        autoSlideInterval = setInterval(() => goToSlide(currentSlide + 1), 3000);
     };
 
-    const stopAutoSlide = () => {
-        clearInterval(autoSlideInterval);
-    };
+    const stopAutoSlide = () => clearInterval(autoSlideInterval);
 
-    prevBtn.addEventListener('click', () => {
-        stopAutoSlide();
-        goToSlide(currentSlide - 1);
-        startAutoSlide();
-    });
-
-    nextBtn.addEventListener('click', () => {
-        stopAutoSlide();
-        goToSlide(currentSlide + 1);
-        startAutoSlide();
-    });
-
-    dots.forEach(dot => {
-        dot.addEventListener('click', () => {
-            stopAutoSlide();
-            goToSlide(parseInt(dot.dataset.index));
-            startAutoSlide();
+    const bindSliderControls = () => {
+        const dots = getDots();
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                stopAutoSlide();
+                goToSlide(parseInt(dot.dataset.index));
+                startAutoSlide();
+            });
         });
-    });
+    };
 
+    if (prevBtn) prevBtn.addEventListener('click', () => { stopAutoSlide(); goToSlide(currentSlide - 1); startAutoSlide(); });
+    if (nextBtn) nextBtn.addEventListener('click', () => { stopAutoSlide(); goToSlide(currentSlide + 1); startAutoSlide(); });
+
+    // [FIX] localStorage 대신 Supabase PangData.getTestimonials() 사용
+    async function loadTestimonials() {
+        try {
+            if (window.PangData) {
+                const items = await PangData.getTestimonials();
+                if (items && items.length > 0 && testimonialTrack) {
+                    testimonialTrack.innerHTML = items.map(t => `
+                        <div class="testimonial-card">
+                            <div class="testimonial-card__inner">
+                                <div class="testimonial-card__photo">
+                                    <img src="${t.photo || 'https://picsum.photos/seed/pang1/200/200'}" alt="${t.author || ''}">
+                                </div>
+                                <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:20px;">${'★'.repeat(t.stars || 5)}</div>
+                                <p class="testimonial-card__text">"${t.text || ''}"</p>
+                                <div class="testimonial-card__footer">
+                                    <div class="testimonial-card__info">
+                                        <p class="testimonial-card__author">${t.author || ''}</p>
+                                        <span class="testimonial-card__badge" style="background:${t.badge_color || 'var(--color-brand-purple)'}">${t.badge || ''}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    if (dotsContainer) {
+                        dotsContainer.innerHTML = items.map((_, i) =>
+                            `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`
+                        ).join('');
+                    }
+                    totalSlides = items.length;
+                    bindSliderControls();
+                }
+            }
+        } catch (err) {
+            console.error('[Testimonial] Supabase 로드 실패:', err);
+        }
+    }
+
+    // 초기 HTML 데이터로 먼저 setup, 이후 Supabase로 교체
+    totalSlides = document.querySelectorAll('.testimonial-card').length;
+    bindSliderControls();
+    loadTestimonials();
     startAutoSlide();
 
 
@@ -409,19 +408,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollTopBtn = document.getElementById('scrollTopBtn');
     const scrollTopParent = scrollTopBtn ? scrollTopBtn.parentElement : null;
 
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 500) {
-            if (scrollTopParent) scrollTopParent.classList.add('visible');
-            else if (scrollTopBtn) scrollTopBtn.classList.add('visible');
-        } else {
-            if (scrollTopParent) scrollTopParent.classList.remove('visible');
-            else if (scrollTopBtn) scrollTopBtn.classList.remove('visible');
-        }
-    });
+    // [FIX] scrollTopBtn null 가드 추가
+    if (scrollTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                if (scrollTopParent) scrollTopParent.classList.add('visible');
+                else scrollTopBtn.classList.add('visible');
+            } else {
+                if (scrollTopParent) scrollTopParent.classList.remove('visible');
+                else scrollTopBtn.classList.remove('visible');
+            }
+        });
 
-    scrollTopBtn.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 
 
     // ── Smooth Scroll for Anchor Links ──────────────────────
@@ -499,9 +501,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const clone = platformTrack.innerHTML;
         platformTrack.innerHTML += clone;
 
-        // Optional: Dynamic speed adjustment based on number of items
-        const itemCount = platformTrack.children.length; // Now it's original * 2
-        const baseDuration = itemCount * 2; // 2 seconds per item
+        // [FIX] 복제 후 children.length는 원본의 2배 → 2로 나눠서 올바른 속도 계산
+        const originalCount = platformTrack.children.length / 2;
+        const baseDuration = originalCount * 2; // 아이템 1개당 2초
         platformTrack.style.setProperty('animation-duration', `${baseDuration}s`);
     }
 
@@ -728,11 +730,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     for (let j = 0; j < itemsPerPage; j++) {
                         const idx = i * itemsPerPage + j;
                         if (idx < catItems.length) {
-                            const url = catItems[idx].media_url;
+                            let url = catItems[idx].media_url;
                             const isVid = catItems[idx].media_type === 'video' || _isVideoUrl(url);
+                            // [FIX] #t=0.001 적용 → 비디오 첫 프레임 썸네일 표시
+                            if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
                             const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
                             const mediaTag = isVid
-                                ? `<video src="${url}" autoplay loop muted playsinline style="${mediaStyle}"></video>`
+                                ? `<video src="${url}" muted playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
                                 : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
                             pageHtml += `
                                 <div class="category-thumb" data-label="${catName} #${idx + 1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">
@@ -741,6 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                             `;
                         }
+
                     }
                     pageHtml += '</div>';
                     trackHtml += pageHtml;
@@ -876,12 +881,16 @@ document.addEventListener('DOMContentLoaded', () => {
             stopAuto();
         });
 
-        // 영상 썸네일 영역 호버 시 자동 롤링 정지 (데스크탑 등)
+        // [FIX] 호버용 별도 플래그 사용 → manualStop(클릭/터치) 과 충돌 방지
         const thumbWraps = slider.querySelectorAll('.thumb-all-wrap');
         thumbWraps.forEach(wrap => {
-            wrap.addEventListener('mouseenter', () => { manualStop = true; stopAuto(); });
-            wrap.addEventListener('mouseleave', startAuto);
+            wrap.addEventListener('mouseenter', () => { stopAuto(); });
+            wrap.addEventListener('mouseleave', () => {
+                // manualStop(클릭/터치 정지)이 아닌 경우에만 자동 재개
+                if (!manualStop) startAuto();
+            });
         });
+
 
         // 터치 스와이프
         let touchStartX = 0;

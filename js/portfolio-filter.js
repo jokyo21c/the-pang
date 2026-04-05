@@ -113,21 +113,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             portfolioDots.innerHTML += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
         }
 
-        // 초기화 시 애니메이션 효과 (Fade-in)
+        // [FIX] 슬라이드 위치 먼저 리셋 (transform 충돌 방지)
         portfolioTrack.style.transition = 'none';
-        portfolioTrack.style.opacity = '0';
-        portfolioTrack.style.transform = 'scale(0.98)';
-        
+        portfolioTrack.style.transform = 'translateX(0%)';
+        portfolioWrap.dataset.slideIndex = '0';
+
         // Force reflow
         void portfolioTrack.offsetWidth;
-        
-        portfolioTrack.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        portfolioTrack.style.opacity = '1';
-        portfolioTrack.style.transform = 'scale(1)';
 
-        // 슬라이드 위치 리셋
-        portfolioWrap.dataset.slideIndex = '0';
-        portfolioTrack.style.transform = 'translateX(0%)';
+        // Fade-in 애니메이션 적용 (transform 독립적으로)
+        portfolioTrack.style.opacity = '0';
+        portfolioTrack.style.transition = 'opacity 0.3s ease';
+        void portfolioTrack.offsetWidth;
+        portfolioTrack.style.opacity = '1';
+
 
         // 슬라이드 기능 재초기화 (전역에 노출된 initThumbAllSlide 호출)
         let currentWrap = document.getElementById('portfolioSlideWrap');
