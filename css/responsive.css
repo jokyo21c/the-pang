@@ -70,22 +70,24 @@
 
     .pang-next-preview.mobile-only {
         position: absolute !important;
-        top: 20px !important;     /* 제목 라인과 얼추 맞도록 화면 상단 여백 */
-        right: 20px !important;   /* 우측 여백 확보 */
+        top: 18px !important;     /* 아이콘(90px) 세로 중앙정렬 기준 먹팡 텍스트 상단 위치 */
+        right: 16px !important;   /* 우측 안전 여백 유지 */
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        justify-content: center !important;
+        justify-content: center !important;  /* 내부 요소 세로 중앙 정렬 */
         gap: 6px !important;
-        background: rgba(255,255,255,0.08) !important; /* 좀 더 잘 보이게 배경색 강화 */
+        background: rgba(255,255,255,0.08) !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
         border-radius: 12px !important;
         padding: 10px 8px !important;
         margin-top: 0 !important; 
         cursor: pointer;
         transition: background 0.2s ease, transform 0.2s ease;
-        z-index: 100 !important; /* 모든 요소의 위로 올라오도록 설정 */
-        width: 76px !important; 
+        z-index: 100 !important;
+        width: 76px !important;        /* 가로 폭 유지 */
+        height: 120px !important;      /* 먹팡 텍스트 상단 ~ 설명 텍스트 하단 범위 */
+        box-sizing: border-box !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
     }
 
@@ -432,6 +434,47 @@
         font-size: 24px;
     }
 
+    /* ── 모바일: 아이콘 + 제목 가로 배치 헤더 ─── */
+    /* pang-slide 안의 category-info만 적용 */
+    .pang-slide .category-info__icon {
+        font-size: 90px;   /* 기존 112px 대비 약 20% 축소 */
+        margin-bottom: 0;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+
+    /* 아이콘과 제목을 묶는 가로 flex 헤더 래퍼 */
+    .pang-slide .category-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 아이콘 + 타이틀 가로 정렬 래퍼 */
+    .pang-slide .pang-header-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    /* 타이틀 영역: 두 줄로 분리 표시 */
+    .pang-slide .category-info__title {
+        font-size: 26px;
+        margin-bottom: 0;
+        line-height: 1.25;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* SHORTS 부분을 작게 */
+    .pang-slide .category-info__title .title-sub {
+        font-size: 14px;
+        font-weight: var(--fw-medium);
+        color: var(--color-text-secondary);
+        letter-spacing: 0.05em;
+    }
+
     .category-info p {
         font-size: 14px !important;
     }
@@ -440,9 +483,20 @@
         margin: 32px 0 24px;
     }
 
+    /* 모바일 전용: 썸네일 아래로 이동한 견적 버튼 스타일 */
+    .mobile-moved-btn {
+        margin: 0 auto !important;
+        padding: 6.5px 19px !important; /* 기존 8px 24px 대비 약 20% 축소 */
+        font-size: 11px !important; /* 기존 14px 대비 약 20% 축소 */
+        display: inline-flex !important;
+        justify-self: center !important; /* 그리드 내 중앙 정렬 */
+        width: auto !important;
+        grid-column: 1 / -1 !important;
+    }
+
     .category-info__targets li {
         font-size: 16px;
-        padding: 8px 0;
+        padding: 5px 0;
     }
 
     .category-info__targets li i {
@@ -855,6 +909,7 @@
         width: auto !important;
         max-width: none !important;
         flex-direction: column !important;
+        z-index: 999 !important; /* nav(1100)보다 낮게 설정하여 햄버거 버튼 클릭 보장 */
     }
 
     .floating-sidebar__menu {
@@ -862,7 +917,7 @@
         justify-content: center !important;
         padding: 8px 1px !important;
         border-radius: 40px !important;
-        gap: 8px !important;
+        gap: 16px !important; /* 터치 간섭 방지 충분한 간격 */
         width: auto !important;
         background: transparent !important;
         backdrop-filter: none !important;
@@ -882,17 +937,19 @@
 
     .floating-sidebar__link {
         width: 42px !important;
-        height: 52px !important;
+        height: 44px !important; /* 터치 영역 보장 규격 */
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 1px !important;
+        gap: 2px !important; /* 아이콘-텍스트 충분히 구분 가능한 최소 간격 */
     }
 
     .floating-sidebar__link i {
         font-size: 22px !important;
         color: #FFFFFF !important;
+        line-height: 1 !important;
+        transition: color 0.3s ease, filter 0.3s ease !important;
     }
 
     .floating-sidebar__label {
@@ -909,11 +966,27 @@
         text-align: center !important;
         white-space: nowrap !important;
         width: 100% !important;
+        line-height: 1.2 !important;
+        transition: color 0.3s ease, filter 0.3s ease !important;
     }
 
-    /* Kakao button style adjustment */
+    /* 히어로 섹션 전용 - 시인성 확보를 위한 그림자 효과 */
+    .floating-sidebar.in-hero .floating-sidebar__link i,
+    .floating-sidebar.in-hero .floating-sidebar__label {
+        filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.85)) !important;
+    }
+
+    /* Active (현재 위치한 섹션) 상태: 주황색 */
+    .floating-sidebar__link.active i,
+    .floating-sidebar__link.active .floating-sidebar__label {
+        color: var(--color-brand-orange) !important;
+    }
+
+    /* 카카오(문의) 버튼은 active 여부와 상관없이 노란색 고정 */
     .floating-sidebar__item--kakao .floating-sidebar__link i,
-    .floating-sidebar__item--kakao .floating-sidebar__label {
+    .floating-sidebar__item--kakao .floating-sidebar__link .floating-sidebar__label,
+    .floating-sidebar__item--kakao .floating-sidebar__link.active i,
+    .floating-sidebar__item--kakao .floating-sidebar__link.active .floating-sidebar__label {
         color: var(--color-kakao) !important;
     }
 

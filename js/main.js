@@ -778,7 +778,24 @@ document.addEventListener('DOMContentLoaded', () => {
         let autoTimer = null;
         let manualStop = false; // ★ 터치로 인한 수동 중지 플래그
         const TOTAL = slides.length;
-        const AUTO_INTERVAL = 4000; // 4초간 대기 (사용자 수정 요청)
+        const AUTO_INTERVAL = 2000; // 2초간 대기 (사용자 수정 요청)
+
+        // 슬라이드 인덱스 ↔ 팡 섹션 ID 매핑
+        const pangIdMap = ['meokpang', 'nolpang', 'swimpang', 'salpang', 'meotpang'];
+
+        // 사이드바 active 아이콘 동기화
+        const syncSidebarActive = (index) => {
+            const targetId = pangIdMap[index];
+            if (!targetId) return;
+            const sidebarLinks = document.querySelectorAll('.floating-sidebar__link[href^="#"]');
+            sidebarLinks.forEach(link => {
+                if (link.closest('.floating-sidebar__item--kakao')) return;
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${targetId}`) {
+                    link.classList.add('active');
+                }
+            });
+        };
 
         // 슬라이더 이동
         const goToPang = (index, smooth = true) => {
@@ -791,6 +808,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // CSS transform으로 500% 너비의 트랙 이동 (한 슬라이드당 20%)
             track.style.transition = smooth ? 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
             track.style.transform = `translateX(-${currentPang * 20}%)`;
+
+            // 사이드바 아이콘 active 상태 동기화 (모바일에서만)
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                syncSidebarActive(currentPang);
+            }
         };
 
         // 자동 슬라이딩
@@ -822,7 +844,13 @@ document.addEventListener('DOMContentLoaded', () => {
             card.addEventListener('mouseleave', startAuto);
         });
 
-        // 영상 썸네일 영역 호버/조작 시 자동 롤링 정지 (사용자 스크린샷 요구사항)
+        // 슬라이더 자체 클릭 시 (썸네일 등) 자동 롤링 영구 정지 (스크롤 이탈 전까지)
+        slider.addEventListener('click', () => {
+            manualStop = true;
+            stopAuto();
+        });
+
+        // 영상 썸네일 영역 호버 시 자동 롤링 정지 (데스크탑 등)
         const thumbWraps = slider.querySelectorAll('.thumb-all-wrap');
         thumbWraps.forEach(wrap => {
             wrap.addEventListener('mouseenter', () => { manualStop = true; stopAuto(); });
@@ -933,6 +961,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // 모바일에서만 동작하도록 (768px 이하)
         const mediaQuery = window.matchMedia('(max-width: 768px)');
 
+        // 견적 받기 버튼 반응형 DOM 이동
+        const repositionQuoteButtons = (isMobile) => {
+            document.querySelectorAll('.category-content').forEach(content => {
+                const btn = content.querySelector('.btn[href="#order"]');
+                const info = content.querySelector('.category-info');
+                
+                if (!btn || !info) return;
+
+                if (isMobile) {
+                    btn.classList.add('mobile-moved-btn');
+                    content.appendChild(btn); // 썸네일 뒤(맨 아래)로 이동
+                } else {
+                    btn.classList.remove('mobile-moved-btn');
+                    info.appendChild(btn); // 원상복구
+                }
+            });
+        };
+
         const onMediaChange = (mq) => {
             if (mq.matches) {
                 // 모바일: 슬라이더 초기화
@@ -945,6 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 track.style.transform = '';
                 track.style.transition = '';
             }
+            repositionQuoteButtons(mq.matches);
         };
 
         mediaQuery.addEventListener('change', onMediaChange);
