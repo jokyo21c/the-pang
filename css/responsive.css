@@ -286,6 +286,12 @@
         padding: var(--section-pad-mobile);
     }
 
+    /* 히어로/푸터 제외 모든 섹션 — 좌측 네비바 공간(63px) 확보 */
+    /* 네비바: 10px(Edge) + 1px(padding) + 42px(icon) + 1px(padding) + 5px(gap) + 4px(menu padding) = 63px */
+    .section:not(.hero):not(.footer) .container {
+        padding-left: 63px;
+    }
+
     .section-header {
         margin-bottom: 40px;
     }
@@ -462,10 +468,12 @@
         grid-template-columns: unset;
     }
 
-    /* 각 슬라이드 아이템: 한 번에 한 장씩 보이게 */
+    /* 각 슬라이드 아이템: 2장 동시에 보이기 — 고정 크기 */
     .thumb-slider-track .category-thumb {
-        flex: 0 0 calc(50% - 6px);
-        /* 2장 동시에 보이기: 슬라이드 1개당 2장 */
+        flex: 0 0 144px;
+        width: 144px !important;
+        height: 256px !important;
+        aspect-ratio: unset !important;
     }
 
     /* ── thumb-all 2열 숏츠 높이 제한 (portfolio 섹션만) ── */
@@ -838,24 +846,24 @@
         font-size: 16px;
     }
 
-    /* Floating Sidebar - Bottom Horizontal */
+    /* Floating Sidebar - Left Vertical (Mobile) */
     .floating-sidebar {
-        left: 50% !important;
-        top: auto !important;
-        bottom: 24px !important;
-        transform: translateX(-50%) !important;
-        width: calc(100% - 40px) !important;
-        max-width: 450px !important;
-        flex-direction: row;
+        left: 10px !important;
+        top: 50% !important;
+        bottom: auto !important;
+        transform: translateY(-50%) !important;
+        width: auto !important;
+        max-width: none !important;
+        flex-direction: column !important;
     }
 
     .floating-sidebar__menu {
-        flex-direction: row !important;
+        flex-direction: column !important;
         justify-content: center !important;
-        padding: 8px 16px !important;
+        padding: 8px 1px !important;
         border-radius: 40px !important;
-        gap: 12px !important;
-        width: 100%;
+        gap: 8px !important;
+        width: auto !important;
         background: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
@@ -867,29 +875,50 @@
         flex-shrink: 0;
     }
 
-    /* Hide Home and Top buttons on mobile */
-    .floating-sidebar__item:first-child,
+    /* Top 버튼만 숨김 — 홈 아이콘은 표시 */
     .floating-sidebar__item--top {
         display: none !important;
     }
 
     .floating-sidebar__link {
         width: 42px !important;
-        height: 42px !important;
+        height: 52px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 1px !important;
     }
 
     .floating-sidebar__link i {
-        font-size: 20px !important;
-        color: var(--color-brand-orange) !important;
+        font-size: 22px !important;
+        color: #FFFFFF !important;
     }
 
     .floating-sidebar__label {
-        display: none !important;
+        display: block !important;
+        position: static !important;
+        transform: none !important;
+        background: transparent !important;
+        color: #FFFFFF !important;
+        font-size: 10px !important;
+        font-weight: 500 !important;
+        padding: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        width: 100% !important;
     }
 
     /* Kakao button style adjustment */
+    .floating-sidebar__item--kakao .floating-sidebar__link i,
+    .floating-sidebar__item--kakao .floating-sidebar__label {
+        color: var(--color-kakao) !important;
+    }
+
     .floating-sidebar__item--kakao {
-        margin-left: 0; /* Reset margin since top button is removed */
+        margin-left: 0;
     }
 }
 
