@@ -34,13 +34,13 @@
         will-change: transform;
     }
 
-    /* ── 팔 섹션 모바일 네비게이션 (< dots >) ────────────────────── */
+    /* ── 팡 섹션 모바일 네비게이션 (dots only) ────────────────────── */
     .pang-mobile-nav.mobile-only {
         display: flex !important;
         align-items: center;
         justify-content: center;
         gap: 12px;
-        padding: 20px 0 8px;
+        padding: 14px 0 6px;
         width: 100%;
     }
 
