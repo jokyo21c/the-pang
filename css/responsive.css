@@ -9,7 +9,8 @@
 
 
 /* 팡 섹션 모바일 네비게이션 선 숨김 */
-.pang-mobile-nav.mobile-only {
+.pang-mobile-nav.mobile-only,
+.mobile-break {
     display: none;
 }
 
