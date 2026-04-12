@@ -131,15 +131,15 @@
     .nav__hamburger {
         display: flex !important;
         transform: none; /* scale 제거 — transform이 있으면 z-index stacking context 문제 발생 */
-        order: -1;
+        order: 1; /* Left */
         background: rgba(0, 0, 0, 0.5);
-        padding: 10px;
+        padding: 8px; /* Reduced from 10px (~15% reduction) */
         border-radius: 6px;
         backdrop-filter: blur(4px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-sizing: border-box;
-        min-width: 44px;
-        min-height: 44px;
+        min-width: 38px; /* Reduced from 44px (~15% reduction) */
+        min-height: 38px; /* Reduced from 44px (~15% reduction) */
         align-items: center;
         justify-content: center;
         position: relative;
@@ -151,13 +151,15 @@
 
     .nav__logo {
         font-size: 20px;
-        order: 2;
+        order: 2; /* Center */
+        margin: 0 auto;
+        text-align: center;
     }
     
     .nav__auth {
-        order: 0;
-        margin: 0 auto; /* Center perfectly between hamburger and logo */
-        gap: 6px; /* Bring buttons slightly closer */
+        order: 3; /* Right */
+        margin: 0; 
+        gap: 6px; 
     }
 
     .nav__auth-btn {
@@ -442,8 +444,92 @@
         font-size: 14px !important;
     }
 
-    .category-info__targets {
+    .category-body-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        width: 100%;
         margin: 32px 0 24px;
+        gap: 16px;
+    }
+
+    .category-info__targets {
+        margin: 0;
+        flex: 1;
+    }
+
+    .pang-next-preview.mobile-only {
+        display: flex !important;
+        flex-direction: column;
+        width: 68px; /* Slightly wider */
+        align-self: center; /* Stop it from stretching to fill height */
+        height: 105px; /* Shorter than the full list height */
+        background: linear-gradient(180deg, #ff9533 0%, #eb5b00 100%); /* Strong contrast orange */
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-bottom: 4px solid #b34500; /* Thick 3D button lip */
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-shrink: 0;
+        padding: 4px;
+        box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.6), 0 6px 16px rgba(0, 0, 0, 0.4);
+        transition: transform 0.15s, border-bottom-width 0.15s, margin-top 0.15s, box-shadow 0.15s;
+    }
+
+    .pang-next-preview.mobile-only:active {
+        transform: translateY(3px);
+        border-bottom-width: 1px;
+        margin-top: 3px;
+        box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .pang-next-preview::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+        z-index: 0;
+    }
+
+    .pang-next-preview > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .pang-next-preview__icon {
+        font-size: 24px;
+        line-height: 1;
+        margin-bottom: 2px;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+    }
+
+    .pang-next-preview__title {
+        font-size: 11px;
+        font-weight: var(--fw-bold);
+        color: #ffffff;
+        font-family: var(--font-kr);
+        text-align: center;
+        line-height: 1.25;
+        word-break: keep-all;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .pang-next-preview__arrow {
+        font-size: 13px;
+        color: #fff;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 2px;
+        text-shadow: none;
     }
 
     /* 모바일 전용: 썸네일 아래로 이동한 견적 버튼 스타일 */

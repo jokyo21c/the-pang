@@ -629,6 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let startX = 0, startY = 0, currentTranslate = 0, prevTranslate = 0, isDragging = false;
 
         const touchStart = (e) => {
+            e.stopPropagation(); // 썸네일 스와이프 시 부모 팡 슬라이더로 이벤트 전달 방지
             if (isTransitioning) return;
             startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
             startY = e.type.includes('mouse') ? e.pageY : e.touches[0].clientY;
@@ -638,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const touchMove = (e) => {
+            e.stopPropagation();
             if (!isDragging) return;
             const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
             const diff = currentPosition - startX;
@@ -648,6 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const touchEnd = (e) => {
+            e.stopPropagation();
             if (!isDragging) return;
             isDragging = false;
 
@@ -783,7 +786,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentPang = 0;
         let autoTimer = null;
-        let manualStop = false; // ★ 터치로 인한 수동 중지 플래그
+        let manualStop = false;    // 수동 조작으로 인한 일시 중지 플래그
+        let navJustClicked = false; // 네비 클릭 직후 스크롤 중 자동 재개 방지 플래그
         const TOTAL = slides.length;
         const AUTO_INTERVAL = 2000; // 2초간 대기 (사용자 수정 요청)
 
@@ -912,7 +916,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Y축 방향(위아래 스크롤) 요동이 X축보다 크다면 좌우 스와이프로 간주하지 않음
             if (Math.abs(diffY) > Math.abs(diffX)) {
-                startAuto();
+                if (!manualStop) startAuto(); // manualStop 상태면 재개 안 함
                 return;
             }
 
@@ -927,69 +931,82 @@ document.addEventListener('DOMContentLoaded', () => {
             startAuto(); // manualStop=true 라면 동작하지 않음
         }, { passive: true });
 
-        // 하단 플로팅 바 및 사이드바에서 네비게이션 클릭 시 해당 팡 슬라이드로 이동 및 다이너믹 스크롤
-        const bottomNavLinks = document.querySelectorAll('.floating-sidebar__link[href^="#"]');
-        bottomNavLinks.forEach(link => {
+        // ── 사이드바 모든 링크 클릭 통합 처리 (모바일/PC 공통) ──────────────────
+        // nav.js의 이중 리스너 제거 후 이곳에서 단일 처리 (이벤트 순서 충돌 방지)
+        const allSidebarLinks = document.querySelectorAll('.floating-sidebar__link');
+        allSidebarLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                const targetId = link.getAttribute('href').replace('#', '');
+                const href = link.getAttribute('href') || '';
+                const isExternal = !href.startsWith('#');
+                const isKakao = link.closest('.floating-sidebar__item--kakao');
 
-                // 타겟이 먹팡, 놀팡 등 팡 슬라이드 내부 요소인지 확인
-                const slideIndex = slides.findIndex(slide => slide.id === targetId);
+                // 카카오(외부 링크)는 기본 동작 유지
+                if (isKakao || isExternal) return;
 
-                if (slideIndex !== -1) {
-                    // 모바일에서만 가로 슬라이더 조작 모드 활성화
-                    if (window.matchMedia('(max-width: 768px)').matches) {
-                        e.preventDefault(); // 기본 앵커 이동 방지
-                        e.stopImmediatePropagation(); // 전역 Smooth Scroll 등 다른 이벤트 중지
+                const targetId = href.replace('#', '');
 
-                        // 자동 롤링 정지 후 해당 인덱스로 이동
-                        manualStop = true;
-                        stopAuto();
-                        goToPang(slideIndex);
-
-                        // 화면을 해당 컨테이너 뷰포트로 부드럽게 스크롤 (헤더 영역 보정)
-                        const headerOffset = 70;
-                        const elementPos = slider.getBoundingClientRect().top;
-                        const offsetPos = elementPos + window.pageYOffset - headerOffset;
-
-                        window.scrollTo({
-                            top: offsetPos,
-                            behavior: 'smooth'
-                        });
-                    } else {
-                        // PC 모드: 가로 슬라이더 무시, 정확히 해당 섹터로 수직 스크롤
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-
-                        const targetElement = document.getElementById(targetId);
-                        if (targetElement) {
-                            const headerOffset = 80;
-                            const elementPos = targetElement.getBoundingClientRect().top;
-                            const offsetPos = elementPos + window.pageYOffset - headerOffset;
-
-                            window.scrollTo({
-                                top: offsetPos,
-                                behavior: 'smooth'
-                            });
-                        }
+                // ── Active 상태 업데이트 (카카오 제외) ─────────────
+                document.querySelectorAll('.floating-sidebar__link').forEach(l => {
+                    if (!l.closest('.floating-sidebar__item--kakao')) {
+                        l.classList.remove('active');
                     }
+                });
+                link.classList.add('active');
+
+                // ── 팡 슬라이드 (먹팡~멋팡) 처리 ────────────────────
+                const slideIndex = slides.findIndex(slide => slide.id === targetId);
+                if (slideIndex !== -1 && window.matchMedia('(max-width: 768px)').matches) {
+                    e.preventDefault(); // 앵커 기본 이동 완전 차단
+                    e.stopImmediatePropagation();
+
+                    // 자동 슬라이드 즉시 정지 (navJustClicked로 IntersectionObserver 재개도 방지)
+                    manualStop = true;
+                    navJustClicked = true;
+                    stopAuto();
+
+                    // 슬라이드 이동
+                    goToPang(slideIndex);
+
+                    // 팡 섹션이 화면에 보이도록 스크롤
+                    const headerOffset = 70;
+                    const elementPos = slider.getBoundingClientRect().top;
+                    const offsetPos = elementPos + window.pageYOffset - headerOffset;
+                    window.scrollTo({ top: offsetPos, behavior: 'smooth' });
+
+                    // smooth scroll 완료(약 800ms) 후 플래그 해제 → 이후 이탈+재진입 시 정상 재개
+                    setTimeout(() => { navJustClicked = false; }, 900);
+                    return;
+                }
+
+                // ── 일반 앵커(홈, 기타 섹션) 처리 ───────────────────
+                e.preventDefault();
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    const headerOffset = 70;
+                    const offsetPos = targetEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+                    window.scrollTo({ top: offsetPos, behavior: 'smooth' });
                 }
             });
         });
 
-        // 뷰포트 교차 관찰자: 화면 밖으로 나갔다가 돌아오면 재개
+
+        // 뷰포트 교차 관찰자 — 화면 밖으로 나갔다가 돌아오면 자동 재개 (manualStop 리셋)
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    manualStop = false; // 상태 초기화
+                    // 네비 클릭 직후 스크롤 중이면 자동 재개 건너뜀
+                    if (navJustClicked) return;
+                    // 스크롤로 다시 진입하면 상태 리셋 후 자동 재개
+                    manualStop = false;
                     if (window.matchMedia('(max-width: 768px)').matches) {
                         startAuto();
                     }
                 } else {
+                    // 화면에서 이탈 시 자동 정지
                     stopAuto();
                 }
             });
-        }, { threshold: 0.1 }); // 10% 이상 보일 때
+        }, { threshold: 0.1 });
 
         observer.observe(slider);
 

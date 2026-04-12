@@ -905,6 +905,14 @@
     font-size: 32px;
 }
 
+.category-body-flex {
+    display: block;
+}
+
+.pang-next-preview.mobile-only {
+    display: none;
+}
+
 /* ── Thumbnail Layout ─────────────────────────────────── */
 .category-thumbnails {
     display: flex;
