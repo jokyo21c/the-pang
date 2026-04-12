@@ -583,10 +583,12 @@
     /* ── thumb-all 2열 숏츠 높이 제한 (portfolio 섹션만) ── */
     /* 먹팡~멋팡은 aspect-ratio:9/16 원래 스타일 유지 */
     /* portfolio 섹션("실제 결과물")은 먹팡~멋팡과 동일한 크기로 통일 */
-    #portfolio .thumb-all-page .category-thumb {
-        aspect-ratio: 9/16 !important;
-        height: auto !important;
+    #portfolio .category-thumb {
+        flex: 0 0 88px !important;
+        width: 88px !important;
+        height: 156px !important;
         max-height: unset !important;
+        aspect-ratio: 9/16 !important;
     }
 
     /* Dot indicators — 모바일에서만 보임 */
@@ -775,8 +777,9 @@
     }
     /* Portfolio */
     .portfolio-page {
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: repeat(3, 88px) !important;
         grid-template-rows: auto !important;
+        gap: 5px !important;
     }
 
     .portfolio-filter {

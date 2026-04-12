@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         portfolioDots.innerHTML = '';
         
         const isMobile = window.innerWidth <= 768;
-        const ITEMS_PER_PAGE = isMobile ? 2 : 10;
+        const ITEMS_PER_PAGE = isMobile ? 3 : 10; // 모바일에서 한 줄에 3개씩 배치
         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
         
         for (let i = 0; i < totalPages; i++) {
