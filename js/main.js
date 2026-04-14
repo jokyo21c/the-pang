@@ -612,12 +612,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!dot) return;
                 const idx = Array.from(dotsContainer.querySelectorAll('.thumb-all-dot')).indexOf(dot);
                 if (idx < 0) return;
-                
+
                 const half = Math.floor(MAX_VISIBLE_DOTS / 2);
                 let pageIdx = (currentIndex - 1);
                 if (pageIdx < 0) pageIdx = totalPages - 1;
                 if (pageIdx >= totalPages) pageIdx = 0;
-                
+
                 let winStart = pageIdx - half;
                 winStart = Math.max(0, Math.min(winStart, totalPages - Math.min(totalPages, MAX_VISIBLE_DOTS)));
                 const targetPageIdx = winStart + idx;
