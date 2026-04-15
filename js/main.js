@@ -690,6 +690,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Portfolio Center-Focus Carousel (Mobile Only) ─────────────
     window.initPortfolioCarousel = function (wrap) {
+        if (!wrap) return;
+
+        // 이미 이벤트/기본 구조가 설정되었다면 무시
+        if (wrap.dataset.carouselInit === 'true') {
+            // 외부(Supabase 로드 등)에서 요소가 변경되었다면 아이템 배열과 이벤트를 다시 세팅
+            if (wrap._reinitItems) {
+                wrap._reinitItems();
+            }
+            return;
+        }
+
         const track = wrap.querySelector('.thumb-all-track');
         const viewport = wrap.querySelector('.thumb-all-viewport');
         const prevBtn = wrap.querySelector('.thumb-all-nav--prev');
@@ -698,15 +709,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!track) return;
 
-        // ── thumb-all-page 구조라면 flat하게 변환 (팡 섹션 지원) ──
+        // ── thumb-all-page 구조라면 flat하게 변환 (팡 섹션 정적 HTML 지원) ──
         const existingPages = Array.from(track.querySelectorAll('.thumb-all-page'));
         if (existingPages.length > 0) {
             const flatItems = [];
             existingPages.forEach(page => {
                 Array.from(page.querySelectorAll('.category-thumb')).forEach(thumb => {
                     const item = document.createElement('div');
-                    item.className = 'portfolio-carousel-item';
-                    item.style.cssText = thumb.style.cssText || 'background: var(--bg-surface-elevated);';
+                    // css 클래스를 유지하여 배경색 등이 보존되게 함
+                    item.className = 'portfolio-carousel-item ' + Array.from(thumb.classList).filter(c => c !== 'category-thumb').join(' ');
+                    item.style.cssText = thumb.style.cssText;
+                    
+                    if (thumb.dataset.color) {
+                        item.style.background = thumb.dataset.color;
+                    }
+                    if (!item.style.background) {
+                        item.style.background = 'var(--bg-surface-elevated)';
+                    }
+                    
                     item.innerHTML = thumb.innerHTML;
                     flatItems.push(item);
                 });
@@ -715,35 +735,14 @@ document.addEventListener('DOMContentLoaded', () => {
             flatItems.forEach(item => track.appendChild(item));
         }
 
-        const items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
+        let items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
         if (items.length === 0) return;
 
-        const total = items.length;
+        wrap.dataset.carouselInit = 'true'; // 초기화 등록
+
+        let total = items.length;
         let currentIndex = 0;
         const MAX_DOTS = 5;
-
-        // 영상 자동 넘김 및 클릭 시 이동/풀스크린 재생 이벤트 등록
-        items.forEach((item, i) => {
-            const video = item.querySelector('video');
-            if (video) {
-                video.onended = () => {
-                    if (currentIndex === i) {
-                        updateCarousel(currentIndex + 1);
-                    }
-                };
-            }
-
-            item.addEventListener('click', () => {
-                if (currentIndex === i) {
-                    // 중앙 아이템 클릭 시 풀스크린 오버레이 열기
-                    const src = video ? video.src : (item.querySelector('img') ? item.querySelector('img').src : null);
-                    if (src) openFullscreenMedia(src, !video);
-                } else {
-                    // 중앙이 아닌 배경 아이템을 클릭하면 중앙으로 이동
-                    updateCarousel(i);
-                }
-            });
-        });
 
         // 풀스크린(확장) 오버레이 생성 함수
         function openFullscreenMedia(src, isImage = false) {
@@ -773,6 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaEl.controls = true;
                 mediaEl.autoplay = true;
                 mediaEl.playsInline = true;
+                mediaEl.muted = true;
                 mediaEl.style.maxWidth = '100%';
                 mediaEl.style.maxHeight = '90%';
                 mediaEl.style.outline = 'none';
@@ -788,6 +788,31 @@ document.addEventListener('DOMContentLoaded', () => {
             closeBtn.style.border = 'none';
             closeBtn.style.fontSize = '35px';
             closeBtn.style.cursor = 'pointer';
+
+            const unmuteBtn = document.createElement('button');
+            unmuteBtn.innerHTML = '<i class="ri-volume-mute-line"></i>';
+            unmuteBtn.style.position = 'absolute';
+            unmuteBtn.style.top = '70px';
+            unmuteBtn.style.right = '20px';
+            unmuteBtn.style.background = 'transparent';
+            unmuteBtn.style.color = '#fff';
+            unmuteBtn.style.border = 'none';
+            unmuteBtn.style.fontSize = '30px';
+            unmuteBtn.style.cursor = 'pointer';
+
+            if (!isImage) {
+                unmuteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (mediaEl.muted) {
+                        mediaEl.muted = false;
+                        unmuteBtn.innerHTML = '<i class="ri-volume-up-line"></i>';
+                    } else {
+                        mediaEl.muted = true;
+                        unmuteBtn.innerHTML = '<i class="ri-volume-mute-line"></i>';
+                    }
+                });
+                overlay.appendChild(unmuteBtn);
+            }
 
             overlay.appendChild(mediaEl);
             overlay.appendChild(closeBtn);
@@ -815,13 +840,49 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // dots 생성
-        if (dotsContainer) {
-            const count = Math.min(total, MAX_DOTS);
-            dotsContainer.innerHTML = Array.from({ length: count }, (_, i) =>
-                `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`
-            ).join('');
-        }
+        wrap._reinitItems = function() {
+            items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
+            total = items.length;
+            
+            // 영상 자동 넘김 및 클릭 시 이동/풀스크린 재생 이벤트 등록
+            items.forEach((item, i) => {
+                const video = item.querySelector('video');
+                if (video) {
+                    video.onended = () => {
+                        if (currentIndex === i) {
+                            updateCarousel(currentIndex + 1);
+                        }
+                    };
+                }
+
+                item.addEventListener('click', () => {
+                    if (currentIndex === i) {
+                        // 중앙 아이템 클릭 시 풀스크린 오버레이 열기
+                        const src = video ? video.src : (item.querySelector('img') ? item.querySelector('img').src : null);
+                        if (src) {
+                            // 모달 열림 방지를 위해 이벤트 버블링 임시 방지
+                            openFullscreenMedia(src, !video);
+                        }
+                    } else {
+                        // 중앙이 아닌 배경 아이템을 클릭하면 중앙으로 이동
+                        updateCarousel(i);
+                    }
+                });
+            });
+
+            // dots 재생성 필요 시
+            if (dotsContainer) {
+                const count = Math.min(total, MAX_DOTS);
+                dotsContainer.innerHTML = Array.from({ length: count }, (_, i) =>
+                    `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`
+                ).join('');
+            }
+
+            updateCarousel(0, false);
+        };
+        
+        // 처음 아이템 바인딩 실행
+        wrap._reinitItems();
 
         function updateDots(idx) {
             if (!dotsContainer) return;
@@ -845,7 +906,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index >= total) index = 0;
             currentIndex = index;
 
-            const vw = (viewport || wrap).offsetWidth;
+            let vw = (viewport || wrap).offsetWidth;
+            // 만약 요소가 숨겨져 있어서 vw가 0이면 컨테이너 너비나 브라우저 너비로 대체
+            if (vw === 0) {
+                const container = wrap.closest('.container');
+                vw = container ? container.offsetWidth : window.innerWidth;
+                // 약간의 패딩 감안 (오차 방지)
+                if (vw === window.innerWidth) vw -= 32; 
+            }
+
             const itemWidth = vw / 3;
 
             // 모든 아이템 너비 동일하게 설정
@@ -860,13 +929,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 아이템 상태 클래스 적용 및 영상 재생 제어
             items.forEach((item, i) => {
-                const dist = Math.abs(i - currentIndex);
+                let dist = Math.abs(i - currentIndex);
+                // 양방향 무한 루프 고려 최단 거리 (아이템이 3개 이상일 때)
+                if (total >= 3 && dist > total / 2) dist = total - dist;
+
                 item.classList.remove('is-center', 'is-side', 'is-far');
                 
                 const video = item.querySelector('video');
 
                 if (dist === 0) {
                     item.classList.add('is-center');
+                    // 현재 활성화된 팡 섹션의 슬라이드만 자동 재생 시도
+                    const parentPang = wrap.closest('.pang-slide');
+                    const isActivePang = !parentPang || parentPang.style.transform.includes('0px') || parentPang.style.transform.includes('0%') || !parentPang.style.transform;
+                    // (상세 뷰포트 상태 파악은 어려우므로 일단 play)
                     if (video) video.play().catch(e => console.warn('Autoplay prevented:', e));
                 } else {
                     if (dist === 1) item.classList.add('is-side');
@@ -882,6 +958,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDots(currentIndex);
             wrap.dataset.slideIndex = currentIndex;
         }
+
+        wrap._updateCarousel = updateCarousel; // 외부(재초기화) 등에서 호출할 수 있도록 노출
 
         // 레이아웃 후 초기화 (offsetWidth 확보)
         requestAnimationFrame(() => updateCarousel(0, false));
