@@ -580,16 +580,16 @@
         aspect-ratio: unset !important;
     }
 
-    /* ── portfolio 섹션: 모바일 센터-포커스 캐러셀 ── */
-    #portfolio .thumb-all-viewport {
+    /* ── 모바일 센터-포커스 캐러셀 (포트폴리오 + 팡 섹션 공용) ── */
+    .thumb-all-viewport {
         width: 100%;
         overflow: hidden;
         position: relative;
         /* 확대된 아이템이 잘리지 않도록 상하 여백 추가 */
-        padding: 15% 0; 
+        padding: 15% 0;
     }
 
-    #portfolio .thumb-all-track {
+    .thumb-all-track {
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -598,7 +598,7 @@
     }
 
     /* 개별 캐러셀 아이템 */
-    #portfolio .portfolio-carousel-item {
+    .portfolio-carousel-item {
         flex-shrink: 0;
         aspect-ratio: 9/16;
         position: relative;
@@ -612,7 +612,7 @@
     }
 
     /* 중앙 아이템: 150% 확대, 블러 없음 */
-    #portfolio .portfolio-carousel-item.is-center {
+    .portfolio-carousel-item.is-center {
         transform: scale(1.5);
         filter: none;
         opacity: 1;
@@ -621,21 +621,21 @@
     }
 
     /* 좌우 인접 아이템: 축소(70%) + 블러 */
-    #portfolio .portfolio-carousel-item.is-side {
+    .portfolio-carousel-item.is-side {
         transform: scale(0.7);
         filter: blur(2px);
         opacity: 0.6;
     }
 
     /* 더 멀리 있는 아이템: 더 축소(50%) + 더 블러 */
-    #portfolio .portfolio-carousel-item.is-far {
+    .portfolio-carousel-item.is-far {
         transform: scale(0.5);
         filter: blur(4px);
         opacity: 0.3;
     }
 
-    #portfolio .portfolio-carousel-item img,
-    #portfolio .portfolio-carousel-item video {
+    .portfolio-carousel-item img,
+    .portfolio-carousel-item video {
         width: 100%;
         height: 100%;
         object-fit: cover;

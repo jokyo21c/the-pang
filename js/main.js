@@ -698,6 +698,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!track) return;
 
+        // ── thumb-all-page 구조라면 flat하게 변환 (팡 섹션 지원) ──
+        const existingPages = Array.from(track.querySelectorAll('.thumb-all-page'));
+        if (existingPages.length > 0) {
+            const flatItems = [];
+            existingPages.forEach(page => {
+                Array.from(page.querySelectorAll('.category-thumb')).forEach(thumb => {
+                    const item = document.createElement('div');
+                    item.className = 'portfolio-carousel-item';
+                    item.style.cssText = thumb.style.cssText || 'background: var(--bg-surface-elevated);';
+                    item.innerHTML = thumb.innerHTML;
+                    flatItems.push(item);
+                });
+            });
+            track.innerHTML = '';
+            flatItems.forEach(item => track.appendChild(item));
+        }
+
         const items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
         if (items.length === 0) return;
 
@@ -946,44 +963,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dotsContainer = section.querySelector('.thumb-all-dots');
                 if (!track || !dotsContainer) return;
 
-                let trackHtml = '';
-                let dotsHtml = '';
-                const itemsPerPage = 2;
-                const totalPages = Math.ceil(catItems.length / itemsPerPage);
+                const isMobile = window.innerWidth <= 768;
+                const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
 
-                for (let i = 0; i < totalPages; i++) {
-                    let pageHtml = '<div class="thumb-all-page">';
-                    for (let j = 0; j < itemsPerPage; j++) {
-                        const idx = i * itemsPerPage + j;
-                        if (idx < catItems.length) {
-                            let url = catItems[idx].media_url;
-                            const isVid = catItems[idx].media_type === 'video' || _isVideoUrl(url);
-                            // [FIX] #t=0.001 적용 → 비디오 첫 프레임 썸네일 표시
-                            if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
-                            const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
-                            const mediaTag = isVid
-                                ? `<video src="${url}" muted playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
-                                : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
-                            pageHtml += `
-                                <div class="category-thumb" data-label="${catName} #${idx + 1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">
-                                    ${mediaTag}
-                                    <div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>
-                                </div>
-                            `;
+                if (isMobile) {
+                    // 모바일: 개별 flat 아이템으로 렌더링 (센터-포커스 캐러셀)
+                    let trackHtml = '';
+                    catItems.forEach((catItem, idx) => {
+                        let url = catItem.media_url;
+                        const isVid = catItem.media_type === 'video' || _isVideoUrl(url);
+                        if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
+                        const mediaTag = isVid
+                            ? `<video src="${url}" muted playsinline preload="metadata" style="${mediaStyle}"></video>`
+                            : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
+                        trackHtml += `<div class="portfolio-carousel-item" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
+                    });
+                    track.innerHTML = trackHtml;
+                    dotsContainer.innerHTML = ''; // initPortfolioCarousel에서 생성
+                } else {
+                    // 데스크톱: 기존 페이지 방식
+                    let trackHtml = '';
+                    let dotsHtml = '';
+                    const itemsPerPage = 2;
+                    const totalPages = Math.ceil(catItems.length / itemsPerPage);
+
+                    for (let i = 0; i < totalPages; i++) {
+                        let pageHtml = '<div class="thumb-all-page">';
+                        for (let j = 0; j < itemsPerPage; j++) {
+                            const idx = i * itemsPerPage + j;
+                            if (idx < catItems.length) {
+                                let url = catItems[idx].media_url;
+                                const isVid = catItems[idx].media_type === 'video' || _isVideoUrl(url);
+                                if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
+                                const mediaTag = isVid
+                                    ? `<video src="${url}" muted playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
+                                    : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
+                                pageHtml += `<div class="category-thumb" data-label="${catName} #${idx + 1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
+                            }
                         }
-
+                        pageHtml += '</div>';
+                        trackHtml += pageHtml;
+                        dotsHtml += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
                     }
-                    pageHtml += '</div>';
-                    trackHtml += pageHtml;
-                    dotsHtml += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
+                    track.innerHTML = trackHtml;
+                    dotsContainer.innerHTML = dotsHtml;
                 }
-                track.innerHTML = trackHtml;
-                dotsContainer.innerHTML = dotsHtml;
             });
 
-            // 슬라이더 재초기화
+            // 슬라이더 재초기화 (모바일/데스크톱 분기)
             document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
-                window.initThumbAllSlide(wrap);
+                if (window.innerWidth <= 768) {
+                    window.initPortfolioCarousel(wrap);
+                } else {
+                    window.initThumbAllSlide(wrap);
+                }
             });
         } catch (err) {
             console.error('Supabase 포트폴리오 로드 실패:', err);
@@ -993,9 +1026,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Supabase에서 비동기 로드 (기본 썸네일은 HTML에 유지)
     loadPortfolioFromSupabase();
 
-    // Initialize all existing sliders
+    // Initialize all existing sliders (모바일/데스크톱 분기)
     document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
-        window.initThumbAllSlide(wrap);
+        if (window.innerWidth <= 768) {
+            window.initPortfolioCarousel(wrap);
+        } else {
+            window.initThumbAllSlide(wrap);
+        }
     });
 
 
