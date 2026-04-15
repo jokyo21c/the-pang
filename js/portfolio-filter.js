@@ -109,10 +109,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             void portfolioTrack.offsetWidth;
             portfolioTrack.style.opacity = '1';
 
-            // 캐러셀 초기화 (cloneNode로 이벤트 재등록)
+            // 캐러셀 리셋(cloneNode로 이전 이벤트 정리 후) 초기화
             let currentWrap = document.getElementById('portfolioSlideWrap');
             if (window.initPortfolioCarousel && currentWrap) {
                 const newWrap = currentWrap.cloneNode(true);
+                newWrap.dataset.carouselInit = ''; // 클론 시 복사된 초기화 상태 방지
                 currentWrap.parentNode.replaceChild(newWrap, currentWrap);
                 window.initPortfolioCarousel(newWrap);
             }
