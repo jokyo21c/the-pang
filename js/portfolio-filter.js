@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (item.url) {
                     const isVid = item.type === 'video' || isVideoUrl(item.url);
                     mediaTag = isVid
-                        ? `<video src="${item.url}" muted playsinline preload="metadata" style="${mediaStyle}"></video>`
+                        ? `<video src="${item.url}" muted playsinline webkit-playsinline preload="metadata" style="${mediaStyle}"></video>`
                         : `<img src="${item.url}" alt="${item.label}" loading="lazy" style="${mediaStyle}">`;
                 }
                 div.innerHTML = mediaTag + `<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>`;

@@ -60,6 +60,7 @@
         flex-shrink: 0;
         transition: background 0.2s ease, transform 0.2s ease;
         backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
     .pang-nav-btn:hover,
@@ -92,7 +93,8 @@
        (화면 밖 요소들이 계속 opacity: 0으로 남거나 transform 되는 현상 방지) */
     .pang-section-slider .pang-slide {
         display: block !important;
-        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        min-height: 100vh !important; /* dvh 미지원 브라우저 폴백 */
         height: auto !important;
     }
     
@@ -137,6 +139,7 @@
         padding: 8px; /* Reduced from 10px (~15% reduction) */
         border-radius: 6px;
         backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-sizing: border-box;
         min-width: 38px; /* Reduced from 44px (~15% reduction) */
@@ -587,6 +590,8 @@
         position: relative;
         /* 확대된 아이템이 잘리지 않도록 상하 여백 추가 */
         padding: 15% 0;
+        touch-action: pan-y; /* 수평 스와이프 시 상하 스크롤만 브라우저가 처리 */
+        -webkit-overflow-scrolling: touch;
     }
 
     .thumb-all-track {
@@ -594,6 +599,7 @@
         flex-direction: row;
         align-items: center;
         will-change: transform;
+        -webkit-transform: translateZ(0); /* iOS GPU 가속 강제 */
         /* transition은 JS에서 제어 */
     }
 
@@ -1017,7 +1023,7 @@
     .floating-sidebar {
         left: 10px !important;
         /* 네비게이션 바(약 56px) 아래부터 화면 끝까지의 중앙에 배치 */
-        top: calc(var(--nav-height-mobile, 60px) + (100vh - var(--nav-height-mobile, 60px)) / 2) !important;
+        top: calc(var(--nav-height-mobile, 60px) + (100dvh - var(--nav-height-mobile, 60px)) / 2) !important;
         bottom: auto !important;
         transform: translateY(-50%) !important;
         width: auto !important;

@@ -939,11 +939,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (dist === 0) {
                     item.classList.add('is-center');
-                    // 현재 활성화된 팡 섹션의 슬라이드만 자동 재생 시도
-                    const parentPang = wrap.closest('.pang-slide');
-                    const isActivePang = !parentPang || parentPang.style.transform.includes('0px') || parentPang.style.transform.includes('0%') || !parentPang.style.transform;
-                    // (상세 뷰포트 상태 파악은 어려우므로 일단 play)
-                    if (video) video.play().catch(e => console.warn('Autoplay prevented:', e));
+                    // 실제 모바일 기기에서 autoplay를 위해 muted + playsinline 강제 설정
+                    if (video) {
+                        video.muted = true;
+                        video.setAttribute('playsinline', '');
+                        video.setAttribute('webkit-playsinline', '');
+                        video.play().catch(e => console.warn('Autoplay prevented:', e));
+                    }
                 } else {
                     if (dist === 1) item.classList.add('is-side');
                     else item.classList.add('is-far');
@@ -1052,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const isVid = catItem.media_type === 'video' || _isVideoUrl(url);
                         if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
                         const mediaTag = isVid
-                            ? `<video src="${url}" muted playsinline preload="metadata" style="${mediaStyle}"></video>`
+                            ? `<video src="${url}" muted playsinline webkit-playsinline preload="metadata" style="${mediaStyle}"></video>`
                             : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
                         trackHtml += `<div class="portfolio-carousel-item" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
                     });
@@ -1074,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const isVid = catItems[idx].media_type === 'video' || _isVideoUrl(url);
                                 if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
                                 const mediaTag = isVid
-                                    ? `<video src="${url}" muted playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
+                                    ? `<video src="${url}" muted playsinline webkit-playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
                                     : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
                                 pageHtml += `<div class="category-thumb" data-label="${catName} #${idx + 1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
                             }
