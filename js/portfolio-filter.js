@@ -78,62 +78,97 @@ document.addEventListener('DOMContentLoaded', async () => {
         portfolioDots.innerHTML = '';
         
         const isMobile = window.innerWidth <= 768;
-        const ITEMS_PER_PAGE = isMobile ? 3 : 10; // 모바일에서 한 줄에 3개씩 배치
-        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
         
-        for (let i = 0; i < totalPages; i++) {
-            const page = document.createElement('div');
-            page.className = 'thumb-all-page portfolio-page';
-            
-            for (let j = 0; j < ITEMS_PER_PAGE; j++) {
-                const item = filtered[i * ITEMS_PER_PAGE + j];
-                if (item) {
-                    const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
-                    let mediaTag = '';
-                    
-                    if (item.url) {
-                        const isVid = item.type === 'video' || isVideoUrl(item.url);
-                        mediaTag = isVid 
-                            ? `<video src="${item.url}" muted playsinline loop onmouseenter="this.play()" onmouseleave="this.pause()" preload="metadata" style="${mediaStyle}"></video>`
-                            : `<img src="${item.url}" alt="${item.label}" style="${mediaStyle}">`;
-                    }
-                    
-                    const bgStyle = item.bg ? `background: ${item.bg};` : 'background: var(--bg-surface-elevated);';
+        if (isMobile) {
+            // ── 모바일: 센터-포커스 캐러셀 (아이템 하나하나 개별 렌더링) ──
+            const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
 
-                    page.innerHTML += `
-                        <div class="category-thumb" data-label="${item.label}" data-color="${item.bg || ''}" style="${bgStyle} position:relative; overflow:hidden;">
-                            ${mediaTag}
-                            <div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>
-                        </div>
-                    `;
+            filtered.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'portfolio-carousel-item';
+                const bgStyle = item.bg ? `background: ${item.bg};` : 'background: var(--bg-surface-elevated);';
+                div.setAttribute('style', bgStyle);
+
+                let mediaTag = '';
+                if (item.url) {
+                    const isVid = item.type === 'video' || isVideoUrl(item.url);
+                    mediaTag = isVid
+                        ? `<video src="${item.url}" muted playsinline preload="metadata" style="${mediaStyle}"></video>`
+                        : `<img src="${item.url}" alt="${item.label}" loading="lazy" style="${mediaStyle}">`;
                 }
+                div.innerHTML = mediaTag + `<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>`;
+                portfolioTrack.appendChild(div);
+            });
+
+            // 트랙 페이드인
+            portfolioTrack.style.transition = 'none';
+            portfolioTrack.style.transform = '';
+            void portfolioTrack.offsetWidth;
+            portfolioTrack.style.opacity = '0';
+            portfolioTrack.style.transition = 'opacity 0.3s ease';
+            void portfolioTrack.offsetWidth;
+            portfolioTrack.style.opacity = '1';
+
+            // 캐러셀 초기화 (cloneNode로 이벤트 재등록)
+            let currentWrap = document.getElementById('portfolioSlideWrap');
+            if (window.initPortfolioCarousel && currentWrap) {
+                const newWrap = currentWrap.cloneNode(true);
+                currentWrap.parentNode.replaceChild(newWrap, currentWrap);
+                window.initPortfolioCarousel(newWrap);
             }
+
+        } else {
+            // ── 데스크톱: 기존 페이지 방식 ──
+            const ITEMS_PER_PAGE = 10;
+            const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
             
-            portfolioTrack.appendChild(page);
-            portfolioDots.innerHTML += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
-        }
+            for (let i = 0; i < totalPages; i++) {
+                const page = document.createElement('div');
+                page.className = 'thumb-all-page portfolio-page';
+                
+                for (let j = 0; j < ITEMS_PER_PAGE; j++) {
+                    const item = filtered[i * ITEMS_PER_PAGE + j];
+                    if (item) {
+                        const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
+                        let mediaTag = '';
+                        
+                        if (item.url) {
+                            const isVid = item.type === 'video' || isVideoUrl(item.url);
+                            mediaTag = isVid 
+                                ? `<video src="${item.url}" muted playsinline loop onmouseenter="this.play()" onmouseleave="this.pause()" preload="metadata" style="${mediaStyle}"></video>`
+                                : `<img src="${item.url}" alt="${item.label}" style="${mediaStyle}">`;
+                        }
+                        
+                        const bgStyle = item.bg ? `background: ${item.bg};` : 'background: var(--bg-surface-elevated);';
 
-        // [FIX] 슬라이드 위치 먼저 리셋 (transform 충돌 방지)
-        portfolioTrack.style.transition = 'none';
-        portfolioTrack.style.transform = 'translateX(0%)';
-        portfolioWrap.dataset.slideIndex = '0';
+                        page.innerHTML += `
+                            <div class="category-thumb" data-label="${item.label}" data-color="${item.bg || ''}" style="${bgStyle} position:relative; overflow:hidden;">
+                                ${mediaTag}
+                                <div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                portfolioTrack.appendChild(page);
+                portfolioDots.innerHTML += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
+            }
 
-        // Force reflow
-        void portfolioTrack.offsetWidth;
+            portfolioTrack.style.transition = 'none';
+            portfolioTrack.style.transform = 'translateX(0%)';
+            portfolioWrap.dataset.slideIndex = '0';
+            void portfolioTrack.offsetWidth;
+            portfolioTrack.style.opacity = '0';
+            portfolioTrack.style.transition = 'opacity 0.3s ease';
+            void portfolioTrack.offsetWidth;
+            portfolioTrack.style.opacity = '1';
 
-        // Fade-in 애니메이션 적용 (transform 독립적으로)
-        portfolioTrack.style.opacity = '0';
-        portfolioTrack.style.transition = 'opacity 0.3s ease';
-        void portfolioTrack.offsetWidth;
-        portfolioTrack.style.opacity = '1';
-
-
-        // 슬라이드 기능 재초기화 (전역에 노출된 initThumbAllSlide 호출)
-        let currentWrap = document.getElementById('portfolioSlideWrap');
-        if (window.initThumbAllSlide && currentWrap) {
-            const newWrap = currentWrap.cloneNode(true);
-            currentWrap.parentNode.replaceChild(newWrap, currentWrap);
-            window.initThumbAllSlide(newWrap);
+            let currentWrap = document.getElementById('portfolioSlideWrap');
+            if (window.initThumbAllSlide && currentWrap) {
+                const newWrap = currentWrap.cloneNode(true);
+                currentWrap.parentNode.replaceChild(newWrap, currentWrap);
+                window.initThumbAllSlide(newWrap);
+            }
         }
     }
 

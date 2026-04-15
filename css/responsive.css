@@ -580,15 +580,75 @@
         aspect-ratio: unset !important;
     }
 
-    /* ── thumb-all 2열 숏츠 높이 제한 (portfolio 섹션만) ── */
-    /* 먹팡~멋팡은 aspect-ratio:9/16 원래 스타일 유지 */
-    /* portfolio 섹션("실제 결과물")은 먹팡~멋팡과 동일한 크기로 통일 */
-    #portfolio .category-thumb {
-        flex: 0 0 88px !important;
-        width: 88px !important;
-        height: 156px !important;
-        max-height: unset !important;
-        aspect-ratio: 9/16 !important;
+    /* ── portfolio 섹션: 모바일 센터-포커스 캐러셀 ── */
+    #portfolio .thumb-all-viewport {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        /* 확대된 아이템이 잘리지 않도록 상하 여백 추가 */
+        padding: 15% 0; 
+    }
+
+    #portfolio .thumb-all-track {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        will-change: transform;
+        /* transition은 JS에서 제어 */
+    }
+
+    /* 개별 캐러셀 아이템 */
+    #portfolio .portfolio-carousel-item {
+        flex-shrink: 0;
+        aspect-ratio: 9/16;
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        transform-origin: center center;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                    filter 0.4s ease,
+                    opacity 0.4s ease;
+        cursor: pointer;
+    }
+
+    /* 중앙 아이템: 150% 확대, 블러 없음 */
+    #portfolio .portfolio-carousel-item.is-center {
+        transform: scale(1.5);
+        filter: none;
+        opacity: 1;
+        z-index: 2;
+        position: relative;
+    }
+
+    /* 좌우 인접 아이템: 축소(70%) + 블러 */
+    #portfolio .portfolio-carousel-item.is-side {
+        transform: scale(0.7);
+        filter: blur(2px);
+        opacity: 0.6;
+    }
+
+    /* 더 멀리 있는 아이템: 더 축소(50%) + 더 블러 */
+    #portfolio .portfolio-carousel-item.is-far {
+        transform: scale(0.5);
+        filter: blur(4px);
+        opacity: 0.3;
+    }
+
+    #portfolio .portfolio-carousel-item img,
+    #portfolio .portfolio-carousel-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        border-radius: inherit;
+    }
+
+    /* ── 모바일에서 포트폴리오 더보기 버튼 숨기기 ── */
+    .portfolio-more-btn-wrap {
+        display: none !important;
     }
 
     /* Dot indicators — 모바일에서만 보임 */

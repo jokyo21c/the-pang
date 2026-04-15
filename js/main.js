@@ -688,6 +688,229 @@ document.addEventListener('DOMContentLoaded', () => {
         touchTarget.addEventListener('mouseup', touchEnd);
     };
 
+    // ── Portfolio Center-Focus Carousel (Mobile Only) ─────────────
+    window.initPortfolioCarousel = function (wrap) {
+        const track = wrap.querySelector('.thumb-all-track');
+        const viewport = wrap.querySelector('.thumb-all-viewport');
+        const prevBtn = wrap.querySelector('.thumb-all-nav--prev');
+        const nextBtn = wrap.querySelector('.thumb-all-nav--next');
+        const dotsContainer = wrap.querySelector('.thumb-all-dots');
+
+        if (!track) return;
+
+        const items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
+        if (items.length === 0) return;
+
+        const total = items.length;
+        let currentIndex = 0;
+        const MAX_DOTS = 5;
+
+        // 영상 자동 넘김 및 클릭 시 이동/풀스크린 재생 이벤트 등록
+        items.forEach((item, i) => {
+            const video = item.querySelector('video');
+            if (video) {
+                video.onended = () => {
+                    if (currentIndex === i) {
+                        updateCarousel(currentIndex + 1);
+                    }
+                };
+            }
+
+            item.addEventListener('click', () => {
+                if (currentIndex === i) {
+                    // 중앙 아이템 클릭 시 풀스크린 오버레이 열기
+                    const src = video ? video.src : (item.querySelector('img') ? item.querySelector('img').src : null);
+                    if (src) openFullscreenMedia(src, !video);
+                } else {
+                    // 중앙이 아닌 배경 아이템을 클릭하면 중앙으로 이동
+                    updateCarousel(i);
+                }
+            });
+        });
+
+        // 풀스크린(확장) 오버레이 생성 함수
+        function openFullscreenMedia(src, isImage = false) {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+            overlay.style.zIndex = '99999';
+            overlay.style.display = 'flex';
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.style.flexDirection = 'column';
+
+            let mediaEl;
+            if (isImage) {
+                mediaEl = document.createElement('img');
+                mediaEl.src = src;
+                mediaEl.style.maxWidth = '100%';
+                mediaEl.style.maxHeight = '90%';
+                mediaEl.style.objectFit = 'contain';
+            } else {
+                mediaEl = document.createElement('video');
+                mediaEl.src = src;
+                mediaEl.controls = true;
+                mediaEl.autoplay = true;
+                mediaEl.playsInline = true;
+                mediaEl.style.maxWidth = '100%';
+                mediaEl.style.maxHeight = '90%';
+                mediaEl.style.outline = 'none';
+            }
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '<i class="ri-close-line"></i>';
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.top = '20px';
+            closeBtn.style.right = '20px';
+            closeBtn.style.background = 'transparent';
+            closeBtn.style.color = '#fff';
+            closeBtn.style.border = 'none';
+            closeBtn.style.fontSize = '35px';
+            closeBtn.style.cursor = 'pointer';
+
+            overlay.appendChild(mediaEl);
+            overlay.appendChild(closeBtn);
+            document.body.appendChild(overlay);
+
+            // 기존 캐러셀의 해당 비디오는 잠시 일시정지
+            if (!isImage) {
+                const currentOriginalVideo = items[currentIndex].querySelector('video');
+                if (currentOriginalVideo) currentOriginalVideo.pause();
+            }
+
+            const closeOverlay = () => {
+                if (!isImage) mediaEl.pause();
+                overlay.remove();
+                // 닫을 때 기존 캐러셀 비디오 다시 재생
+                if (!isImage) {
+                    const currentOriginalVideo = items[currentIndex].querySelector('video');
+                    if (currentOriginalVideo) currentOriginalVideo.play().catch(e => console.warn(e));
+                }
+            };
+
+            closeBtn.addEventListener('click', closeOverlay);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeOverlay();
+            });
+        }
+
+        // dots 생성
+        if (dotsContainer) {
+            const count = Math.min(total, MAX_DOTS);
+            dotsContainer.innerHTML = Array.from({ length: count }, (_, i) =>
+                `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`
+            ).join('');
+        }
+
+        function updateDots(idx) {
+            if (!dotsContainer) return;
+            const dots = dotsContainer.querySelectorAll('.thumb-all-dot');
+            if (!dots.length) return;
+            if (total <= MAX_DOTS) {
+                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+            } else {
+                const half = Math.floor(MAX_DOTS / 2);
+                let winStart = idx - half;
+                winStart = Math.max(0, Math.min(winStart, total - MAX_DOTS));
+                const activeDotIdx = idx - winStart;
+                dots.forEach((d, i) => d.classList.toggle('active', i === activeDotIdx));
+            }
+        }
+
+        function updateCarousel(index, animate) {
+            if (animate === undefined) animate = true;
+            // 무한 루프
+            if (index < 0) index = total - 1;
+            if (index >= total) index = 0;
+            currentIndex = index;
+
+            const vw = (viewport || wrap).offsetWidth;
+            const itemWidth = vw / 3;
+
+            // 모든 아이템 너비 동일하게 설정
+            items.forEach(item => { item.style.width = itemWidth + 'px'; });
+
+            // 중앙 정렬 translateX
+            const translateX = vw / 2 - itemWidth * (currentIndex + 0.5);
+            track.style.transition = animate
+                ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)'
+                : 'none';
+            track.style.transform = `translateX(${translateX}px)`;
+
+            // 아이템 상태 클래스 적용 및 영상 재생 제어
+            items.forEach((item, i) => {
+                const dist = Math.abs(i - currentIndex);
+                item.classList.remove('is-center', 'is-side', 'is-far');
+                
+                const video = item.querySelector('video');
+
+                if (dist === 0) {
+                    item.classList.add('is-center');
+                    if (video) video.play().catch(e => console.warn('Autoplay prevented:', e));
+                } else {
+                    if (dist === 1) item.classList.add('is-side');
+                    else item.classList.add('is-far');
+                    
+                    if (video) {
+                        video.pause();
+                        video.currentTime = 0; // 배경으로 갈 때 첫 프레임으로 초기화
+                    }
+                }
+            });
+
+            updateDots(currentIndex);
+            wrap.dataset.slideIndex = currentIndex;
+        }
+
+        // 레이아웃 후 초기화 (offsetWidth 확보)
+        requestAnimationFrame(() => updateCarousel(0, false));
+
+        // 버튼
+        if (prevBtn) prevBtn.addEventListener('click', () => updateCarousel(currentIndex - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => updateCarousel(currentIndex + 1));
+
+        // Dots 클릭
+        if (dotsContainer) {
+            dotsContainer.addEventListener('click', (e) => {
+                const dot = e.target.closest('.thumb-all-dot');
+                if (!dot) return;
+                const idx = Array.from(dotsContainer.querySelectorAll('.thumb-all-dot')).indexOf(dot);
+                if (idx < 0) return;
+                const half = Math.floor(MAX_DOTS / 2);
+                let winStart = currentIndex - half;
+                winStart = Math.max(0, Math.min(winStart, total - Math.min(total, MAX_DOTS)));
+                updateCarousel(winStart + idx);
+            });
+        }
+
+        // 터치 스와이프
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const touchTarget = viewport || wrap;
+
+        touchTarget.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        touchTarget.addEventListener('touchend', (e) => {
+            const diffX = e.changedTouches[0].clientX - touchStartX;
+            const diffY = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(diffY) > Math.abs(diffX)) return; // 수직 스크롤 무시
+            if (Math.abs(diffX) > 30) {
+                if (diffX < 0) updateCarousel(currentIndex + 1);
+                else updateCarousel(currentIndex - 1);
+            }
+        });
+
+        // 리사이즈 시 재계산
+        window.addEventListener('resize', () => updateCarousel(currentIndex, false));
+    };
+
     // ── Dynamic Portfolio Categories from Supabase ─────────────────
     const _isVideoUrl = (url) => {
         if (!url) return false;
