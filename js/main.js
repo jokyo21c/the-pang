@@ -694,9 +694,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 이미 이벤트/기본 구조가 설정되었다면 무시
         if (wrap.dataset.carouselInit === 'true') {
-            // 외부(Supabase 로드 등)에서 요소가 변경되었다면 아이템 배열과 이벤트를 다시 세팅
+            // 외부(Supabase 로드 등)에서 요소가 변경된 경우, 현재 인덱스 유지하며 아이템만 업데이트
             if (wrap._reinitItems) {
-                wrap._reinitItems();
+                wrap._reinitItems(false); // resetPosition=false: 현재 슬라이드 위치 유지
             }
             return;
         }
@@ -840,29 +840,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        wrap._reinitItems = function() {
+        // resetPosition: true=인덱스 0으로 리셋(첫 초기화), false=현재 위치 유지(Supabase 재로드)
+        wrap._reinitItems = function(resetPosition) {
+            if (resetPosition === undefined) resetPosition = true;
+
             items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
             total = items.length;
             
-            // 영상 자동 넘김 및 클릭 시 이동/풀스크린 재생 이벤트 등록
+            // 클릭 이벤트만 등록 (onended 자동이동 제거 - 무작위 점프 방지)
             items.forEach((item, i) => {
                 const video = item.querySelector('video');
-                if (video) {
-                    video.onended = () => {
-                        if (currentIndex === i) {
-                            updateCarousel(currentIndex + 1);
-                        }
-                    };
-                }
+                // video.onended 는 등록하지 않음 (영상 끝나도 자동이동 안 함)
 
                 item.addEventListener('click', () => {
                     if (currentIndex === i) {
                         // 중앙 아이템 클릭 시 풀스크린 오버레이 열기
                         const src = video ? video.src : (item.querySelector('img') ? item.querySelector('img').src : null);
-                        if (src) {
-                            // 모달 열림 방지를 위해 이벤트 버블링 임시 방지
-                            openFullscreenMedia(src, !video);
-                        }
+                        if (src) openFullscreenMedia(src, !video);
                     } else {
                         // 중앙이 아닌 배경 아이템을 클릭하면 중앙으로 이동
                         updateCarousel(i);
@@ -870,19 +864,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
-            // dots 재생성 필요 시
+            // dots 재생성 (총 개수가 변경된 경우 갱신)
             if (dotsContainer) {
                 const count = Math.min(total, MAX_DOTS);
-                dotsContainer.innerHTML = Array.from({ length: count }, (_, i) =>
-                    `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`
+                dotsContainer.innerHTML = Array.from({ length: count }, (_, j) =>
+                    `<span class="thumb-all-dot ${j === 0 ? 'active' : ''}"></span>`
                 ).join('');
             }
 
-            updateCarousel(0, false);
+            // 위치 리셋 여부에 따라 처리
+            if (resetPosition) {
+                updateCarousel(0, false); // 첫 초기화: 인덱스 0으로 이동
+            } else {
+                // Supabase 재로드: 현재 인덱스 유지하며 레이아웃만 재계산
+                updateCarousel(currentIndex, false);
+            }
         };
         
-        // 처음 아이템 바인딩 실행
-        wrap._reinitItems();
+        // 처음 아이템 바인딩 실행 (초기화이므로 0번 인덱스로 설정)
+        wrap._reinitItems(true);
 
         function updateDots(idx) {
             if (!dotsContainer) return;
