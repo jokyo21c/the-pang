@@ -109,13 +109,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             void portfolioTrack.offsetWidth;
             portfolioTrack.style.opacity = '1';
 
-            // 캐러셀 리셋(cloneNode로 이전 이벤트 정리 후) 초기화
-            let currentWrap = document.getElementById('portfolioSlideWrap');
+            // 캐러셀 강제 재초기화 (기존 wrap에서 직접 상태 리셋)
+            const currentWrap = document.getElementById('portfolioSlideWrap');
             if (window.initPortfolioCarousel && currentWrap) {
-                const newWrap = currentWrap.cloneNode(true);
-                newWrap.dataset.carouselInit = ''; // 클론 시 복사된 초기화 상태 방지
-                currentWrap.parentNode.replaceChild(newWrap, currentWrap);
-                window.initPortfolioCarousel(newWrap);
+                currentWrap.dataset.carouselInit = ''; // 초기화 상태 강제 리셋
+                currentWrap._reinitItems = null;
+                currentWrap._updateCarousel = null;
+                window.initPortfolioCarousel(currentWrap);
             }
 
         } else {
