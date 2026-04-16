@@ -694,7 +694,7 @@
         -ms-overflow-style: none;
         gap: 16px;
         padding-top: 24px;
-        padding-bottom: 32px;
+        padding-bottom: 8px; /* 카운터/닷츠와의 간격을 최소화하기 위해 대폭 축소 (기존 32px) */
         margin-top: -16px; 
     }
     
@@ -737,7 +737,7 @@
     }
 
     .pricing-card__features li {
-        padding: 5px 0; /* 리스트 상하 여백 대폭 축소 */
+        padding: 2px 0; /* 리스트 상하 여백을 최소치로 축소 */
         font-size: 12px; /* 텍스트 크기 축소 */
     }
     
