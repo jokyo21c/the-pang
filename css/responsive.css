@@ -703,9 +703,32 @@
     }
 
     .pricing-card {
-        flex: 0 0 calc(100% - 10px);
+        flex: 0 0 calc(100% - 12px);
         max-width: 100%;
         scroll-snap-align: center;
+        padding: 24px 18px; /* 모바일 전용: 상하좌우 여백 축소로 세로 길이 절약 */
+    }
+    
+    .pricing-card__name {
+        font-size: 18px; /* 글꼴 크기 소폭 축소 */
+    }
+    
+    .pricing-card__price {
+        font-size: 28px;
+    }
+
+    .pricing-card--standard .pricing-card__price {
+        font-size: 32px;
+    }
+    
+    .pricing-card__features li {
+        padding: 6px 0; /* 줄 간격 축소 */
+        font-size: 13px; /* 모바일 폭에 맞춰 텍스트 축소 */
+    }
+    
+    .pricing-card__btn {
+        padding: 12px;
+        margin-top: auto;
     }
 
     .pricing-card--standard {
