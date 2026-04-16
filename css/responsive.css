@@ -1178,6 +1178,7 @@
         grid-column: 1 / -1 !important;
         width: 100% !important;
         margin-bottom: 0 !important;
+        min-width: 0 !important; /* CSS Grid 버그(자식 요소 가로 팽창 방지) 고침 */
     }
 
     /* ── 행 2, 열 1: 이전 버튼 ── */
