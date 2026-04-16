@@ -117,6 +117,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // PC 환경(768px 초과)에서 해당 팡 섹션 스크롤 진입 시 오렌지색 액티브 처리
+        if (matchedId && pangIds.includes(matchedId)) {
+            if (window.innerWidth > 768) {
+                clearSidebarActive();
+                sidebarLinks.forEach(link => {
+                    if (link.getAttribute('href') === `#${matchedId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        }
+
         // PC 상단 nav 링크 active
         navLinks.forEach(link => {
             link.classList.remove('active');

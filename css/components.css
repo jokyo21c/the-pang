@@ -2071,62 +2071,68 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 50px;
-    height: 50px;
-    color: var(--color-text-primary);
-    border-radius: 50%;
+    width: 48px;
+    height: 52px;
+    gap: 3px;
+    color: #FFFFFF;
+    border-radius: 8px; /* Rounded corners instead of full circle for better fit with text */
     transition: var(--transition);
     position: relative;
     pointer-events: auto; /* wrapper의 pointer-events:none 상속 방지 */
 }
 
 .floating-sidebar__link i {
-    font-size: 24px;
-    transition: transform 0.3s ease;
+    font-size: 22px;
+    line-height: 1;
+    transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .floating-sidebar__label {
-    position: absolute;
-    left: 65px;
-    top: 50%;
-    transform: translateY(-50%) translateX(-10px);
-    background: var(--color-brand-purple);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    position: static;
+    transform: none;
+    background: transparent;
+    color: #FFFFFF;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    opacity: 1;
+    visibility: visible;
+    transition: color 0.3s ease;
 }
 
 /* 2D Line Animation/Hover Effects */
 .floating-sidebar__link:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: var(--color-brand-purple);
 }
 
 .floating-sidebar__link:hover i {
     transform: scale(1.15);
 }
 
-.floating-sidebar__link:hover .floating-sidebar__label {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(-50%) translateX(0);
+/* Active State (Orange) */
+.floating-sidebar__link.active i,
+.floating-sidebar__link.active .floating-sidebar__label {
+    color: var(--color-brand-orange);
 }
 
-/* Kakao Style */
+/* Drop shadow for hero section */
+.floating-sidebar.in-hero .floating-sidebar__link i,
+.floating-sidebar.in-hero .floating-sidebar__label {
+    filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.85));
+}
+
+/* Kakao Style - Always Yellow! */
+.floating-sidebar__item--kakao .floating-sidebar__link i,
+.floating-sidebar__item--kakao .floating-sidebar__label,
+.floating-sidebar__item--kakao .floating-sidebar__link.active i,
+.floating-sidebar__item--kakao .floating-sidebar__link.active .floating-sidebar__label {
+    color: var(--color-kakao);
+}
+
 .floating-sidebar__item--kakao .floating-sidebar__link:hover {
-    background: var(--color-kakao);
-    color: #111;
-}
-
-.floating-sidebar__item--kakao .floating-sidebar__label {
-    background: var(--color-kakao);
-    color: #111;
+    background: rgba(254, 229, 0, 0.15); /* Light yellow bg on hover */
 }
 
 /* Responsive */
