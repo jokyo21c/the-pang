@@ -1221,6 +1221,58 @@
         margin: 0 !important;
         justify-self: end !important;
     }
+
+    /* ── 전역 설정: 모든 슬라이드 컨트롤을 '실제 후기' 스타일로 강제 통일 ── */
+    .thumb-all-nav--prev, .thumb-all-nav--next,
+    .service-nav--prev, .service-nav--next,
+    .pricing-nav--prev, .pricing-nav--next,
+    .process-nav--prev, .process-nav--next,
+    .news-nav--prev, .news-nav--next {
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 50% !important;
+        background: var(--color-bg-card) !important;
+        border: 1px solid var(--color-border) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: var(--color-text-primary) !important;
+        font-size: 18px !important;
+        opacity: 1 !important;
+    }
+
+    .thumb-all-nav--prev:active, .thumb-all-nav--next:active,
+    .service-nav--prev:active, .service-nav--next:active,
+    .pricing-nav--prev:active, .pricing-nav--next:active,
+    .process-nav--prev:active, .process-nav--next:active,
+    .news-nav--prev:active, .news-nav--next:active {
+        background: var(--color-brand-purple) !important;
+        border-color: var(--color-brand-purple) !important;
+    }
+
+    .thumb-all-dot, .thumb-dots .dot,
+    .service-dot,
+    .pricing-dot,
+    .process-dot,
+    .news-dot {
+        width: 10px !important;
+        height: 10px !important;
+        border-radius: 50% !important;
+        background: var(--color-border) !important;
+        transition: width 0.3s ease, background 0.3s ease, border-radius 0.3s ease !important;
+        transform: none !important;
+    }
+
+    .thumb-all-dot.active, .thumb-dots .dot.active,
+    .service-dot.active,
+    .pricing-dot.active,
+    .process-dot.active,
+    .news-dot.active {
+        background: var(--color-brand-purple) !important;
+        width: 28px !important;
+        border-radius: 5px !important;
+        transform: none !important;
+    }
 }
 
 
