@@ -913,6 +913,13 @@
     display: none;
 }
 
+/* PC 환경 먹팡(첫번째 팡) 섹션만 아이콘과 텍스트가 우측으로 치우쳐보이는 현상 보정 */
+@media (min-width: 769px) {
+    #meokpang .pang-header-row {
+        transform: translateX(-16px);
+    }
+}
+
 /* ── Thumbnail Layout ─────────────────────────────────── */
 .category-thumbnails {
     display: flex;
