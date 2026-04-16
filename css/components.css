@@ -866,9 +866,17 @@
     opacity: 1;
 }
 
+.pang-header-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
 .category-info__icon {
     font-size: 112px;
-    margin-bottom: 24px;
+    margin-bottom: 0px;
     line-height: 1;
     /* 아이콘 주변 불필요한 공백 제거 */
     display: block;
@@ -878,7 +886,7 @@
     font-size: 56px;
     font-weight: var(--fw-bold);
     color: var(--color-text-primary);
-    margin-bottom: 24px;
+    margin-bottom: 0px;
     font-family: var(--font-kr);
 }
 
