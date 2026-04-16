@@ -1158,6 +1158,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 슬라이더 이동
         const goToPang = (index, smooth = true) => {
+            // PC 환경에서는 수평 슬라이더 애니메이션을 동작시키지 않음
+            if (window.innerWidth > 768) {
+                track.style.transform = '';
+                return;
+            }
+
             // 무한 루프 처리
             if (index < 0) index = TOTAL - 1;
             if (index >= TOTAL) index = 0;
@@ -1179,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 자동 슬라이딩
         const startAuto = () => {
-            if (manualStop) return; // 수동으로 중지된 상태라면 무시
+            if (manualStop || window.innerWidth > 768) return; // 수동으로 중지된 상태거나 PC 환경이면 무시
             stopAuto();
             autoTimer = setInterval(() => {
                 goToPang(currentPang + 1);
