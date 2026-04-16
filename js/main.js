@@ -942,6 +942,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 실제 모바일 기기에서 autoplay를 위해 muted + playsinline 강제 설정
                     if (video) {
                         video.muted = true;
+                        video.loop = true;
                         video.setAttribute('playsinline', '');
                         video.setAttribute('webkit-playsinline', '');
                         video.play().catch(e => console.warn('Autoplay prevented:', e));
@@ -1054,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const isVid = catItem.media_type === 'video' || _isVideoUrl(url);
                         if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
                         const mediaTag = isVid
-                            ? `<video src="${url}" muted playsinline webkit-playsinline preload="metadata" style="${mediaStyle}"></video>`
+                            ? `<video src="${url}" muted loop playsinline webkit-playsinline preload="metadata" style="${mediaStyle}"></video>`
                             : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
                         trackHtml += `<div class="portfolio-carousel-item" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
                     });
@@ -1076,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const isVid = catItems[idx].media_type === 'video' || _isVideoUrl(url);
                                 if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
                                 const mediaTag = isVid
-                                    ? `<video src="${url}" muted playsinline webkit-playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
+                                    ? `<video src="${url}" muted loop playsinline webkit-playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
                                     : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
                                 pageHtml += `<div class="category-thumb" data-label="${catName} #${idx + 1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
                             }
