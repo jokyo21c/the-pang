@@ -2258,6 +2258,14 @@
     pointer-events: none; /* wrapper의 투명 영역이 클릭 이벤트 가로채는 것 방지 */
 }
 
+/* PC 환경에서 사이드바 전체 10% 확대 */
+@media (min-width: 769px) {
+    .floating-sidebar {
+        transform: translateY(-50%) scale(1.1);
+        transform-origin: left center; /* 왼쪽 가장자리 기준 확대 */
+    }
+}
+
 .floating-sidebar__menu {
     display: flex;
     flex-direction: column;
