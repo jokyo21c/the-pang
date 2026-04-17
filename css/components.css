@@ -927,9 +927,31 @@
         transform: translateX(-16px);
     }
 
-    /* 나머지 팡들의 설명 텍스트가 1줄이므로 먹팡(2줄)과 높이를 맞추기 위해 상단 간격 조정 (기존 64px + 약 29px) */
+    /* ── PC 전용 팡 섹션 간격 수치 정밀 조정 ──────────────── */
+
+    /* 2. 먹팡: 설명 → 리스트 간격 48px */
+    #meokpang .category-info__targets {
+        margin-top: 48px;
+    }
+
+    /* 2. 나머지 팡: 설명 → 리스트 간격 77px */
     .pang-slide:not(#meokpang) .category-info__targets {
-        margin-top: 93px;
+        margin-top: 77px;
+    }
+
+    /* 3. 리스트 아이템 상하 간격: 9px × 2 = 18px */
+    .pang-slide .category-info__targets li {
+        padding: 9px 0;
+    }
+
+    /* 4. 리스트 → 버튼 사이 간격 = 15px(하단) + 5px(버튼 margin-top) = 20px */
+    .pang-slide .category-info__targets {
+        margin-bottom: 15px;
+    }
+
+    /* 5. 팡 탭 → 썸네일 간격: 탭 margin-bottom(50px) + 썸네일 패딩(30px) = 80px */
+    .pang-slide .category-thumbnails {
+        padding-top: 30px;
     }
 }
 
@@ -1139,7 +1161,7 @@
     .pc-pang-tabs-wrapper {
         display: block;
         padding-top: 0px; 
-        margin-bottom: 20px; /* 섹션 바디와 간격 조절 */
+        margin-bottom: 50px; /* 탭 → 제목 간격: 50px */
         position: relative;
         z-index: 10;
     }
@@ -1148,11 +1170,11 @@
         display: none !important;
     }
 
-    /* 팡 섹션 안의 지금 견적 받기 버튼 50% 축소 (모바일엔 영향 없음) */
+    /* 팡 섹션 안의 지금 견적 받기 버튼 현재 크기에서 10% 추가 축소 (모바일엔 영향 없음) */
     .pang-slide .category-info .btn--primary.btn--small {
-        transform: scale(0.5);
+        transform: scale(0.72);
         transform-origin: left center;
-        margin-top: -10px;
+        margin-top: 5px; /* list(margin-bottom:15px) + 5px = 20px */
     }
 }
 
