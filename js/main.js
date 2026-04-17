@@ -1342,6 +1342,46 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                // ── 팡 슬라이드 (먹팡~멋팡) 처리 (PC) ─────────────────
+                if (slideIndex !== -1 && window.innerWidth > 768) {
+                    e.preventDefault();
+                    
+                    // 1. PC 팡 탭 상태 동기화
+                    const pcPangTabs = document.querySelectorAll('.pc-pang-tabs-wrapper .pc-pang-tab-btn');
+                    pcPangTabs.forEach(t => {
+                        t.classList.remove('active');
+                        if (t.getAttribute('data-target') === targetId) {
+                            t.classList.add('active');
+                        }
+                    });
+
+                    // 2. 팡 섹션 노출 토글
+                    const pcPangSections = [
+                        document.getElementById('meokpang'),
+                        document.getElementById('nolpang'),
+                        document.getElementById('swimpang'),
+                        document.getElementById('salpang'),
+                        document.getElementById('meotpang')
+                    ];
+                    pcPangSections.forEach(sec => {
+                        if (sec) {
+                            if (sec.id === targetId) {
+                                sec.classList.remove('pang-slide-pc-hidden');
+                                setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
+                            } else {
+                                sec.classList.add('pang-slide-pc-hidden');
+                            }
+                        }
+                    });
+
+                    // 3. 부드러운 스크롤 이동 (팡 통합 슬라이더 래퍼 기준)
+                    const sliderNode = document.getElementById('pangSectionSlider');
+                    if (sliderNode) {
+                        const top = sliderNode.getBoundingClientRect().top + window.pageYOffset - 70;
+                        window.scrollTo({ top: top, behavior: 'smooth' });
+                    }
+                    return;
+                }
                 // ── 일반 앵커(홈, 기타 섹션) 처리 ───────────────────
                 e.preventDefault();
                 const targetEl = document.getElementById(targetId);
@@ -1644,6 +1684,18 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                         t.classList.add('active');
                     }
                 });
+
+                // 사이드바 네비게이션 아이콘 연동 동기화 (PC)
+                if (window.innerWidth > 768) {
+                    document.querySelectorAll('.floating-sidebar__link').forEach(link => {
+                        if (!link.closest('.floating-sidebar__item--kakao')) {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${targetId}`) {
+                                link.classList.add('active');
+                            }
+                        }
+                    });
+                }
 
                 // 해당되는 팡 섹션만 노출 (클래스 토글)
                 pcPangSections.forEach(sec => {
