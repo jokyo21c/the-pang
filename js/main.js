@@ -907,12 +907,17 @@ document.addEventListener('DOMContentLoaded', () => {
             currentIndex = index;
 
             let vw = (viewport || wrap).offsetWidth;
-            // 만약 요소가 숨겨져 있어서 vw가 0이면 컨테이너 너비나 브라우저 너비로 대체
-            if (vw === 0) {
-                const container = wrap.closest('.container');
-                vw = container ? container.offsetWidth : window.innerWidth;
-                // 약간의 패딩 감안 (오차 방지)
-                if (vw === window.innerWidth) vw -= 32; 
+            // PC 팡 섹션: 그리드 레이아웃이 아직 계산되지 않아 viewport 너비가 작을 수 있음
+            // threshold를 200으로 높여서 더 넓은 범위에서 폴백 적용
+            if (vw < 200) {
+                if (window.innerWidth > 768 && wrap.closest('.pang-slide')) {
+                    // PC 팡 섹션: container의 grid 1fr 1fr 우측열 너비 추정
+                    const container = wrap.closest('.container');
+                    vw = container ? (container.offsetWidth - 40) / 2 : window.innerWidth / 3;
+                } else {
+                    const gridCol = wrap.closest('.category-thumbnails');
+                    vw = gridCol ? gridCol.offsetWidth : (wrap.closest('.container') ? wrap.closest('.container').offsetWidth / 2 : window.innerWidth / 2);
+                }
             }
 
             const itemWidth = vw / 3;
@@ -966,6 +971,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 레이아웃 후 초기화 (offsetWidth 확보)
         requestAnimationFrame(() => updateCarousel(0, false));
+        // PC에서 그리드 레이아웃이 늦게 계산될 수 있으므로 지연 재계산
+        setTimeout(() => updateCarousel(currentIndex, false), 300);
 
         // 버튼
         if (prevBtn) prevBtn.addEventListener('click', () => updateCarousel(currentIndex - 1));
@@ -1045,10 +1052,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!track || !dotsContainer) return;
 
                 const isMobile = window.innerWidth <= 768;
+                const isPangSection = !!section.closest('.pang-slide');
+                const useCenterCarousel = isMobile || isPangSection;
                 const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
 
-                if (isMobile) {
-                    // 모바일: 개별 flat 아이템으로 렌더링 (센터-포커스 캐러셀)
+                if (useCenterCarousel) {
+                    // 모바일 + PC 팡 섹션: 개별 flat 아이템으로 렌더링 (센터-포커스 캐러셀)
                     let trackHtml = '';
                     catItems.forEach((catItem, idx) => {
                         let url = catItem.media_url;
@@ -1062,7 +1071,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     track.innerHTML = trackHtml;
                     dotsContainer.innerHTML = ''; // initPortfolioCarousel에서 생성
                 } else {
-                    // 데스크톱: 기존 페이지 방식
+                    // 데스크톱 (팡 섹션 제외): 기존 페이지 방식
                     let trackHtml = '';
                     let dotsHtml = '';
                     const itemsPerPage = 2;
@@ -1091,9 +1100,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // 슬라이더 재초기화 (모바일/데스크톱 분기)
+            // 슬라이더 재초기화 (모바일/데스크톱 분기, 팡 섹션은 항상 센터 포커스)
             document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
-                if (window.innerWidth <= 768) {
+                const isPang = wrap.closest('.pang-slide') !== null;
+                if (window.innerWidth <= 768 || isPang) {
                     window.initPortfolioCarousel(wrap);
                 } else {
                     window.initThumbAllSlide(wrap);
@@ -1109,7 +1119,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize all existing sliders (모바일/데스크톱 분기)
     document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
-        if (window.innerWidth <= 768) {
+        const isPangSection = wrap.closest('.pang-slide') !== null;
+        if (window.innerWidth <= 768 || isPangSection) {
             window.initPortfolioCarousel(wrap);
         } else {
             window.initThumbAllSlide(wrap);

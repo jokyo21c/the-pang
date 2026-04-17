@@ -926,6 +926,11 @@
     #meokpang .pang-header-row {
         transform: translateX(-16px);
     }
+
+    /* 나머지 팡들의 설명 텍스트가 1줄이므로 먹팡(2줄)과 높이를 맞추기 위해 상단 간격 조정 (기존 64px + 약 29px) */
+    .pang-slide:not(#meokpang) .category-info__targets {
+        margin-top: 93px;
+    }
 }
 
 /* ── Thumbnail Layout ─────────────────────────────────── */
@@ -1097,6 +1102,96 @@
 
 .category-thumb:hover .category-thumb__overlay {
     opacity: 1;
+}
+
+/* ── PC 환경 팡 섹션 썸네일 캐러셀 (센터 포커스) ───────────────── */
+@media (min-width: 769px) {
+    .pang-slide .category-content {
+        align-items: stretch; 
+    }
+    .pang-slide .category-thumbnails {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        padding-bottom: 80px;
+    }
+
+    .pang-slide .thumb-all-wrap {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+    }
+    
+    .pang-slide .thumb-all-viewport {
+        overflow: hidden;
+        position: relative;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        /* 확대된 중앙 아이템이 잘리지 않도록 상하 여백 추가 */
+        padding: 15% 0;
+    }
+
+    .pang-slide .thumb-all-track {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        will-change: transform;
+    }
+
+    .pang-slide .portfolio-carousel-item {
+        flex-shrink: 0;
+        aspect-ratio: 9/16;
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius-card);
+        transform-origin: center center;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                    filter 0.4s ease,
+                    opacity 0.4s ease;
+        cursor: pointer;
+    }
+
+    /* 중앙 아이템: 150% 확대 (모바일 포트폴리오와 동일) */
+    .pang-slide .portfolio-carousel-item.is-center {
+        transform: scale(1.5);
+        filter: none;
+        opacity: 1;
+        z-index: 2;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    /* 좌우 인접: 70% 축소 + 블러 */
+    .pang-slide .portfolio-carousel-item.is-side {
+        transform: scale(0.7);
+        filter: blur(4px);
+        opacity: 0.6;
+    }
+
+    /* 더 먼 아이템: 50% 축소 + 강한 블러 */
+    .pang-slide .portfolio-carousel-item.is-far {
+        transform: scale(0.5);
+        filter: blur(8px);
+        opacity: 0.2;
+    }
+
+    .pang-slide .portfolio-carousel-item img,
+    .pang-slide .portfolio-carousel-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        border-radius: inherit;
+    }
 }
 
 .category-thumb__overlay i {
