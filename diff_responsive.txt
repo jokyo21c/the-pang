@@ -1,0 +1,179 @@
+﻿diff --git a/css/responsive.css b/css/responsive.css
+index 48b694d..4e1dcbe 100644
+--- a/css/responsive.css
++++ b/css/responsive.css
+@@ -8,10 +8,7 @@
+    ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
+ 
+ 
+-/* ???뱀뀡 紐⑤컮???ㅻ퉬寃뚯씠?????④? */
+-.pang-mobile-nav.mobile-only {
+-    display: none;
+-}
++
+ 
+ /* ?? Max 768px (Mobile) ?????????????????????????????????? */
+ @media (max-width: 768px) {
+@@ -34,57 +31,75 @@
+         will-change: transform;
+     }
+ 
+-    /* ?? ???뱀뀡 紐⑤컮???ㅻ퉬寃뚯씠??(dots only) ?????????????????????? */
+-    .pang-mobile-nav.mobile-only {
++    /* ?? 紐⑤컮???ㅼ쓬 ??移대뱶 (?댁쟾 ?붿옄??蹂듭썝) ?????????????????????? */
++    .pang-next-card {
++        position: absolute !important;
++        top: 176px !important;     /* 酉고떚?돠룻뿤?댁꺏 ??由ъ뒪???쒖옉 以꾧낵 ?뺣젹?섍쾶 ?꾩튂 議곗젙 */
++        right: 16px !important;
+         display: flex !important;
+-        align-items: center;
+-        justify-content: center;
+-        gap: 12px;
+-        padding: 14px 0 6px;
+-        width: 100%;
+-    }
+-
+-    .pang-nav-btn {
+-        width: 36px;
+-        height: 36px;
+-        border-radius: 50%;
+-        background: rgba(0, 0, 0, 0.5);
+-        border: 1px solid rgba(255, 255, 255, 0.2);
+-        display: flex;
+-        align-items: center;
+-        justify-content: center;
+-        color: #fff;
+-        font-size: 20px;
++        flex-direction: column !important;
++        align-items: center !important;
++        justify-content: center !important;
++        gap: 6px !important;
++        background: rgba(255,255,255,0.08) !important;
++        border: 1px solid rgba(255,255,255,0.15) !important;
++        border-radius: 12px !important;
++        padding: 10px 8px !important;
++        margin-top: 0 !important; 
+         cursor: pointer;
+-        flex-shrink: 0;
+         transition: background 0.2s ease, transform 0.2s ease;
+-        backdrop-filter: blur(4px);
+-    }
+-
+-    .pang-nav-btn:hover,
+-    .pang-nav-btn:active {
+-        background: rgba(255, 255, 255, 0.15);
+-        transform: scale(1.1);
++        z-index: 100 !important;
++        width: 76px !important;        /* 36px ?κ렐踰꾪듉 ?띿꽦 ?꾩쟾 臾댁떆 */
++        height: 120px !important; 
++        box-sizing: border-box !important;
++        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
++        color: #fff !important;
++        backdrop-filter: blur(4px) !important;
++    }
++
++    .pang-next-card:hover,
++    .pang-next-card:active {
++        background: rgba(255,107,53,0.15) !important;
++        border-color: rgba(255,107,53,0.4) !important;
++        transform: translateY(-2px) !important;
++    }
++
++    .pang-next-card__label {
++        font-size: 9px;
++        font-weight: 500;
++        color: var(--color-brand-orange, #ff6b35);
++        text-transform: uppercase;
++        letter-spacing: 0.05em;
+     }
+ 
+-    .pang-nav-dots {
+-        display: flex;
+-        align-items: center;
+-        gap: 6px;
++    .pang-next-card__icon {
++        font-size: 24px;
++        line-height: 1;
++        margin: 2px 0;
+     }
+ 
+-    .pang-nav-dot {
+-        width: 8px;
+-        height: 8px;
+-        border-radius: 4px;
+-        background: rgba(255, 255, 255, 0.25);
+-        transition: width 0.3s ease, background 0.3s ease;
+-        cursor: pointer;
++    .pang-next-card__name {
++        font-size: 11px;
++        font-weight: 700;
++        color: #fff;
++        white-space: nowrap;
++        text-overflow: ellipsis;
++        overflow: hidden;
++        width: 100%;
++        text-align: center;
+     }
+ 
+-    .pang-nav-dot.active {
+-        width: 24px;
+-        background: var(--color-brand-purple);
++    .pang-next-card__arrow {
++        width: 20px;
++        height: 20px;
++        border-radius: 50%;
++        background: var(--color-brand-orange, #ff6b35);
++        display: flex;
++        align-items: center;
++        justify-content: center;
++        color: #fff;
++        font-size: 14px;
++        margin-top: 2px;
+     }
+ 
+     /* 紐⑤컮???뚮젆???щ씪?대뜑 ?섍꼍?먯꽑 ?ㅽ겕濡?湲곕컲 ?좊땲硫붿씠??Observer, GSAP) 鍮꾪솢?깊솕 
+@@ -133,13 +148,13 @@
+         transform: none; /* scale ?쒓굅 ??transform???덉쑝硫?z-index stacking context 臾몄젣 諛쒖깮 */
+         order: -1;
+         background: rgba(0, 0, 0, 0.5);
+-        padding: 10px;
++        padding: 8px; /* Reduced by 10% */
+         border-radius: 6px;
+         backdrop-filter: blur(4px);
+         border: 1px solid rgba(255, 255, 255, 0.2);
+         box-sizing: border-box;
+-        min-width: 44px;
+-        min-height: 44px;
++        min-width: 40px; /* Reduced by 10% */
++        min-height: 40px; /* Reduced by 10% */
+         align-items: center;
+         justify-content: center;
+         position: relative;
+@@ -151,13 +166,15 @@
+ 
+     .nav__logo {
+         font-size: 20px;
+-        order: 2;
++        order: 0;
++        flex: 1;
++        text-align: center;
++        z-index: 1000;
+     }
+     
+     .nav__auth {
+-        order: 0;
+-        margin: 0 auto; /* Center perfectly between hamburger and logo */
+-        gap: 6px; /* Bring buttons slightly closer */
++        margin: 0;
++        gap: 6px;
+     }
+ 
+     .nav__auth-btn {
+@@ -377,6 +394,7 @@
+     .category-content {
+         grid-template-columns: 1fr;
+         gap: 24px;
++        position: relative;
+     }
+ 
+     .category-tabs {

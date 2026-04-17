@@ -1617,6 +1617,49 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         }
     }
 
+    // ── PC 전용 팡 섹션 탭 로직 ──────────────────────────────────────
+    const pcPangTabs = document.querySelectorAll('.pc-pang-tabs-wrapper .portfolio-filter__btn');
+    const pcPangSections = [
+        document.getElementById('meokpang'),
+        document.getElementById('nolpang'),
+        document.getElementById('swimpang'),
+        document.getElementById('salpang'),
+        document.getElementById('meotpang')
+    ];
+
+    if (pcPangTabs.length > 0) {
+        // 초기 렌더링 시 첫 번째 섹션(먹팡)을 제외하고 모두 PC 환경에서 가림 처리
+        pcPangSections.forEach(sec => {
+            if (sec && sec.id !== 'meokpang') sec.classList.add('pang-slide-pc-hidden');
+        });
+
+        pcPangTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetId = tab.getAttribute('data-target');
+                
+                // 버튼 활성화 상태 토글
+                pcPangTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // 해당되는 팡 섹션만 노출 (클래스 토글)
+                pcPangSections.forEach(sec => {
+                    if (sec) {
+                        if (sec.id === targetId) {
+                            sec.classList.remove('pang-slide-pc-hidden');
+                        } else {
+                            sec.classList.add('pang-slide-pc-hidden');
+                        }
+                    }
+                });
+
+                // 숨겨져 있던 슬라이더(캐러셀)가 나타날 때 width/height 측정 오류로 깨지는 현상 방지. 강제 리사이즈 이벤트 트리거
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 50);
+            });
+        });
+    }
+
     renderDynamicFooter();
 });
 

@@ -1,0 +1,337 @@
+﻿commit cf3bfea70e5649f7e48037241e998c56902f0fbc
+Author: User <user@example.com>
+Date:   Mon Apr 6 14:08:31 2026 +0900
+
+    Mobile pang nav: remove prev/next arrow buttons, keep dots only
+
+diff --git a/css/responsive.css b/css/responsive.css
+index 30fe154..48b694d 100644
+--- a/css/responsive.css
++++ b/css/responsive.css
+@@ -34,13 +34,13 @@
+         will-change: transform;
+     }
+ 
+-    /* ?? ???뱀뀡 紐⑤컮???ㅻ퉬寃뚯씠??(< dots >) ?????????????????????? */
++    /* ?? ???뱀뀡 紐⑤컮???ㅻ퉬寃뚯씠??(dots only) ?????????????????????? */
+     .pang-mobile-nav.mobile-only {
+         display: flex !important;
+         align-items: center;
+         justify-content: center;
+         gap: 12px;
+-        padding: 20px 0 8px;
++        padding: 14px 0 6px;
+         width: 100%;
+     }
+ 
+
+commit 01c50fdb030c2016eab5462d91e18f06dc292b42
+Author: User <user@example.com>
+Date:   Sun Apr 5 21:00:41 2026 +0900
+
+    Fix mobile navigation, slider dots, and server network access. Add server.py for fallback.
+
+diff --git a/css/responsive.css b/css/responsive.css
+index 8677fe8..30fe154 100644
+--- a/css/responsive.css
++++ b/css/responsive.css
+@@ -8,8 +8,8 @@
+    ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
+ 
+ 
+-/* ?ㅼ쓬 ??誘몃━蹂닿린 而댄룷?뚰듃 ??湲곕낯 ?④? */
+-.pang-next-preview.mobile-only {
++/* ???뱀뀡 紐⑤컮???ㅻ퉬寃뚯씠?????④? */
++.pang-mobile-nav.mobile-only {
+     display: none;
+ }
+ 
+@@ -34,6 +34,59 @@
+         will-change: transform;
+     }
+ 
++    /* ?? ???뱀뀡 紐⑤컮???ㅻ퉬寃뚯씠??(< dots >) ?????????????????????? */
++    .pang-mobile-nav.mobile-only {
++        display: flex !important;
++        align-items: center;
++        justify-content: center;
++        gap: 12px;
++        padding: 20px 0 8px;
++        width: 100%;
++    }
++
++    .pang-nav-btn {
++        width: 36px;
++        height: 36px;
++        border-radius: 50%;
++        background: rgba(0, 0, 0, 0.5);
++        border: 1px solid rgba(255, 255, 255, 0.2);
++        display: flex;
++        align-items: center;
++        justify-content: center;
++        color: #fff;
++        font-size: 20px;
++        cursor: pointer;
++        flex-shrink: 0;
++        transition: background 0.2s ease, transform 0.2s ease;
++        backdrop-filter: blur(4px);
++    }
++
++    .pang-nav-btn:hover,
++    .pang-nav-btn:active {
++        background: rgba(255, 255, 255, 0.15);
++        transform: scale(1.1);
++    }
++
++    .pang-nav-dots {
++        display: flex;
++        align-items: center;
++        gap: 6px;
++    }
++
++    .pang-nav-dot {
++        width: 8px;
++        height: 8px;
++        border-radius: 4px;
++        background: rgba(255, 255, 255, 0.25);
++        transition: width 0.3s ease, background 0.3s ease;
++        cursor: pointer;
++    }
++
++    .pang-nav-dot.active {
++        width: 24px;
++        background: var(--color-brand-purple);
++    }
++
+     /* 紐⑤컮???뚮젆???щ씪?대뜑 ?섍꼍?먯꽑 ?ㅽ겕濡?湲곕컲 ?좊땲硫붿씠??Observer, GSAP) 鍮꾪솢?깊솕 
+        (?붾㈃ 諛??붿냼?ㅼ씠 怨꾩냽 opacity: 0?쇰줈 ?④굅??transform ?섎뒗 ?꾩긽 諛⑹?) */
+     .pang-section-slider .pang-slide {
+@@ -59,105 +112,7 @@
+     }
+ 
+ 
+-    /* ?? ?ㅼ쓬 ??誘몃━蹂닿린 移대뱶 (?곗긽??異뺤냼 諛곗튂) ???????????????????????????? */
+-    .pang-section-slider .section {
+-        position: relative; /* ?뱀뀡???덈? 諛곗튂 湲곗??쇰줈 ?쇱쓬 */
+-    }
+-
+-    .category-content {
+-        position: relative; 
+-    }
+-
+-    .pang-next-preview.mobile-only {
+-        position: absolute !important;
+-        top: 18px !important;     /* ?꾩씠肄?90px) ?몃줈 以묒븰?뺣젹 湲곗? 癒뱁뙜 ?띿뒪???곷떒 ?꾩튂 */
+-        right: 16px !important;   /* ?곗륫 ?덉쟾 ?щ갚 ?좎? */
+-        display: flex !important;
+-        flex-direction: column !important;
+-        align-items: center !important;
+-        justify-content: center !important;  /* ?대? ?붿냼 ?몃줈 以묒븰 ?뺣젹 */
+-        gap: 6px !important;
+-        background: rgba(255,255,255,0.08) !important;
+-        border: 1px solid rgba(255,255,255,0.15) !important;
+-        border-radius: 12px !important;
+-        padding: 10px 8px !important;
+-        margin-top: 0 !important; 
+-        cursor: pointer;
+-        transition: background 0.2s ease, transform 0.2s ease;
+-        z-index: 100 !important;
+-        width: 76px !important;        /* 媛濡????좎? */
+-        height: 120px !important;      /* 癒뱁뙜 ?띿뒪???곷떒 ~ ?ㅻ챸 ?띿뒪???섎떒 踰붿쐞 */
+-        box-sizing: border-box !important;
+-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+-    }
+ 
+-    .pang-next-preview.mobile-only:hover,
+-    .pang-next-preview.mobile-only:active {
+-        background: rgba(255,107,53,0.15);
+-        border-color: rgba(255,107,53,0.4);
+-        transform: translateY(-1px);
+-    }
+-
+-    .pang-next-preview__thumb {
+-        width: 32px;
+-        height: 32px;
+-        border-radius: 10px;
+-        background: rgba(255,255,255,0.08);
+-        display: flex;
+-        align-items: center;
+-        justify-content: center;
+-        font-size: 16px;
+-        flex-shrink: 0;
+-    }
+-
+-    .pang-next-preview__info {
+-        display: flex;
+-        flex-direction: column;
+-        align-items: center;
+-        text-align: center;
+-        gap: 2px;
+-        width: 100%;
+-        overflow: hidden;
+-    }
+-
+-    .pang-next-preview__label {
+-        font-size: 9px;
+-        font-weight: 500;
+-        color: var(--color-brand-orange, #ff6b35);
+-        text-transform: uppercase;
+-        letter-spacing: 0.05em;
+-    }
+-
+-    .pang-next-preview__name {
+-        font-size: 10px;
+-        font-weight: 700;
+-        color: #fff;
+-        white-space: nowrap;
+-        text-overflow: ellipsis;
+-        overflow: hidden;
+-        width: 100%; /* 湲몃㈃ ...?쇰줈 ?앸왂 */
+-    }
+-
+-    .pang-next-preview__btn {
+-        width: 24px;
+-        height: 24px;
+-        border-radius: 50%;
+-        background: var(--color-brand-orange, #ff6b35);
+-        border: none;
+-        display: flex;
+-        align-items: center;
+-        justify-content: center;
+-        color: #fff;
+-        font-size: 16px;
+-        cursor: pointer;
+-        flex-shrink: 0;
+-        transition: transform 0.2s ease;
+-        margin-top: 2px;
+-    }
+-
+-    .pang-next-preview__btn:hover {
+-        transform: scale(1.1);
+-    }
+ 
+ 
+     .nav {
+@@ -174,16 +129,24 @@
+     }
+ 
+     .nav__hamburger {
+-        display: flex;
+-        transform: scale(0.85); /* Slightly enlarged to accommodate the new padding nicely */
+-        transform-origin: left center;
++        display: flex !important;
++        transform: none; /* scale ?쒓굅 ??transform???덉쑝硫?z-index stacking context 臾몄젣 諛쒖깮 */
+         order: -1;
+-        background: rgba(0, 0, 0, 0.5); /* Dark background for visibility */
+-        padding: 8px;
++        background: rgba(0, 0, 0, 0.5);
++        padding: 10px;
+         border-radius: 6px;
+         backdrop-filter: blur(4px);
+         border: 1px solid rgba(255, 255, 255, 0.2);
+-        box-sizing: content-box; /* Maintain inner geometry for animation */
++        box-sizing: border-box;
++        min-width: 44px;
++        min-height: 44px;
++        align-items: center;
++        justify-content: center;
++        position: relative;
++        z-index: 1200;
++        cursor: pointer;
++        -webkit-tap-highlight-color: transparent;
++        touch-action: manipulation; /* ?붾툝??以?諛⑹? + ?곗튂 諛섏쓳 媛쒖꽑 */
+     }
+ 
+     .nav__logo {
+@@ -903,13 +866,14 @@
+     /* Floating Sidebar - Left Vertical (Mobile) */
+     .floating-sidebar {
+         left: 10px !important;
+-        top: 50% !important;
++        /* ?ㅻ퉬寃뚯씠??諛???56px) ?꾨옒遺???붾㈃ ?앷퉴吏??以묒븰??諛곗튂 */
++        top: calc(var(--nav-height-mobile, 60px) + (100vh - var(--nav-height-mobile, 60px)) / 2) !important;
+         bottom: auto !important;
+         transform: translateY(-50%) !important;
+         width: auto !important;
+         max-width: none !important;
+         flex-direction: column !important;
+-        z-index: 999 !important; /* nav(1100)蹂대떎 ??쾶 ?ㅼ젙?섏뿬 ?꾨쾭嫄?踰꾪듉 ?대┃ 蹂댁옣 */
++        z-index: 500 !important; /* nav(1100) 諛?hamburger(1200)蹂대떎 ??쾶 ?ㅼ젙 */
+     }
+ 
+     .floating-sidebar__menu {
+@@ -993,6 +957,74 @@
+     .floating-sidebar__item--kakao {
+         margin-left: 0;
+     }
++
++    /* ?? 怨듯넻 紐⑤컮???ㅻ퉬寃뚯씠???щ㎎ (?섎떒 ??以? < dots >) ?? */
++    /* ??? ?????몃꽕??thumb-all), ?쒕퉬?? 媛寃? ?댁뒪 ?щ씪?대뜑 */
++    /* ?????대룞 ?덇퀬移대뱶(pang-next-preview)????洹쒖튃怨?臾닿? */
++    .thumb-all-wrap,
++    .service-slider-container,
++    .pricing-slider-container,
++    .news-slider-container {
++        display: grid !important;
++        /* 3?? [?댁쟾踰꾪듉] [?먮뱾] [?ㅼ쓬踰꾪듉] */
++        grid-template-columns: auto 1fr auto !important;
++        grid-template-rows: auto auto !important;
++        align-items: center !important;
++        row-gap: 12px !important;
++        column-gap: 10px !important;
++    }
++
++    /* ?? ??1: ?щ씪?대뱶 肄섑뀗痢?(?꾩껜 ?덈퉬) ?? */
++    .thumb-all-wrap > .thumb-all-viewport,
++    .service-slider-container > .grid,
++    .pricing-slider-container > .pricing-grid,
++    .news-slider-container > .grid {
++        grid-row: 1 !important;
++        grid-column: 1 / -1 !important;
++        width: 100% !important;
++        margin-bottom: 0 !important;
++    }
++
++    /* ?? ??2, ??1: ?댁쟾 踰꾪듉 ?? */
++    .thumb-all-nav--prev,
++    .service-nav--prev,
++    .pricing-nav--prev,
++    .news-nav--prev {
++        grid-row: 2 !important;
++        grid-column: 1 !important;
++        position: static !important;
++        transform: none !important;
++        margin: 0 !important;
++        justify-self: start !important;
++    }
++
++    /* ?? ??2, ??2: Dots (以묒븰 ?뺣젹) ?? */
++    .thumb-all-dots,
++    .service-dots,
++    .pricing-dots,
++    .news-dots {
++        grid-row: 2 !important;
++        grid-column: 2 !important;
++        position: static !important;
++        display: flex !important;
++        justify-content: center !important;
++        align-items: center !important;
++        margin: 0 !important;
++        padding: 0 !important;
++    }
++
++    /* ?? ??2, ??3: ?ㅼ쓬 踰꾪듉 ?? */
++    .thumb-all-nav--next,
++    .service-nav--next,
++    .pricing-nav--next,
++    .news-nav--next {
++        grid-row: 2 !important;
++        grid-column: 3 !important;
++        position: static !important;
++        transform: none !important;
++        margin: 0 !important;
++        justify-self: end !important;
++    }
+ }
+ 
+ 

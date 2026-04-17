@@ -1104,6 +1104,32 @@
     opacity: 1;
 }
 
+/* ── PC 전용 팡 섹션 탭 네비게이션 ───────────────── */
+.pc-pang-tabs-wrapper {
+    display: none; /* 모바일 환경에서는 절대 노출 안 함 */
+}
+
+@media (min-width: 769px) {
+    .pc-pang-tabs-wrapper {
+        display: block;
+        padding-top: 0px; 
+        margin-bottom: 20px; /* 섹션 바디와 간격 조절 */
+        position: relative;
+        z-index: 10;
+    }
+    
+    .pang-slide-pc-hidden {
+        display: none !important;
+    }
+
+    /* 팡 섹션 안의 지금 견적 받기 버튼 50% 축소 (모바일엔 영향 없음) */
+    .pang-slide .category-info .btn--primary.btn--small {
+        transform: scale(0.5);
+        transform-origin: left center;
+        margin-top: -10px;
+    }
+}
+
 /* ── PC 환경 팡 섹션 썸네일 캐러셀 (센터 포커스) ───────────────── */
 @media (min-width: 769px) {
     .pang-slide .category-content {
