@@ -1618,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     }
 
     // ── PC 전용 팡 섹션 탭 로직 ──────────────────────────────────────
-    const pcPangTabs = document.querySelectorAll('.pc-pang-tabs-wrapper .portfolio-filter__btn');
+    const pcPangTabs = document.querySelectorAll('.pc-pang-tabs-wrapper .pc-pang-tab-btn');
     const pcPangSections = [
         document.getElementById('meokpang'),
         document.getElementById('nolpang'),
@@ -1637,9 +1637,13 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             tab.addEventListener('click', () => {
                 const targetId = tab.getAttribute('data-target');
                 
-                // 버튼 활성화 상태 토글
-                pcPangTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
+                // 버튼 활성화 상태 토글 (모든 영역의 동일 타겟 탭들을 활성화)
+                pcPangTabs.forEach(t => {
+                    t.classList.remove('active');
+                    if (t.getAttribute('data-target') === targetId) {
+                        t.classList.add('active');
+                    }
+                });
 
                 // 해당되는 팡 섹션만 노출 (클래스 토글)
                 pcPangSections.forEach(sec => {

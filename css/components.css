@@ -1109,6 +1109,32 @@
     display: none; /* 모바일 환경에서는 절대 노출 안 함 */
 }
 
+/* 포트폴리오 탭 클래스(portfolio-filter)와의 간섭 방지용 독립 스타일 */
+.pc-pang-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pc-pang-tab-btn {
+    padding: 12px 40px;
+    border-radius: var(--radius-badge);
+    background: var(--color-bg-card);
+    color: var(--color-text-muted);
+    font-size: 20px;
+    font-weight: var(--fw-semibold);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pc-pang-tab-btn.active,
+.pc-pang-tab-btn:hover {
+    background: var(--color-brand-orange);
+    color: var(--color-text-primary);
+}
+
 @media (min-width: 769px) {
     .pc-pang-tabs-wrapper {
         display: block;
