@@ -719,14 +719,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // css 클래스를 유지하여 배경색 등이 보존되게 함
                     item.className = 'portfolio-carousel-item ' + Array.from(thumb.classList).filter(c => c !== 'category-thumb').join(' ');
                     item.style.cssText = thumb.style.cssText;
-                    
+
                     if (thumb.dataset.color) {
                         item.style.background = thumb.dataset.color;
                     }
                     if (!item.style.background) {
                         item.style.background = 'var(--bg-surface-elevated)';
                     }
-                    
+
                     item.innerHTML = thumb.innerHTML;
                     flatItems.push(item);
                 });
@@ -773,6 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaEl.autoplay = true;
                 mediaEl.playsInline = true;
                 mediaEl.muted = true;
+                mediaEl.volume = 0.3; // 최초 음량 30%
                 mediaEl.style.maxWidth = '100%';
                 mediaEl.style.maxHeight = '90%';
                 mediaEl.style.outline = 'none';
@@ -788,6 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeBtn.style.border = 'none';
             closeBtn.style.fontSize = '35px';
             closeBtn.style.cursor = 'pointer';
+            closeBtn.style.zIndex = '1000'; // 네이티브 컨트롤보다 위에 위치
 
             const unmuteBtn = document.createElement('button');
             unmuteBtn.innerHTML = '<i class="ri-volume-mute-line"></i>';
@@ -799,10 +801,13 @@ document.addEventListener('DOMContentLoaded', () => {
             unmuteBtn.style.border = 'none';
             unmuteBtn.style.fontSize = '30px';
             unmuteBtn.style.cursor = 'pointer';
+            unmuteBtn.style.zIndex = '1000'; // 모바일 클릭 인식을 위한 z-index 추가
 
             if (!isImage) {
+                // 클릭 (및 모바일 터치) 지원
                 unmuteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault(); // 기본 이벤트 방지
                     if (mediaEl.muted) {
                         mediaEl.muted = false;
                         unmuteBtn.innerHTML = '<i class="ri-volume-up-line"></i>';
@@ -814,6 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.appendChild(unmuteBtn);
             }
 
+            // 오버레이에 DOM 추가 (버튼들이 비디오보다 나중에/혹은 z-index로 위로 오게)
             overlay.appendChild(mediaEl);
             overlay.appendChild(closeBtn);
             document.body.appendChild(overlay);
@@ -841,12 +847,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // resetPosition: true=인덱스 0으로 리셋(첫 초기화), false=현재 위치 유지(Supabase 재로드)
-        wrap._reinitItems = function(resetPosition) {
+        wrap._reinitItems = function (resetPosition) {
             if (resetPosition === undefined) resetPosition = true;
 
             items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
             total = items.length;
-            
+
             // 클릭 이벤트만 등록 (onended 자동이동 제거 - 무작위 점프 방지)
             items.forEach((item, i) => {
                 const video = item.querySelector('video');
@@ -880,7 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateCarousel(currentIndex, false);
             }
         };
-        
+
         // 처음 아이템 바인딩 실행 (초기화이므로 0번 인덱스로 설정)
         wrap._reinitItems(true);
 
@@ -939,7 +945,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (total >= 3 && dist > total / 2) dist = total - dist;
 
                 item.classList.remove('is-center', 'is-side', 'is-far');
-                
+
                 const video = item.querySelector('video');
 
                 if (dist === 0) {
@@ -955,7 +961,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     if (dist === 1) item.classList.add('is-side');
                     else item.classList.add('is-far');
-                    
+
                     if (video) {
                         video.pause();
                         video.currentTime = 0; // 배경으로 갈 때 첫 프레임으로 초기화
