@@ -119,56 +119,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
         } else {
-            // ── 데스크톱: 기존 페이지 방식 ──
-            const ITEMS_PER_PAGE = 10;
-            const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-            
-            for (let i = 0; i < totalPages; i++) {
-                const page = document.createElement('div');
-                page.className = 'thumb-all-page portfolio-page';
-                
-                for (let j = 0; j < ITEMS_PER_PAGE; j++) {
-                    const item = filtered[i * ITEMS_PER_PAGE + j];
-                    if (item) {
-                        const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
-                        let mediaTag = '';
-                        
-                        if (item.url) {
-                            const isVid = item.type === 'video' || isVideoUrl(item.url);
-                            mediaTag = isVid 
-                                ? `<video src="${item.url}" muted playsinline loop onmouseenter="this.play()" onmouseleave="this.pause()" preload="metadata" style="${mediaStyle}"></video>`
-                                : `<img src="${item.url}" alt="${item.label}" style="${mediaStyle}">`;
-                        }
-                        
-                        const bgStyle = item.bg ? `background: ${item.bg};` : 'background: var(--bg-surface-elevated);';
+            // ── PC: 그리드 방식 (더보기/초기화 버튼) ──
+            // track을 비우고 더보기 버튼 상태도 초기화한 뒤 PC 그리드 매니저에 위임
+            portfolioTrack.innerHTML = '';
+            portfolioDots.innerHTML = '';
 
-                        page.innerHTML += `
-                            <div class="category-thumb" data-label="${item.label}" data-color="${item.bg || ''}" style="${bgStyle} position:relative; overflow:hidden;">
-                                ${mediaTag}
-                                <div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div>
-                            </div>
-                        `;
-                    }
-                }
-                
-                portfolioTrack.appendChild(page);
-                portfolioDots.innerHTML += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
-            }
-
-            portfolioTrack.style.transition = 'none';
-            portfolioTrack.style.transform = 'translateX(0%)';
-            portfolioWrap.dataset.slideIndex = '0';
-            void portfolioTrack.offsetWidth;
+            // 페이드인 효과
             portfolioTrack.style.opacity = '0';
-            portfolioTrack.style.transition = 'opacity 0.3s ease';
             void portfolioTrack.offsetWidth;
+            portfolioTrack.style.transition = 'opacity 0.3s ease';
             portfolioTrack.style.opacity = '1';
 
-            let currentWrap = document.getElementById('portfolioSlideWrap');
-            if (window.initThumbAllSlide && currentWrap) {
-                const newWrap = currentWrap.cloneNode(true);
-                currentWrap.parentNode.replaceChild(newWrap, currentWrap);
-                window.initThumbAllSlide(newWrap);
+            // 더보기 버튼의 이전 바인딩 상태 초기화 (필터 변경마다 재설정)
+            const moreBtn = document.getElementById('portfolioMoreBtn');
+            if (moreBtn) {
+                // 기존 이벤트 리스너를 제거하기 위해 버튼을 복제·교체
+                const newBtn = moreBtn.cloneNode(true);
+                newBtn.style.display = 'none';
+                newBtn.removeAttribute('data-pc-grid-bound');
+                moreBtn.parentNode.replaceChild(newBtn, moreBtn);
+            }
+
+            // PC 그리드 매니저 호출 (filtered 아이템 기준으로 재렌더링)
+            if (window.initPortfolioPcGrid) {
+                window.initPortfolioPcGrid(filtered);
             }
         }
     }

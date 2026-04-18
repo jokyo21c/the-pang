@@ -172,7 +172,7 @@
                         <div class="category-info">
                             <div class="pang-header-row">
                                 <span class="category-info__icon">🍖</span>
-                                <h3 class="category-info__title"><span>먹팡</span><span class="title-sub">SHORTS</span></h3>
+                                <h3 class="category-info__title"><span>먹팡</span></h3>
                             </div>
                             <p style="color: var(--color-text-secondary);">
                                 음식점·카페·베이커리를 위한 특급 숏츠 광고.<br> 침 넘어가는 영상으로 고객을 끌어모읍니다.
@@ -255,7 +255,7 @@
                 <div class="category-info">
                     <div class="pang-header-row">
                         <span class="category-info__icon">🎮</span>
-                        <h3 class="category-info__title"><span>놀팡</span><span class="title-sub">SHORTS</span></h3>
+                        <h3 class="category-info__title"><span>놀팡</span></h3>
                     </div>
                     <p style="color: var(--color-text-secondary);">
                         키즈카페·방탈출·오락시설의 짜릿한 재미를<br class="mobile-break"> 30초에 담습니다.
@@ -338,7 +338,7 @@
                 <div class="category-info">
                     <div class="pang-header-row">
                         <span class="category-info__icon">🛌</span>
-                        <h3 class="category-info__title"><span>쉼팡</span><span class="title-sub">SHORTS</span></h3>
+                        <h3 class="category-info__title"><span>쉼팡</span></h3>
                     </div>
                     <p style="color: var(--color-text-secondary);">
                         호텔·스파·힐링공간의 고급스러운 분위기를<br class="mobile-break"> 영상으로 전달합니다.
@@ -421,7 +421,7 @@
                 <div class="category-info">
                     <div class="pang-header-row">
                         <span class="category-info__icon">🛍️</span>
-                        <h3 class="category-info__title"><span>살팡</span><span class="title-sub">SHORTS</span></h3>
+                        <h3 class="category-info__title"><span>살팡</span></h3>
                     </div>
                     <p style="color: var(--color-text-secondary);">
                         온라인 쇼핑몰·스마트스토어의 상품을<br class="mobile-break"> 매력적으로 보여줍니다.
@@ -502,7 +502,7 @@
                 <div class="category-info">
                     <div class="pang-header-row">
                         <span class="category-info__icon">💄</span>
-                        <h3 class="category-info__title"><span>멋팡</span><span class="title-sub">SHORTS</span></h3>
+                        <h3 class="category-info__title"><span>멋팡</span></h3>
                     </div>
                     <p style="color: var(--color-text-secondary);">
                         뷰티·패션·헬스 브랜드의 스타일을<br class="mobile-break"> 감각적인 영상으로 표현합니다.
@@ -850,9 +850,8 @@
                 </div>
             </div>
 
-            <div class="text-center portfolio-more-btn-wrap" style="margin-top:40px;">
-                <a href="#portfolio" class="btn btn--purple-outline btn--small">더보기 <i
-                        class="ri-arrow-right-line"></i></a>
+            <div class="text-center portfolio-more-btn-wrap" id="portfolioMoreBtnWrap" style="margin-top:40px;">
+                <button class="btn btn--purple-outline btn--small" id="portfolioMoreBtn" style="display:none;">더보기 <i class="ri-arrow-right-line"></i></button>
             </div>
         </div>
     </section>
@@ -1343,10 +1342,15 @@
 <div class="thumb-modal" id="thumbModal" role="dialog" aria-modal="true">
     <div class="thumb-modal__inner">
         <div class="thumb-modal__content" id="thumbModalContent"></div>
-        <button class="thumb-modal__close" id="thumbModalClose" aria-label="닫기">
-            <i class="ri-close-line"></i>
-        </button>
     </div>
+    <!-- 버튼들을 .inner 밖에 배치: transform/overflow 이슈를 완전 우회 -->
+    <button class="thumb-modal__close" id="thumbModalClose" aria-label="닫기">
+        <i class="ri-close-line"></i>
+    </button>
+    <!-- PC 전용 소리 버튼 -->
+    <button class="thumb-modal__sound" id="thumbModalSound" aria-label="소리" title="소리 토글">
+        <i class="ri-volume-up-line" id="thumbModalSoundIcon"></i>
+    </button>
 </div>
 
 <script>
@@ -1371,7 +1375,7 @@
         const vid = thumb.querySelector('video');
         
         if (vid) {
-            mediaHtml = `<video src="${vid.src}" autoplay controls playsinline style="width:100%;height:100%;object-fit:contain;position:absolute;inset:0;z-index:10;"></video>`;
+            mediaHtml = `<video src="${vid.src}" autoplay muted playsinline style="width:100%;height:100%;object-fit:contain;position:absolute;inset:0;z-index:10;"></video>`;
         } else if (img) {
             mediaHtml = `<img src="${img.src}" style="width:100%;height:100%;object-fit:contain;position:absolute;inset:0;z-index:10;">`;
         } else {
@@ -1387,6 +1391,42 @@
         }
         
         modalContent.innerHTML = mediaHtml;
+
+        const modalVideo = modalContent.querySelector('video');
+        const soundBtn = document.getElementById('thumbModalSound');
+        const soundIcon = document.getElementById('thumbModalSoundIcon');
+
+        if (modalVideo && window.innerWidth > 768) {
+            const isPortfolio = !!thumb.closest('#portfolioTrack, #portfolioSlideWrap');
+
+            if (isPortfolio) {
+                // 포트폴리오: 네이티브 컨트롤 바 사용, 커스텀 소리버튼 숨김
+                // volume을 먼저 설정해야 unmute 시 해당 음량으로 재생됨
+                modalVideo.controls = true;
+                modalVideo.volume = 0.2; // 음소거 해제 시 20% 음량으로 재생
+                modalVideo.muted = true;  // 최초는 음소거 상태로 시작
+                if (soundBtn) soundBtn.style.display = 'none';
+            } else {
+                // 팡 섹션: 커스텀 소리버튼 사용 (컨트론 바 없음)
+                modalVideo.muted = false;
+                modalVideo.volume = 0.2;
+                if (soundBtn) {
+                    soundBtn.style.display = 'flex';
+                    soundIcon.className = 'ri-volume-up-line';
+                    soundBtn.onclick = () => {
+                        if (modalVideo.muted) {
+                            modalVideo.muted = false;
+                            modalVideo.volume = 0.2;
+                            soundIcon.className = 'ri-volume-up-line';
+                        } else {
+                            modalVideo.muted = true;
+                            soundIcon.className = 'ri-volume-mute-line';
+                        }
+                    };
+                }
+            }
+        }
+
         modal.classList.add('open');
         document.body.style.overflow = 'hidden';
     }

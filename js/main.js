@@ -1030,6 +1030,84 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     };
 
+    // ── PC 전용 포트폴리오 그리드 매니저 ─────────────────────────────
+    // PC 환경의 #portfolio 섹션에서만 동작. 모바일/팡 섹션과 완전히 독립.
+    window.initPortfolioPcGrid = function (allItems) {
+        if (window.innerWidth <= 768) return; // PC 전용
+
+        const track = document.getElementById('portfolioTrack');
+        const moreBtn = document.getElementById('portfolioMoreBtn');
+        if (!track || !moreBtn) return;
+
+        const COLS = 5;
+        const INITIAL_ROWS = 2;
+        const PAGE_SIZE = COLS;       // 더보기 1회당 1행(5개) 추가
+        const INITIAL_COUNT = COLS * INITIAL_ROWS; // 10개
+        const mediaStyle = 'width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit;z-index:1;';
+
+        // grid 아이템 HTML 생성 헬퍼
+        function makeItemHtml(item, idx) {
+            let url = item.media_url || item.url || '';
+            const isVid = item.media_type === 'video' || _isVideoUrl(url);
+            if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
+            const mediaTag = isVid
+                ? `<video src="${url}" muted loop playsinline webkit-playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
+                : `<img src="${url}" alt="포트폴리오 #${idx + 1}" style="${mediaStyle}">`;
+            return `<div class="portfolio-grid-item" style="background:var(--bg-surface-elevated);position:relative;overflow:hidden;border-radius:var(--radius-card);cursor:pointer;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
+        }
+
+        let shownCount = 0;
+
+        // 표시된 아이템 수 기준으로 track을 다시 렌더링
+        function renderGrid(count) {
+            const sliceItems = allItems.slice(0, count);
+            // track을 flex wrap 모드로 사용 (CSS에서 설정)
+            track.innerHTML = sliceItems.map((item, i) => makeItemHtml(item, i)).join('');
+            shownCount = count;
+        }
+
+        // 더보기/초기화 버튼 가시성 업데이트
+        function updateMoreBtn() {
+            if (allItems.length <= INITIAL_COUNT) {
+                // 전체 아이템이 10개 이하이면 버튼 숨김
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            if (shownCount >= allItems.length) {
+                // 모든 아이템이 표시됨 → 초기화 버튼으로 전환
+                moreBtn.style.display = 'inline-flex';
+                moreBtn.innerHTML = '초기화 <i class="ri-refresh-line"></i>';
+                moreBtn.dataset.mode = 'reset';
+            } else {
+                // 아직 더 있음 → 더보기 버튼
+                moreBtn.style.display = 'inline-flex';
+                moreBtn.innerHTML = '더보기 <i class="ri-arrow-right-line"></i>';
+                moreBtn.dataset.mode = 'more';
+            }
+        }
+
+        // 버튼 이벤트 (중복 등록 방지)
+        if (!moreBtn.dataset.pcGridBound) {
+            moreBtn.dataset.pcGridBound = 'true';
+            moreBtn.addEventListener('click', () => {
+                if (moreBtn.dataset.mode === 'reset') {
+                    // 초기화: 처음 10개로 되돌림
+                    renderGrid(INITIAL_COUNT);
+                } else {
+                    // 더보기: 5개씩 추가
+                    const nextCount = Math.min(shownCount + PAGE_SIZE, allItems.length);
+                    renderGrid(nextCount);
+                }
+                updateMoreBtn();
+            });
+        }
+
+        // 최초 렌더링 (10개)
+        renderGrid(Math.min(INITIAL_COUNT, allItems.length));
+        updateMoreBtn();
+    };
+
     async function loadPortfolioFromSupabase() {
         try {
             const categories = {
@@ -1076,39 +1154,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     track.innerHTML = trackHtml;
                     dotsContainer.innerHTML = ''; // initPortfolioCarousel에서 생성
-                } else {
-                    // 데스크톱 (팡 섹션 제외): 기존 페이지 방식
-                    let trackHtml = '';
-                    let dotsHtml = '';
-                    const itemsPerPage = 2;
-                    const totalPages = Math.ceil(catItems.length / itemsPerPage);
-
-                    for (let i = 0; i < totalPages; i++) {
-                        let pageHtml = '<div class="thumb-all-page">';
-                        for (let j = 0; j < itemsPerPage; j++) {
-                            const idx = i * itemsPerPage + j;
-                            if (idx < catItems.length) {
-                                let url = catItems[idx].media_url;
-                                const isVid = catItems[idx].media_type === 'video' || _isVideoUrl(url);
-                                if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
-                                const mediaTag = isVid
-                                    ? `<video src="${url}" muted loop playsinline webkit-playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
-                                    : `<img src="${url}" alt="${catName} #${idx + 1}" style="${mediaStyle}">`;
-                                pageHtml += `<div class="category-thumb" data-label="${catName} #${idx + 1}" style="background:var(--bg-surface-elevated); position:relative; overflow:hidden;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
-                            }
-                        }
-                        pageHtml += '</div>';
-                        trackHtml += pageHtml;
-                        dotsHtml += `<span class="thumb-all-dot ${i === 0 ? 'active' : ''}"></span>`;
-                    }
-                    track.innerHTML = trackHtml;
-                    dotsContainer.innerHTML = dotsHtml;
-                }
+                } // (팡 섹션 데스크톱 분기는 센터 캐러셀로 이미 처리됨)
             });
 
-            // 슬라이더 재초기화 (모바일/데스크톱 분기, 팡 섹션은 항상 센터 포커스)
+            // PC 포트폴리오 섹션 전용 그리드 렌더링 (팡 섹션과 별개)
+            if (window.innerWidth > 768) {
+                window.initPortfolioPcGrid(items); // 전체 아이템(카테고리 미분류) 전달
+            }
+
+            // 슬라이더 재초기화 (모바일/팡 섹션만 — PC 포트폴리오 섹션 제외)
             document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
                 const isPang = wrap.closest('.pang-slide') !== null;
+                const isPortfolioSection = wrap.id === 'portfolioSlideWrap';
+                if (isPortfolioSection && window.innerWidth > 768) return; // PC 포트폴리오는 그리드로 처리
                 if (window.innerWidth <= 768 || isPang) {
                     window.initPortfolioCarousel(wrap);
                 } else {
@@ -1123,9 +1181,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Supabase에서 비동기 로드 (기본 썸네일은 HTML에 유지)
     loadPortfolioFromSupabase();
 
-    // Initialize all existing sliders (모바일/데스크톱 분기)
+    // Initialize all existing sliders (모바일/데스크톱 분기 — PC 포트폴리오 섹션 제외)
     document.querySelectorAll('.thumb-all-wrap').forEach(wrap => {
         const isPangSection = wrap.closest('.pang-slide') !== null;
+        const isPortfolioSection = wrap.id === 'portfolioSlideWrap';
+        // PC 환경의 #portfolio 섹션은 그리드 방식으로 처리 (Supabase 로드 후 initPortfolioPcGrid 호출)
+        if (isPortfolioSection && window.innerWidth > 768) return;
         if (window.innerWidth <= 768 || isPangSection) {
             window.initPortfolioCarousel(wrap);
         } else {
