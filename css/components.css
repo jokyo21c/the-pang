@@ -1771,12 +1771,12 @@
 }
 
 .pricing-card {
-    background: var(--color-bg-card);
+    background: #1c1c21; /* 전체 배경보다 조금 더 밝게 하여 카드 구분 */
     border-radius: var(--radius-card);
     padding: 36px 28px;
     position: relative;
     transition: var(--transition);
-    border: 2px solid transparent;
+    border: none;
     display: flex;
     flex-direction: column;
 }
@@ -1786,12 +1786,9 @@
 }
 
 .pricing-card--starter {
-    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .pricing-card--standard {
-    border-color: var(--color-brand-purple);
-    box-shadow: var(--shadow-purple);
 }
 
 .pricing-card--standard:hover {
@@ -1799,12 +1796,10 @@
 }
 
 .pricing-card--premium {
-    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .pricing-card--enterprise {
-    border-color: var(--color-brand-orange);
-    background: linear-gradient(135deg, #1A1A1A, #2A1A3A);
+    background: linear-gradient(135deg, #44184a, #20133b); /* PANG-X 더 두드러지게 강조 */
 }
 
 .pricing-card__badge {
@@ -1834,13 +1829,13 @@
     font-family: var(--font-en);
     font-size: 20px;
     font-weight: var(--fw-bold);
-    color: var(--color-text-primary);
+    color: #ffffff;
     margin-bottom: 4px;
 }
 
 .pricing-card__tier {
     font-size: 13px;
-    color: var(--color-text-muted);
+    color: #ffffff;
     margin-bottom: 20px;
 }
 
@@ -1848,22 +1843,17 @@
     font-family: var(--font-en);
     font-size: 32px;
     font-weight: var(--fw-bold);
-    color: var(--color-text-primary);
+    color: #ffffff;
     margin-bottom: 4px;
 }
 
 .pricing-card--standard .pricing-card__price {
-    color: var(--color-brand-purple);
     font-size: 36px;
-}
-
-.pricing-card--enterprise .pricing-card__price {
-    color: var(--color-brand-orange);
 }
 
 .pricing-card__period {
     font-size: 13px;
-    color: var(--color-text-muted);
+    color: #ffffff;
     margin-bottom: 24px;
 }
 
@@ -1873,12 +1863,12 @@
 
 .pricing-card__features li {
     font-size: 14px;
-    color: var(--color-text-secondary);
+    color: #ffffff;
     padding: 8px 0;
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .pricing-card__features li:last-child {
