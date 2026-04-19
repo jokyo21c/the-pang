@@ -745,8 +745,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const MAX_DOTS = 5;
 
         // 풀스크린(확장) 오버레이 생성 함수
-        function openFullscreenMedia(src, isImage = false) {
+        window.openFullscreenMedia = function(src, isImage = false, originalVideoEl = null) {
+            // 이전 모달이 남아있는 현상(더블클릭 등)을 방지하기 위해 강제 클리어
+            document.querySelectorAll('.pang-fullscreen-overlay').forEach(el => el.remove());
+
             const overlay = document.createElement('div');
+            overlay.className = 'pang-fullscreen-overlay';
             overlay.style.position = 'fixed';
             overlay.style.top = '0';
             overlay.style.left = '0';
@@ -877,8 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 기존 캐러셀의 해당 비디오는 잠시 일시정지
             if (!isImage) {
-                const currentOriginalVideo = items[currentIndex].querySelector('video');
-                if (currentOriginalVideo) currentOriginalVideo.pause();
+                if (originalVideoEl) originalVideoEl.pause();
             }
 
             const closeOverlay = () => {
@@ -886,8 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.remove();
                 // 닫을 때 기존 캐러셀 비디오 다시 재생
                 if (!isImage) {
-                    const currentOriginalVideo = items[currentIndex].querySelector('video');
-                    if (currentOriginalVideo) currentOriginalVideo.play().catch(e => console.warn(e));
+                    if (originalVideoEl) originalVideoEl.play().catch(e => console.warn(e));
                 }
             };
 
@@ -913,7 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (currentIndex === i) {
                         // 중앙 아이템 클릭 시 풀스크린 오버레이 열기
                         const src = video ? video.src : (item.querySelector('img') ? item.querySelector('img').src : null);
-                        if (src) openFullscreenMedia(src, !video);
+                        if (src) window.openFullscreenMedia(src, !video, video);
                     } else {
                         // 중앙이 아닌 배경 아이템을 클릭하면 중앙으로 이동
                         updateCarousel(i);
@@ -1116,7 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 빈 URL일때 깨진 이미지 방지 및 category-thumb 클래스 추가로 hover 효과(overlay) 연동
             // 부모(.portfolio-grid-item)에 pointer-events를 온전히 받게 하고 hover시 비디오 재생/정지
-            return `<div class="portfolio-grid-item category-thumb" style="background:${bgStyle};position:relative;overflow:hidden;border-radius:var(--radius-card);cursor:pointer;" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }">
+            return `<div class="portfolio-grid-item category-thumb" style="background:${bgStyle};position:relative;overflow:hidden;border-radius:var(--radius-card);cursor:pointer;" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }" onclick="event.stopPropagation(); const v=this.querySelector('video'); const url=v?v.src:(this.querySelector('img')?this.querySelector('img').src:null); if(url) window.openFullscreenMedia(url, !v, v);">
                 ${mediaTag}
                 <div class="category-thumb__overlay" style="z-index:2; pointer-events:none;"><i class="ri-play-circle-line"></i></div>
             </div>`;
