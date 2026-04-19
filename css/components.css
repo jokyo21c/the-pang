@@ -878,8 +878,24 @@
     font-size: 112px;
     margin-bottom: 0px;
     line-height: 1;
-    /* 아이콘 주변 불필요한 공백 제거 */
     display: block;
+}
+
+/* Image Icon Styling */
+.category-info__icon img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    display: block;
+    border-radius: 20%;
+}
+
+@media (min-width: 769px) {
+    .category-info__icon img {
+        width: 112px;
+        height: 112px;
+        border-radius: 20%;
+    }
 }
 
 .category-info__title {
@@ -919,6 +935,20 @@
 
 .pang-next-preview.mobile-only {
     display: none;
+}
+
+.pang-next-preview__icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+.pang-next-preview__icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: 20%;
 }
 
 /* PC 환경 먹팡(첫번째 팡) 섹션만 아이콘과 텍스트가 우측으로 치우쳐보이는 현상 보정 */

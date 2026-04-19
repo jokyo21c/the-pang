@@ -178,9 +178,20 @@ async function handleHeroMediaFile(file) {
     showToast('히어로 미디어 업로드 중...');
 
     try {
-        // Supabase Storage에 업로드
-        const result = await AdminStorage.uploadFile(file, 'hero');
-        const type = file.type.startsWith('image/') ? 'image' : 'video';
+        let result;
+        const isVideo = file.type.startsWith('video/');
+
+        if (isVideo && AdminStorage.uploadFileWithProgress) {
+            // 영상: 진행률 표시 업로드 (Bunny.net XHR)
+            result = await AdminStorage.uploadFileWithProgress(file, 'hero', (percent) => {
+                showToast(`히어로 영상 업로드 중... ${percent}%`);
+            });
+        } else {
+            // 이미지: 일반 업로드 (Bunny.net fetch)
+            result = await AdminStorage.uploadFile(file, 'hero');
+        }
+
+        const type = isVideo ? 'video' : 'image';
 
         content.hero.media = { type, url: result.url, path: result.path };
         renderHeroMediaPreview(content.hero.media);
@@ -316,8 +327,18 @@ async function processPortfolioFiles(files, category) {
 
     for (const file of fileArray) {
         try {
-            // Supabase Storage에 업로드
-            const result = await AdminStorage.uploadFile(file, `portfolio/${category}`);
+            let result;
+            const isVideo = file.type.startsWith('video/');
+
+            if (isVideo && AdminStorage.uploadFileWithProgress) {
+                // 영상: 진행률 표시 업로드 (Bunny.net XHR)
+                result = await AdminStorage.uploadFileWithProgress(file, `portfolio/${category}`, (percent) => {
+                    showToast(`영상 업로드 중... ${percent}% (${uploadedCount + 1}/${totalFiles})`);
+                });
+            } else {
+                // 이미지: 일반 업로드 (Bunny.net fetch)
+                result = await AdminStorage.uploadFile(file, `portfolio/${category}`);
+            }
 
             // DB에 항목 추가
             const dbItem = await AdminContent.addPortfolioItem(category, result.url, result.type);
