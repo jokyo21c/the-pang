@@ -764,7 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaEl = document.createElement('img');
                 mediaEl.src = src;
                 mediaEl.style.maxWidth = '100%';
-                mediaEl.style.maxHeight = '90%';
+                mediaEl.style.maxHeight = '90vh';
                 mediaEl.style.objectFit = 'contain';
             } else {
                 mediaEl = document.createElement('video');
@@ -775,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaEl.muted = true;
                 mediaEl.volume = 0.2; // 최초 음량 20%
                 mediaEl.style.maxWidth = '100%';
-                mediaEl.style.maxHeight = '90%';
+                mediaEl.style.maxHeight = '90vh';
                 mediaEl.style.outline = 'none';
             }
 
@@ -816,12 +816,47 @@ document.addEventListener('DOMContentLoaded', () => {
                         unmuteBtn.innerHTML = '<i class="ri-volume-mute-line"></i>';
                     }
                 });
-                overlay.appendChild(unmuteBtn);
+            }
+
+            const isPc = window.innerWidth > 768;
+            if (isPc) {
+                const wrap = document.createElement('div');
+                wrap.style.position = 'relative';
+                wrap.style.display = 'inline-block';
+                
+                // 확대영상 화면이 끝나는 우측 바로 옆(바깥쪽)으로 위치를 변경
+                [closeBtn, unmuteBtn].forEach(btn => {
+                    btn.style.background = 'rgba(255,255,255,0.06)'; // 검증된 어두운 배경(overlay)에서 은은하게 보이도록 세팅
+                    btn.style.borderRadius = '50%';
+                    btn.style.width = '44px';
+                    btn.style.height = '44px';
+                    btn.style.display = 'flex';
+                    btn.style.justifyContent = 'center';
+                    btn.style.alignItems = 'center';
+                    btn.style.transition = 'background 0.2s';
+                    btn.onmouseenter = () => btn.style.background = 'rgba(255,255,255,0.15)';
+                    btn.onmouseleave = () => btn.style.background = 'rgba(255,255,255,0.06)';
+                });
+                
+                closeBtn.style.fontSize = '30px';
+                closeBtn.style.top = '0px';
+                closeBtn.style.right = '-60px'; // 영상 바깥 우측으로 밀어냄
+                
+                unmuteBtn.style.fontSize = '24px';
+                unmuteBtn.style.top = '54px';  // 닫기 버튼 아래 간격 유지
+                unmuteBtn.style.right = '-60px';
+
+                wrap.appendChild(mediaEl);
+                wrap.appendChild(closeBtn);
+                if (!isImage) wrap.appendChild(unmuteBtn);
+                overlay.appendChild(wrap);
+            } else {
+                if (!isImage) overlay.appendChild(unmuteBtn);
+                overlay.appendChild(mediaEl);
+                overlay.appendChild(closeBtn);
             }
 
             // 오버레이에 DOM 추가 (버튼들이 비디오보다 나중에/혹은 z-index로 위로 오게)
-            overlay.appendChild(mediaEl);
-            overlay.appendChild(closeBtn);
             document.body.appendChild(overlay);
 
             // 기존 캐러셀의 해당 비디오는 잠시 일시정지
