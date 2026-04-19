@@ -928,17 +928,17 @@
 }
 
 .pang-next-preview__icon {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 24px;
     height: 24px;
+    color: #ffffff;
 }
 
-.pang-next-preview__icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-    border-radius: 20%;
+.pang-next-preview__icon i {
+    font-size: 24px;
+    line-height: 1;
 }
 
 /* PC 환경 먹팡(첫번째 팡) 섹션만 아이콘과 텍스트가 우측으로 치우쳐보이는 현상 보정 */
