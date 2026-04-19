@@ -1050,10 +1050,24 @@ document.addEventListener('DOMContentLoaded', () => {
             let url = item.media_url || item.url || '';
             const isVid = item.media_type === 'video' || _isVideoUrl(url);
             if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
-            const mediaTag = isVid
-                ? `<video src="${url}" muted loop playsinline webkit-playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()" style="${mediaStyle}"></video>`
-                : `<img src="${url}" alt="포트폴리오 #${idx + 1}" style="${mediaStyle}">`;
-            return `<div class="portfolio-grid-item" style="background:var(--bg-surface-elevated);position:relative;overflow:hidden;border-radius:var(--radius-card);cursor:pointer;">${mediaTag}<div class="category-thumb__overlay" style="z-index:2;"><i class="ri-play-circle-line"></i></div></div>`;
+            
+            // bg 렌더링 수정: 기본값은 회색계열 배경
+            const bgStyle = item.bg ? item.bg : 'var(--color-bg-subtle, #222)';
+
+            let mediaTag = '';
+            if (url) {
+                // preload="auto" 추가 및 video 자체의 onmouseenter 제거 (부모 div에서 제어)
+                mediaTag = isVid
+                    ? `<video src="${url}" muted loop playsinline webkit-playsinline preload="auto" style="${mediaStyle}"></video>`
+                    : `<img src="${url}" alt="포트폴리오 #${idx + 1}" style="${mediaStyle}">`;
+            }
+
+            // 빈 URL일때 깨진 이미지 방지 및 category-thumb 클래스 추가로 hover 효과(overlay) 연동
+            // 부모(.portfolio-grid-item)에 pointer-events를 온전히 받게 하고 hover시 비디오 재생/정지
+            return `<div class="portfolio-grid-item category-thumb" style="background:${bgStyle};position:relative;overflow:hidden;border-radius:var(--radius-card);cursor:pointer;" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }">
+                ${mediaTag}
+                <div class="category-thumb__overlay" style="z-index:2; pointer-events:none;"><i class="ri-play-circle-line"></i></div>
+            </div>`;
         }
 
         let shownCount = 0;
