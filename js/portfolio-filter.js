@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isVideoUrl = (url) => {
         if (!url) return false;
         if (url.startsWith('data:video/')) return true;
-        if (/\.(mp4|webm|ogg|mov|avi)(\?.*)?$/i.test(url)) return true;
+        if (/\.(mp4|webm|ogg|mov|avi)([\?\#].*)?$/i.test(url)) return true;
         return false;
     };
 

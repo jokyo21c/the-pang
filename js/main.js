@@ -1026,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const _isVideoUrl = (url) => {
         if (!url) return false;
         if (url.startsWith('data:video/')) return true;
-        if (/\.(mp4|webm|ogg|mov|avi)(\?.*)?$/i.test(url)) return true;
+        if (/\.(mp4|webm|ogg|mov|avi)([\?\#].*)?$/i.test(url)) return true;
         return false;
     };
 
@@ -1048,7 +1048,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // grid 아이템 HTML 생성 헬퍼
         function makeItemHtml(item, idx) {
             let url = item.media_url || item.url || '';
-            const isVid = item.media_type === 'video' || _isVideoUrl(url);
+            const mType = item.media_type || item.type;
+            const isVid = mType === 'video' || _isVideoUrl(url);
             if (isVid && url && !url.includes('#t=')) url += '#t=0.001';
             
             // bg 렌더링 수정: 기본값은 회색계열 배경
