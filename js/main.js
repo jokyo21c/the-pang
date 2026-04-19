@@ -1847,6 +1847,67 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         });
     }
 
+    // ── 외부 접근용 글로벌 팡 네비게이션 함수 (푸터, 기타 외부 링크용) ──
+    // PC: 탭 전환 + 스크롤, 모바일: 슬라이드 이동 + 스크롤
+    window.navigateToPang = function(pangId) {
+        const pangIdMap = ['meokpang', 'nolpang', 'swimpang', 'salpang', 'meotpang'];
+        const slideIndex = pangIdMap.indexOf(pangId);
+        if (slideIndex === -1) return;
+
+        if (window.innerWidth > 768) {
+            // PC: 탭 전환 로직
+            const pcPangTabs = document.querySelectorAll('.pc-pang-tabs-wrapper .pc-pang-tab-btn');
+            pcPangTabs.forEach(t => {
+                t.classList.remove('active');
+                if (t.getAttribute('data-target') === pangId) t.classList.add('active');
+            });
+            const pcPangSections = ['meokpang','nolpang','swimpang','salpang','meotpang'].map(id => document.getElementById(id));
+            pcPangSections.forEach(sec => {
+                if (sec) {
+                    if (sec.id === pangId) sec.classList.remove('pang-slide-pc-hidden');
+                    else sec.classList.add('pang-slide-pc-hidden');
+                }
+            });
+            // 사이드바 동기화
+            document.querySelectorAll('.floating-sidebar__link').forEach(link => {
+                if (!link.closest('.floating-sidebar__item--kakao')) {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${pangId}`) link.classList.add('active');
+                }
+            });
+            setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
+            // 팡 슬라이더 영역으로 스크롤
+            const sliderNode = document.getElementById('pangSectionSlider');
+            if (sliderNode) {
+                const top = sliderNode.getBoundingClientRect().top + window.pageYOffset - 70;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        } else {
+            // 모바일: 슬라이드 이동 로직
+            const track = document.getElementById('pangSliderTrack');
+            const slider = document.getElementById('pangSectionSlider');
+            if (track) {
+                track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
+                track.style.transform = `translateX(-${slideIndex * 20}%)`;
+                // dot 동기화
+                document.querySelectorAll('.pang-nav-dot').forEach(dot => {
+                    dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === slideIndex);
+                });
+                // 사이드바 동기화
+                document.querySelectorAll('.floating-sidebar__link[href^="#"]').forEach(link => {
+                    if (link.closest('.floating-sidebar__item--kakao')) return;
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${pangId}`) link.classList.add('active');
+                });
+            }
+            // 팡 슬라이더 영역으로 스크롤
+            if (slider) {
+                const top = slider.getBoundingClientRect().top + window.pageYOffset - 70;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        }
+    };
+
     renderDynamicFooter();
 });
 
