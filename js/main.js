@@ -88,12 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="testimonial-card__photo">
                                     <img src="${t.photo || 'https://picsum.photos/seed/pang1/200/200'}" alt="${t.author || ''}">
                                 </div>
-                                <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:20px;">${'★'.repeat(t.stars || 5)}</div>
-                                <p class="testimonial-card__text">"${t.text || ''}"</p>
-                                <div class="testimonial-card__footer">
-                                    <div class="testimonial-card__info">
-                                        <p class="testimonial-card__author">${t.author || ''}</p>
-                                        <span class="testimonial-card__badge" style="background:${t.badge_color || 'var(--color-brand-purple)'}">${t.badge || ''}</span>
+                                <div class="testimonial-card__content">
+                                    <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:20px;">${'★'.repeat(t.stars || 5)}</div>
+                                    <p class="testimonial-card__text">"${t.text || ''}"</p>
+                                    <div class="testimonial-card__footer">
+                                        <div class="testimonial-card__info">
+                                            <p class="testimonial-card__author">${t.author || ''}</p>
+                                            <span class="testimonial-card__badge" style="background:${t.badge_color || 'var(--color-brand-purple)'}">${t.badge || ''}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
