@@ -819,14 +819,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const isPc = window.innerWidth > 768;
+
+            const wrap = document.createElement('div');
+            wrap.style.position = 'relative';
+            wrap.style.display = 'inline-block';
+
             if (isPc) {
-                const wrap = document.createElement('div');
-                wrap.style.position = 'relative';
-                wrap.style.display = 'inline-block';
-                
-                // 확대영상 화면이 끝나는 우측 바로 옆(바깥쪽)으로 위치를 변경
+                // PC: 확대영상 화면이 끝나는 우측 바로 옆(바깥쪽)으로 위치를 변경
                 [closeBtn, unmuteBtn].forEach(btn => {
-                    btn.style.background = 'rgba(255,255,255,0.06)'; // 검증된 어두운 배경(overlay)에서 은은하게 보이도록 세팅
+                    btn.style.background = 'rgba(255,255,255,0.06)';
                     btn.style.borderRadius = '50%';
                     btn.style.width = '44px';
                     btn.style.height = '44px';
@@ -845,16 +846,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 unmuteBtn.style.fontSize = '24px';
                 unmuteBtn.style.top = '54px';  // 닫기 버튼 아래 간격 유지
                 unmuteBtn.style.right = '-60px';
-
-                wrap.appendChild(mediaEl);
-                wrap.appendChild(closeBtn);
-                if (!isImage) wrap.appendChild(unmuteBtn);
-                overlay.appendChild(wrap);
             } else {
-                if (!isImage) overlay.appendChild(unmuteBtn);
-                overlay.appendChild(mediaEl);
-                overlay.appendChild(closeBtn);
+                // 모바일: 영상 영역 안쪽 우측 상단에 배치
+                [closeBtn, unmuteBtn].forEach(btn => {
+                    btn.style.background = 'rgba(0,0,0,0.5)';
+                    btn.style.borderRadius = '50%';
+                    btn.style.width = '40px';
+                    btn.style.height = '40px';
+                    btn.style.display = 'flex';
+                    btn.style.justifyContent = 'center';
+                    btn.style.alignItems = 'center';
+                });
+                
+                closeBtn.style.fontSize = '24px';
+                closeBtn.style.top = '10px';
+                closeBtn.style.right = '10px';
+                
+                unmuteBtn.style.fontSize = '20px';
+                unmuteBtn.style.top = '60px';
+                unmuteBtn.style.right = '10px';
             }
+
+            wrap.appendChild(mediaEl);
+            wrap.appendChild(closeBtn);
+            if (!isImage) wrap.appendChild(unmuteBtn);
+            overlay.appendChild(wrap);
 
             // 오버레이에 DOM 추가 (버튼들이 비디오보다 나중에/혹은 z-index로 위로 오게)
             document.body.appendChild(overlay);
