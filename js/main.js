@@ -1708,7 +1708,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             const contactUl = document.querySelector('.footer__contact');
             if (contactUl && f.contact) {
                 contactUl.innerHTML = `
-                    <li><i class="ri-kakao-talk-fill"></i> ${f.contact.kakao || ''}</li>
+                    <li><a href="https://pf.kakao.com/_CCxcCX" target="_blank"><i class="ri-kakao-talk-fill"></i> ${f.contact.kakao || '카카오톡 채널'}</a></li>
                     <li><i class="ri-mail-line"></i> <a href="mailto:${f.contact.email}" style="color:inherit;">${f.contact.email || ''}</a></li>
                     <li><i class="ri-time-line"></i> ${f.contact.time || ''}</li>
                 `;

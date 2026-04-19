@@ -34,7 +34,7 @@ const DEFAULT_CONTENT = {
             { label: '공지사항', url: '#' }
         ],
         contact: {
-            kakao: '카카오톡 채널',
+            kakao: 'https://pf.kakao.com/_CCxcCX',
             email: 'hello@thepang.kr',
             time: '평일 09:00-18:00'
         }
