@@ -406,10 +406,16 @@
     /* ── 모바일: 아이콘 + 제목 가로 배치 헤더 ─── */
     /* pang-slide 안의 category-info만 적용 */
     .pang-slide .category-info__icon {
-        font-size: 90px;   /* 기존 112px 대비 약 20% 축소 */
         margin-bottom: 0;
         flex-shrink: 0;
         line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pang-slide .category-info__icon i {
+        font-size: 26px; /* Matches mobile title font-size */
     }
 
     /* 아이콘과 제목을 묶는 가로 flex 헤더 래퍼 */

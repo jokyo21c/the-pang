@@ -875,28 +875,18 @@
 }
 
 .category-info__icon {
-    font-size: 112px;
-    margin-bottom: 0px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
-    display: block;
 }
 
-/* Image Icon Styling */
-.category-info__icon img {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    display: block;
-    border-radius: 20%;
+.category-info__icon i {
+    font-size: 56px; /* Matches title text size */
+    color: #ffffff;
 }
 
-@media (min-width: 769px) {
-    .category-info__icon img {
-        width: 112px;
-        height: 112px;
-        border-radius: 20%;
-    }
-}
+/* Remove old image icon styling as it's no longer used */
 
 .category-info__title {
     font-size: 56px;
