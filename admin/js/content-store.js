@@ -14,7 +14,40 @@ const DEFAULT_CONTENT = {
         ctaText: '무료 상담 신청',
         ctaSubText: '지금 시작하기',
     },
-    testimonials: [],
+    testimonials: [
+        {
+            stars: 5,
+            text: "먹팡 촬영 후 매출이 30% 올랐어요. 영상 퀄리티가 정말 미쳤습니다. 강력 추천합니다!",
+            author: "강남 OO 레스토랑 사장님",
+            badge: "먹팡",
+            badgeColor: "rgba(230,57,70,0.15)",
+            photo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop"
+        },
+        {
+            stars: 5,
+            text: "이렇게 결과물이 좋을 줄 몰랐어요. 틱톡에서 조회수 50만 찍었습니다. 가성비 최고!",
+            author: "홍대 OO 카페 대표님",
+            badge: "먹팡",
+            badgeColor: "rgba(230,57,70,0.15)",
+            photo: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=600&auto=format&fit=crop"
+        },
+        {
+            stars: 5,
+            text: "전담 PD가 친절하고 빠르게 납품해줘서 대만족입니다. 다음 달도 또 맡기려고요!",
+            author: "판교 OO 네일샵 원장님",
+            badge: "멋팡",
+            badgeColor: "rgba(123,47,255,0.12)",
+            photo: "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=600&auto=format&fit=crop"
+        },
+        {
+            stars: 5,
+            text: "VR체험 영상이 숏츠에서 터지면서 주말 예약이 3배나 늘었어요. THE PANG 없이는 못합니다!",
+            author: "잠실 OO 체험관 대표님",
+            badge: "놀팡",
+            badgeColor: "rgba(123,47,255,0.15)",
+            photo: "https://images.unsplash.com/photo-1592478411210-911b3bc2b9c7?q=80&w=600&auto=format&fit=crop"
+        }
+    ],
     pricing: [],
     portfolio: {
         meokpang: [],

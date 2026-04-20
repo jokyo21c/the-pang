@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="testimonial-card">
                             <div class="testimonial-card__inner">
                                 <div class="testimonial-card__photo">
-                                    <img src="${t.photo || `images/testimonials/testi${(i % 4) + 1}.png`}" alt="${t.author || ''}">
+                                    <img src="${t.photo || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop'}" alt="${t.author || ''}">
                                 </div>
                                 <div class="testimonial-card__content">
                                     <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:20px;">${'★'.repeat(t.stars || 5)}</div>

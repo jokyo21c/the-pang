@@ -387,37 +387,57 @@ async function removePortfolioItem(category, index, itemId) {
 function renderTestimonialEditor() {
     const container = document.getElementById('testimonial-editor');
     container.innerHTML = content.testimonials.map((t, i) => `
-        <div class="testimonial-item">
-            <div style="font-size:13px;font-weight:600;color:var(--text-secondary);
-                        margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
-                후기 ${i + 1}
+        <div class="testimonial-item editor-card" style="position:relative; margin-bottom: 20px;">
+            <div style="font-size:14px;font-weight:700;color:var(--text-primary);
+                        margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);
+                        display:flex; justify-content:space-between; align-items:center;">
+                <span>💬 후기 ${i + 1}</span>
+                <button class="btn-remove-media" style="position:static; padding: 4px 8px; border-radius: 4px; background: rgba(239,68,68,0.1); color: #ef4444;" onclick="removeTestimonialEditor(${i})" title="삭제">
+                    <i class="ri-delete-bin-line"></i> 삭제
+                </button>
             </div>
+            
             <div class="editor-row">
-                <label>사진 URL (1:1 비율 권장)</label>
-                <input type="url" class="form-control" id="testi-photo-${i}" value="${t.photo || t.photo_url || ''}">
+                <label>고객 사진 (정방형 권장)</label>
+                <div style="display:flex; gap:16px; align-items:flex-start;">
+                     <div style="flex-shrink:0; position:relative;">
+                         <img src="${t.photo || t.photo_url || ''}" style="width:100px;height:100px;border-radius:8px;object-fit:cover;border:1px solid var(--border); background: var(--bg-secondary); display: ${t.photo || t.photo_url ? 'block' : 'none'};" id="testi-preview-${i}" onerror="this.style.display='none'">
+                         ${!(t.photo || t.photo_url) ? `<div style="width:100px;height:100px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:24px;" id="testi-empty-${i}"><i class="ri-image-add-line"></i></div>` : ''}
+                     </div>
+                     <div style="flex-grow:1;">
+                         <input type="url" class="form-control" id="testi-photo-${i}" value="${t.photo || t.photo_url || ''}" placeholder="이미지 URL 직접 입력 또는 파일 업로드" style="margin-bottom: 8px;">
+                         <label class="btn-preview" style="display:inline-flex; align-items:center; gap:4px; padding:8px 12px; border-radius:6px; cursor:pointer; background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-primary); font-size:13px; font-weight:500;">
+                             <i class="ri-upload-cloud-2-line"></i> 직접 사진 업로드
+                             <input type="file" accept="image/*" hidden onchange="handleTestimonialUpload(event, ${i})">
+                         </label>
+                     </div>
+                </div>
             </div>
-            <div style="margin-bottom:16px;">
-                <img src="${t.photo || t.photo_url || ''}" style="width:224px;height:224px;border-radius:10px;object-fit:cover;border:1px solid var(--border);"
-                     id="testi-preview-${i}" onerror="this.style.display='none'">
-            </div>
+            
             <div class="editor-row">
                 <label>별점 (1~5)</label>
                 <input type="number" class="form-control" id="testi-stars-${i}" value="${t.stars || 5}" min="1" max="5">
             </div>
             <div class="editor-row">
                 <label>후기 내용</label>
-                <textarea class="form-control" id="testi-text-${i}" rows="4">${t.text}</textarea>
+                <textarea class="form-control" id="testi-text-${i}" rows="3">${t.text}</textarea>
             </div>
-            <div class="editor-row">
-                <label>작성자 이름</label>
-                <input type="text" class="form-control" id="testi-author-${i}" value="${t.author}">
-            </div>
-            <div class="editor-row">
-                <label>배지 (먹팡/놀팡/쉼팡/살팡/멋팡)</label>
-                <input type="text" class="form-control" id="testi-badge-${i}" value="${t.badge}">
+            <div style="display:flex; gap:16px;">
+                <div class="editor-row" style="flex:1;">
+                    <label>작성자 이름</label>
+                    <input type="text" class="form-control" id="testi-author-${i}" value="${t.author}">
+                </div>
+                <div class="editor-row" style="flex:1;">
+                    <label>배지 이름 (예: 먹팡)</label>
+                    <input type="text" class="form-control" id="testi-badge-${i}" value="${t.badge || ''}">
+                </div>
             </div>
         </div>
-    `).join('');
+    `).join('') + `
+        <button class="btn-save" style="width:100%; background: transparent; color: var(--text-primary); border: 2px dashed var(--border); box-shadow: none;" onclick="addTestimonialEditor()">
+            <i class="ri-add-line"></i> 새 후기 추가
+        </button>
+    `;
 
     // Live photo preview
     content.testimonials.forEach((_, i) => {
@@ -425,23 +445,87 @@ function renderTestimonialEditor() {
         if (photoInput) {
             photoInput.addEventListener('input', () => {
                 const preview = document.getElementById(`testi-preview-${i}`);
-                preview.src = photoInput.value;
-                preview.style.display = 'block';
+                const emptySlot = document.getElementById(`testi-empty-${i}`);
+                if (photoInput.value) {
+                    preview.src = photoInput.value;
+                    preview.style.display = 'block';
+                    if (emptySlot) emptySlot.style.display = 'none';
+                } else {
+                    preview.style.display = 'none';
+                    if (emptySlot) emptySlot.style.display = 'flex';
+                }
             });
         }
     });
+
+    updateStats();
 }
 
 function saveTestimonials() {
-    content.testimonials = content.testimonials.map((t, i) => ({
-        ...t,
-        stars:  parseInt(document.getElementById(`testi-stars-${i}`)?.value) || t.stars || 5,
-        text:   document.getElementById(`testi-text-${i}`)?.value   || t.text,
-        author: document.getElementById(`testi-author-${i}`)?.value || t.author,
-        badge:  document.getElementById(`testi-badge-${i}`)?.value  || t.badge,
-        photo:  document.getElementById(`testi-photo-${i}`)?.value  || t.photo,
-    }));
+    content.testimonials = content.testimonials.map((t, i) => {
+        const starsEl = document.getElementById(`testi-stars-${i}`);
+        if (!starsEl) return t; // Skip if DOM is missing during transition
+        return {
+            ...t,
+            stars:  parseInt(starsEl.value) || t.stars || 5,
+            text:   document.getElementById(`testi-text-${i}`)?.value   || t.text,
+            author: document.getElementById(`testi-author-${i}`)?.value || t.author,
+            badge:  document.getElementById(`testi-badge-${i}`)?.value  || t.badge,
+            photo:  document.getElementById(`testi-photo-${i}`)?.value  || t.photo,
+        };
+    });
 }
+
+// Global hooks for dynamic testimonial actions
+window.addTestimonialEditor = function() {
+    saveTestimonials();
+    content.testimonials.push({
+        stars: 5,
+        text: '',
+        author: '',
+        badge: '먹팡',
+        photo: ''
+    });
+    renderTestimonialEditor();
+};
+
+window.removeTestimonialEditor = function(index) {
+    if (confirm('이 후기를 삭제하시겠습니까?')) {
+        saveTestimonials();
+        content.testimonials.splice(index, 1);
+        renderTestimonialEditor();
+    }
+};
+
+window.handleTestimonialUpload = async function(event, index) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert('이미지 파일만 업로드 가능합니다.');
+        return;
+    }
+
+    showToast('사진 설정 업로드 중...');
+    const btnParams = event.target.parentElement;
+    const oldText = btnParams.innerHTML;
+    btnParams.innerHTML = '<i class="ri-loader-4-line" style="animation:spin .6s linear infinite;display:inline-block;"></i> 업로드 중...';
+    btnParams.style.pointerEvents = 'none';
+
+    try {
+        const result = await AdminStorage.uploadFile(file, 'testimonials');
+        saveTestimonials(); 
+        content.testimonials[index].photo = result.url;
+        renderTestimonialEditor(); 
+        showToast('사진이 업로드되었습니다!');
+    } catch (err) {
+        console.error('후기 사진 업로드 실패:', err);
+        showToast('❌ 업로드 실패: ' + err.message);
+        btnParams.innerHTML = oldText;
+        btnParams.style.pointerEvents = 'auto';
+    }
+    event.target.value = '';
+};
 
 // ── Pricing ──────────────────────────────────────────────
 function renderPricingEditor() {
