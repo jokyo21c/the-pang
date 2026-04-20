@@ -1577,11 +1577,11 @@
 }
 
 .process-step__number--purple {
-    background: var(--color-brand-purple);
+    background: var(--color-brand-orange);
 }
 
 .process-step__number--red {
-    background: var(--color-brand-red);
+    background: var(--color-brand-orange);
 }
 
 .process-step__number--orange {

@@ -1769,9 +1769,14 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             if (gridDivs.length >= 3 && f.companyLinks && f.companyLinks.length > 0) {
                 const companyUl = gridDivs[2].querySelector('.footer__links');
                 if (companyUl) {
-                    companyUl.innerHTML = f.companyLinks.map(link =>
-                        `<li><a href="${link.url}">${link.label}</a></li>`
-                    ).join('');
+                    companyUl.innerHTML = f.companyLinks.map(link => {
+                        if (link.label.includes('이용약관')) {
+                            return `<li><a href="javascript:void(0)" onclick="document.getElementById('termsModal').style.display='flex'">${link.label}</a></li>`;
+                        } else if (link.label.includes('개인정보')) {
+                            return `<li><a href="javascript:void(0)" onclick="document.getElementById('privacyModal').style.display='flex'">${link.label}</a></li>`;
+                        }
+                        return `<li><a href="${link.url}">${link.label}</a></li>`;
+                    }).join('');
                 }
             }
 
@@ -1779,8 +1784,8 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             if (contactUl && f.contact) {
                 contactUl.innerHTML = `
                     <li><a href="https://pf.kakao.com/_CCxcCX" target="_blank"><i class="ri-kakao-talk-fill"></i> ${f.contact.kakao || '카카오톡 채널'}</a></li>
-                    <li><i class="ri-mail-line"></i> <a href="mailto:${f.contact.email}" style="color:inherit;">${f.contact.email || ''}</a></li>
-                    <li><i class="ri-time-line"></i> ${f.contact.time || ''}</li>
+                    <li><i class="ri-mail-line"></i> <a href="mailto:${f.contact.email || 'thepang2026@gmail.com'}" style="color:inherit;">${f.contact.email || 'thepang2026@gmail.com'}</a></li>
+                    <li><i class="ri-time-line"></i> ${f.contact.time || '평일 09:00-18:00'}</li>
                 `;
             }
         } catch (err) {

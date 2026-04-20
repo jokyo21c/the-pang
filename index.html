@@ -774,7 +774,7 @@
 
                 <div class="process-steps fade-in" id="processGrid">
                     <div class="process-step">
-                        <div class="process-step__number process-step__number--purple">
+                        <div class="process-step__number process-step__number--orange">
                             01</div>
                         <span class="process-step__icon"><i class="ri-survey-line" style="color: #ffffff;"></i></span>
                         <h3 class="process-step__title">온라인 견적 신청</h3>
@@ -782,7 +782,7 @@
                     </div>
 
                     <div class="process-step">
-                        <div class="process-step__number process-step__number--red">
+                        <div class="process-step__number process-step__number--orange">
                             02</div>
                         <span class="process-step__icon"><i class="ri-vidicon-line" style="color: #ffffff;"></i></span>
                         <h3 class="process-step__title">전문 PD 현장 방문</h3>
@@ -790,7 +790,7 @@
                     </div>
 
                     <div class="process-step">
-                        <div class="process-step__number process-step__number--purple">
+                        <div class="process-step__number process-step__number--orange">
                             03</div>
                         <span class="process-step__icon"><i class="ri-robot-line" style="color: #ffffff;"></i></span>
                         <h3 class="process-step__title">AI 편집 & 후보정</h3>
@@ -815,6 +815,60 @@
             </div>
         </div>
     </section>
+
+    <style>
+        .process-step__number { transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s ease; }
+        
+        /* PC 환경에서만 애니메이션 효과 적용 */
+        @media (min-width: 769px) {
+            .process-step__number.animated-active { 
+                transform: scale(1.2) translateY(-5px); 
+                box-shadow: 0 10px 25px rgba(229, 60, 17, 0.5);
+                z-index: 2;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const numbers = document.querySelectorAll('.process-step__number');
+            let currentIndex = 0;
+            let animationInterval = null;
+
+            const animateStep = () => {
+                // 모바일 환경(768px 이하)이면 애니메이션 클래스 제거 및 로직 중단
+                if (window.innerWidth <= 768) {
+                    numbers.forEach(num => num.classList.remove('animated-active'));
+                    return;
+                }
+
+                numbers.forEach(num => num.classList.remove('animated-active'));
+                if (numbers[currentIndex]) {
+                    numbers[currentIndex].classList.add('animated-active');
+                }
+                currentIndex = (currentIndex + 1) % numbers.length;
+            };
+
+            const startAnimation = () => {
+                if (window.innerWidth > 768) {
+                    animateStep();
+                    if (!animationInterval) {
+                        animationInterval = setInterval(animateStep, 3000);
+                    }
+                } else {
+                    if (animationInterval) {
+                        clearInterval(animationInterval);
+                        animationInterval = null;
+                        numbers.forEach(num => num.classList.remove('animated-active'));
+                    }
+                }
+            };
+
+            // 초기 실행 및 리사이즈 대응
+            startAnimation();
+            window.addEventListener('resize', startAnimation);
+        });
+    </script>
 
 
     <!-- ════════════════════════════════════════════════════════
@@ -1363,8 +1417,8 @@
                     <h4 class="footer__heading">회사</h4>
                     <ul class="footer__links">
                         <li><a href="#">회사소개</a></li>
-                        <li><a href="#">이용약관</a></li>
-                        <li><a href="#">개인정보처리방침</a></li>
+                        <li><a href="javascript:void(0)" onclick="document.getElementById('termsModal').style.display='flex'">이용약관</a></li>
+                        <li><a href="javascript:void(0)" onclick="document.getElementById('privacyModal').style.display='flex'">개인정보처리방침</a></li>
                         <li><a href="#">공지사항</a></li>
                     </ul>
                 </div>
@@ -1374,7 +1428,7 @@
                     <h4 class="footer__heading">문의</h4>
                     <ul class="footer__contact">
                         <li><a href="https://pf.kakao.com/_CCxcCX" target="_blank"><i class="ri-kakao-talk-fill"></i> 카카오톡 채널</a></li>
-                        <li><i class="ri-mail-line"></i> hello@thepang.kr</li>
+                        <li><i class="ri-mail-line"></i> thepang2026@gmail.com</li>
                         <li><i class="ri-time-line"></i> 평일 09:00-18:00</li>
                     </ul>
                 </div>
@@ -1454,6 +1508,79 @@
         </ul>
     </aside>
 
+    <!-- ── Policy Modals ── -->
+    <style>
+        .policy-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
+        .policy-modal__content { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 40px; position: relative; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
+        .policy-modal__close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 28px; color: var(--color-text-secondary); cursor: pointer; transition: color 0.2s; }
+        .policy-modal__close:hover { color: var(--color-text-primary); }
+        .policy-modal__header { border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 30px; }
+        .policy-modal__title { font-size: 24px; font-weight: 700; color: var(--color-brand-purple); margin-bottom: 5px; }
+        .policy-modal__date { font-size: 13px; color: var(--color-text-muted); }
+        .policy-modal__body h4 { font-size: 16px; color: var(--color-text-primary); margin-top: 15px; margin-bottom: 8px; }
+        .policy-modal__body p { font-size: 14px; margin-bottom: 15px; }
+        @media (max-width: 768px) { .policy-modal__content { padding: 30px 20px; } }
+    </style>
+
+    <div class="policy-modal" id="termsModal">
+        <div class="policy-modal__content fade-in" style="animation: modalFadeIn 0.3s ease forwards;">
+            <button class="policy-modal__close" onclick="document.getElementById('termsModal').style.display='none'">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="policy-modal__header">
+                <h2 class="policy-modal__title">이용약관</h2>
+                <p class="policy-modal__date">시행일자: 2026.04.20</p>
+            </div>
+            <div class="policy-modal__body" style="color: var(--color-text-secondary); line-height: 1.6;">
+                <h4>제 1 조 (목적)</h4>
+                <p>본 약관은 넥스온(이하 "회사")이 운영하는 숏폼 광고 대행 플랫폼 '더팡(THE PANG)'(이하 "서비스")의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항 등을 규정함을 목적으로 합니다.</p>
+                <h4>제 2 조 (용어의 정의)</h4>
+                <p>1. "서비스"란 더팡(THE PANG) 플랫폼을 통해 회사가 고객에게 제공하는 숏폼 광고 제작, 기획, 편집, AI 후보정 및 관련 제반 서비스를 의미합니다.<br>
+                2. "회원"이란 본 약관에 동의하고 서비스를 제공받는 고객을 의미합니다.</p>
+                <h4>제 3 조 (서비스의 제공 등)</h4>
+                <p>1. 회사는 회원에게 성공적인 바이럴 마케팅을 위해 최고의 영상 콘텐츠 풀 패키지를 제공합니다.<br>
+                2. 서비스의 세부 내용 및 요금은 더팡 웹사이트 또는 전담 PD와의 협의를 통해 결정됩니다.</p>
+                <h4>제 4 조 (회원의 의무)</h4>
+                <p>회원은 서비스 이용 과정에서 폭언, 무리한 수정 요구 등 회사의 업무를 방해하는 행위를 하여서는 안 되며, 서비스 결과물을 저작권법 등 관련 법령에 위반하여 임의로 수정·결합하거나 상업적 용도로 불법 배포할 수 없습니다.</p>
+                <h4>제 5 조 (면책사항)</h4>
+                <p>1. 회사는 천재지변, 전쟁 등 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는 서비스 제공에 관한 책임이 면제됩니다.<br>
+                2. 회사는 플랫폼(틱톡, 유튜브, 인스타그램 등)의 정책 변경 등 외부 요인에 의해 발생하는 결과에 대해 책임을 지지 않습니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="policy-modal" id="privacyModal">
+        <div class="policy-modal__content fade-in" style="animation: modalFadeIn 0.3s ease forwards;">
+            <button class="policy-modal__close" onclick="document.getElementById('privacyModal').style.display='none'">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="policy-modal__header">
+                <h2 class="policy-modal__title">개인정보처리방침</h2>
+                <p class="policy-modal__date">시행일자: 2026.04.20</p>
+            </div>
+            <div class="policy-modal__body" style="color: var(--color-text-secondary); line-height: 1.6;">
+                <p>넥스온(이하 "회사")이 운영하는 더팡(THE PANG)은 정보주체의 개인정보를 가장 중요하게 생각하며, 「개인정보 보호법」 등 관련 법령을 준수하고 있습니다.</p>
+                <h4>1. 개인정보의 수집 및 이용 목적</h4>
+                <p>회사는 숏폼 콘텐츠 제작 문의 확인, 상담, 견적 제공, 서비스 제공 및 계약 이행, 서비스 개선을 위해 최소한의 개인정보를 수집합니다.</p>
+                <h4>2. 수집하는 개인정보의 항목</h4>
+                <p>필수항목: 상호명, 담당자 이름, 연락처(전화번호, 이메일), 서비스 요청 사항, 결제 정보 등</p>
+                <h4>3. 개인정보의 보유 및 이용기간</h4>
+                <p>원칙적으로 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 관계 법령의 규정에 의하여 보존할 필요가 있는 경우 적법한 기간 동안 보관합니다.</p>
+                <h4>4. 개인정보의 제3자 제공</h4>
+                <p>회사는 원칙적으로 정보주체의 개인정보를 제3자에게 제공하지 않습니다. 단, 협력업체를 통한 필수 서비스 제공이나 법령에 따른 요구가 있는 경우는 예외로 합니다.</p>
+                <h4>5. 정보주체의 권리와 그 행사방법</h4>
+                <p>정보주체는 언제든지 자신의 개인정보에 대한 열람, 정정, 삭제, 처리정지 등을 요구할 수 있습니다. 자세한 문의나 권리 행사는 이메일(thepang2026@gmail.com)로 연락 부탁드립니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 모달 외부(배경) 클릭 시 닫기
+        window.addEventListener('click', function(e) {
+            if (e.target.id === 'termsModal') document.getElementById('termsModal').style.display = 'none';
+            if (e.target.id === 'privacyModal') document.getElementById('privacyModal').style.display = 'none';
+        });
+    </script>
 </body>
 
 <!-- ── Fullscreen Thumbnail Modal ── -->
