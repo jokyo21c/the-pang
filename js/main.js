@@ -1145,9 +1145,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (shownCount >= allItems.length) {
-                // 모든 아이템이 표시됨 → 초기화 버튼으로 전환
+                // 모든 아이템이 표시됨 → 닫기 버튼으로 전환
                 moreBtn.style.display = 'inline-flex';
-                moreBtn.innerHTML = '초기화 <i class="ri-refresh-line"></i>';
+                moreBtn.innerHTML = '닫기 <i class="ri-refresh-line"></i>';
                 moreBtn.dataset.mode = 'reset';
             } else {
                 // 아직 더 있음 → 더보기 버튼
