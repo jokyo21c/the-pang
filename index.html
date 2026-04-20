@@ -1379,7 +1379,6 @@
         </div>
     </section>
 
-
     <!-- [COMPONENT 12] REMOVED (Moved to Sidebar) -->
 
 
@@ -1519,8 +1518,33 @@
         .policy-modal__date { font-size: 13px; color: var(--color-text-muted); }
         .policy-modal__body h4 { font-size: 16px; color: var(--color-text-primary); margin-top: 15px; margin-bottom: 8px; }
         .policy-modal__body p { font-size: 14px; margin-bottom: 15px; }
+        .policy-modal__body ul { margin-bottom: 15px; padding-left: 20px; }
+        .policy-modal__body li { font-size: 14px; margin-bottom: 8px; list-style: disc; }
         @media (max-width: 768px) { .policy-modal__content { padding: 30px 20px; } }
     </style>
+
+    <div class="policy-modal" id="companyIntroModal">
+        <div class="policy-modal__content fade-in" style="animation: modalFadeIn 0.3s ease forwards;">
+            <button class="policy-modal__close" onclick="document.getElementById('companyIntroModal').style.display='none'">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="policy-modal__header">
+                <h2 class="policy-modal__title">회사소개</h2>
+                <p class="policy-modal__date">THE PANG: 브랜드의 가치를 터뜨리다</p>
+            </div>
+            <div class="policy-modal__body" style="color: var(--color-text-secondary); line-height: 1.6;">
+                <p><strong>더팡(THE PANG)</strong>은 주식회사 넥스온(NexOn)이 운영하는 대한민국 No.1 숏폼 콘텐츠 크리에이티브 그룹입니다.</p>
+                <p>우리는 단순히 영상을 만드는 것을 넘어, 브랜드가 시장에서 어떻게 '터질 수 있는지'를 고민합니다. 30초라는 짧은 시간 안에 소비자들을 매료시키고 행동하게 만드는 임팩트 있는 콘텐츠를 제작합니다.</p>
+                <h4>핵심 가치</h4>
+                <ul>
+                    <li><strong>Creative Explosion:</strong> 틀에 박힌 형식을 깨고 브랜드 고유의 매력을 폭발시킵니다.</li>
+                    <li><strong>AI Intelligence:</strong> 정교한 AI 후보정 기술로 퀄리티는 높이고 단가는 낮췄습니다.</li>
+                    <li><strong>PD-Driven Quality:</strong> 모든 프로젝트는 현장 경험이 풍부한 전문 PD가 직접 기획하고 리드합니다.</li>
+                </ul>
+                <p>먹팡부터 멋팡까지, 모든 업종의 성공적인 숏폼 마케팅 파트너로서 더팡이 함께하겠습니다.</p>
+            </div>
+        </div>
+    </div>
 
     <div class="policy-modal" id="termsModal">
         <div class="policy-modal__content fade-in" style="animation: modalFadeIn 0.3s ease forwards;">
@@ -1574,11 +1598,35 @@
         </div>
     </div>
 
+    <div class="policy-modal" id="noticeModal">
+        <div class="policy-modal__content fade-in" style="animation: modalFadeIn 0.3s ease forwards;">
+            <button class="policy-modal__close" onclick="document.getElementById('noticeModal').style.display='none'">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="policy-modal__header">
+                <h2 class="policy-modal__title">공지사항</h2>
+                <p class="policy-modal__date">최신 소식을 확인하세요</p>
+            </div>
+            <div class="policy-modal__body" style="color: var(--color-text-secondary); line-height: 1.6;">
+                <h4>[안내] 더팡(THE PANG) 정식 런칭 및 프로모션 안내</h4>
+                <p>숏폼 광고 제작의 모든 것, 더팡이 2026년 4월 정식으로 서비스를 시작했습니다. 런칭 기념으로 신규 신청 고객 대상 'AI 썸네일 무료 제작' 프로모션을 진행 중이니 적극적인 관심 부탁드립니다.</p>
+                
+                <h4>[업데이트] 플랫폼별 제작 가이드라인 배포</h4>
+                <p>유튜브 쇼츠, 틱톡, 인스타그램 릴스의 최신 알고리즘을 분석한 제작 가이드라인이 완성되었습니다. 전담 PD 채널을 통해 자세한 가이드북을 요청하실 수 있습니다.</p>
+                
+                <h4>[안내] 2026년 상반기 프로모션 일정 안내</h4>
+                <p>브랜드 구독형(PANG-X) 상품 가입 시 현장 방문 촬영 횟수 추가 등 다양한 혜택이 준비되어 있습니다. 상세 내용은 상담 시 전문 마케터에게 문의 바랍니다.</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 모달 외부(배경) 클릭 시 닫기
         window.addEventListener('click', function(e) {
             if (e.target.id === 'termsModal') document.getElementById('termsModal').style.display = 'none';
             if (e.target.id === 'privacyModal') document.getElementById('privacyModal').style.display = 'none';
+            if (e.target.id === 'companyIntroModal') document.getElementById('companyIntroModal').style.display = 'none';
+            if (e.target.id === 'noticeModal') document.getElementById('noticeModal').style.display = 'none';
         });
     </script>
 </body>

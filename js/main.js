@@ -1770,10 +1770,14 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 const companyUl = gridDivs[2].querySelector('.footer__links');
                 if (companyUl) {
                     companyUl.innerHTML = f.companyLinks.map(link => {
-                        if (link.label.includes('이용약관')) {
+                        if (link.label.includes('회사소개')) {
+                            return `<li><a href="javascript:void(0)" onclick="document.getElementById('companyIntroModal').style.display='flex'">${link.label}</a></li>`;
+                        } else if (link.label.includes('이용약관')) {
                             return `<li><a href="javascript:void(0)" onclick="document.getElementById('termsModal').style.display='flex'">${link.label}</a></li>`;
                         } else if (link.label.includes('개인정보')) {
                             return `<li><a href="javascript:void(0)" onclick="document.getElementById('privacyModal').style.display='flex'">${link.label}</a></li>`;
+                        } else if (link.label.includes('공지사항')) {
+                            return `<li><a href="javascript:void(0)" onclick="document.getElementById('noticeModal').style.display='flex'">${link.label}</a></li>`;
                         }
                         return `<li><a href="${link.url}">${link.label}</a></li>`;
                     }).join('');
