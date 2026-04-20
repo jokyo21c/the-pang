@@ -1134,7 +1134,7 @@
                 <div class="grid grid--3 fade-in" id="newsGrid">
                     <article class="news-card">
                         <div class="news-card__thumb">
-                            <div class="news-card__img" style="background:linear-gradient(135deg,#7b2fff,#1a0a2e)">
+                            <div class="news-card__img" style="background-image:url('images/news/news1.png'); background-size: cover; background-position: center;">
                             </div>
                             <span class="news-card__badge news-card__badge--purple">마케팅
                                 인사이트</span>
@@ -1147,7 +1147,7 @@
 
                     <article class="news-card">
                         <div class="news-card__thumb">
-                            <div class="news-card__img" style="background:linear-gradient(135deg,#e63946,#1a1a2e)">
+                            <div class="news-card__img" style="background-image:url('images/news/news2.png'); background-size: cover; background-position: center;">
                             </div>
                             <span class="news-card__badge news-card__badge--red">성공사례</span>
                         </div>
@@ -1160,7 +1160,7 @@
 
                     <article class="news-card">
                         <div class="news-card__thumb">
-                            <div class="news-card__img" style="background:linear-gradient(135deg,#ff5e00,#2a1a3a)">
+                            <div class="news-card__img" style="background-image:url('images/news/news3.png'); background-size: cover; background-position: center;">
                             </div>
                             <span class="news-card__badge news-card__badge--purple">플랫폼
                                 비교</span>
@@ -1180,6 +1180,127 @@
                 </div>
             </div>
         </div>
+
+        <!-- News Modal HTML/CSS/JS (Scoped perfectly to News Section) -->
+        <style>
+            #newsGrid .news-card { cursor: pointer; transition: transform 0.2s ease; }
+            #newsGrid .news-card:active { transform: scale(0.98); }
+            .news-modal-overlay {
+                position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+                backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            }
+            .news-modal-overlay.open { opacity: 1; pointer-events: auto; }
+            .news-modal-content {
+                background: var(--color-bg-card, #1A1A1A); width: 90%; max-width: 650px; max-height: 85vh;
+                border-radius: 16px; overflow-y: auto; position: relative;
+                transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: 1px solid var(--color-border, #2A2A2A); box-shadow: 0 10px 50px rgba(0,0,0,0.6);
+            }
+            .news-modal-overlay.open .news-modal-content { transform: translateY(0); }
+            .news-modal-header { padding: 32px 32px 24px; border-bottom: 1px solid var(--color-border, #2A2A2A); }
+            .news-modal-close {
+                position: absolute; top: 20px; right: 20px; background: none; border: none; color: #fff; font-size: 28px;
+                cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+                border-radius: 50%; transition: background 0.2s; z-index: 10;
+            }
+            .news-modal-close:hover { background: rgba(255,255,255,0.1); }
+            .news-modal-badge { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 16px; font-family: var(--font-kr); }
+            .news-modal-badge--purple { background: var(--color-brand-purple, #7b2fff); color: #fff; }
+            .news-modal-badge--red { background: var(--color-brand-red, #e63946); color: #fff; }
+            .news-modal-title { font-size: 26px; font-weight: 700; margin-bottom: 12px; line-height: 1.4; color: #fff; font-family: var(--font-kr); }
+            .news-modal-meta { font-size: 14px; color: var(--color-text-muted, #888); margin-bottom: 0; font-family: var(--font-kr); }
+            .news-modal-body { padding: 32px; font-size: 16px; line-height: 1.8; color: var(--color-text-secondary, #ccc); font-family: var(--font-kr); }
+            .news-modal-body h4 { font-size: 19px; margin: 32px 0 16px; color: #fff; font-weight: 600; }
+            .news-modal-body p { margin-bottom: 16px; }
+            .news-modal-body ul { margin-bottom: 16px; padding-left: 20px; list-style: none; }
+            .news-modal-body li { margin-bottom: 12px; position: relative; }
+            .news-modal-body li::before {
+                content: "•"; color: var(--color-brand-purple, #7b2fff); font-weight: bold; position: absolute; left: -16px; top: 0;
+            }
+            @media (max-width: 768px) {
+                .news-modal-header { padding: 24px 24px 16px; }
+                .news-modal-body { padding: 24px; font-size: 15px; }
+                .news-modal-title { font-size: 22px; }
+            }
+        </style>
+
+        <div id="newsModal" class="news-modal-overlay" role="dialog" aria-modal="true">
+            <div class="news-modal-content">
+                <button class="news-modal-close" id="newsModalClose" aria-label="닫기"><i class="ri-close-line"></i></button>
+                <div class="news-modal-header">
+                    <span class="news-modal-badge" id="newsModalBadge">badge</span>
+                    <h3 class="news-modal-title" id="newsModalTitle">title</h3>
+                    <p class="news-modal-meta" id="newsModalMeta">meta</p>
+                </div>
+                <div class="news-modal-body" id="newsModalBodyText">
+                </div>
+            </div>
+        </div>
+
+        <script>
+        (function(){
+            const newsData = [
+                {
+                    badgeClass: 'news-modal-badge--purple',
+                    badgeText: '마케팅 인사이트',
+                    title: '2026 숏폼 광고 트렌드 TOP 5',
+                    meta: '2026.02.20 · 5분 읽기',
+                    body: '<p>2026년 숏폼 광고 시장은 새로운 변화를 맞이하고 있습니다. 기존의 단순한 정보 전달을 넘어, AI 기술과 정교한 타겟팅이 결합된 형태가 대세를 이루고 있습니다.</p><h4>1. 초개인화 영상 (Hyper-Personalization)</h4><p>AI 알고리즘이 사용자의 시청 패턴, 관심사 등을 분석하여 개인별 맞춤형 숏폼 광고를 송출합니다.</p><h4>2. 스토리텔링형 숏츠</h4><p>단순 제품 나열보다는 30초 안에 기승전결이 있는 흥미로운 서사가 있어야 이탈률을 낮출 수 있습니다.</p><h4>3. 네이티브형 광고 필터 및 AR</h4><p>시청자가 거부감 없이 즐길 수 있도록 플랫폼 내 자체 필터나 AR 요소를 결합한 광고가 큰 호응을 얻고 있습니다.</p><p>THE PANG은 이러한 최신 트렌드를 모두 반영한 기획으로 브랜드 가치를 극대화합니다.</p>'
+                },
+                {
+                    badgeClass: 'news-modal-badge--red',
+                    badgeText: '성공사례',
+                    title: '먹팡 숏츠로 월 매출 2배 올린 카페 사례',
+                    meta: '2026.02.15 · 7분 읽기',
+                    body: '<p>서울 홍대에 위치한 한 디저트 카페는 반짝이는 아이디어에도 불구하고 신규 고객 유입에 어려움을 겪고 있었습니다. THE PANG의 <strong>[먹팡]</strong> 패키지를 이용한 후 일어난 놀라운 변화를 소개합니다.</p><h4>문제 상황</h4><p>카페 인테리어와 디저트 맛에는 자신 있었지만, 홍보 부족으로 신규 고객의 발길이 뜸했습니다.</p><h4>THE PANG의 솔루션</h4><ul><li><strong>시각적 극대화:</strong> 방문 촬영 시 디저트의 질감과 초코 시럽이 흐르는 찰나의 순간을 초고화질 매크로 렌즈로 담았습니다.</li><li><strong>맞춤형 AI 편집:</strong> 20대 타겟이 선호하는 트렌디한 비트의 BGM과 시선을 사로잡는 AI 썸네일을 자동 생성하여 적용했습니다.</li></ul><h4>놀라운 결과</h4><p>인스타그램 릴스와 틱톡에 업로드된 지 1주일 만에 조회수 50만을 돌파하였고, 주말 웨이팅이 2시간을 넘어서며 <strong>전월 대비 매출 210% 상승</strong>이라는 쾌거를 이루었습니다.</p>'
+                },
+                {
+                    badgeClass: 'news-modal-badge--purple',
+                    badgeText: '플랫폼 비교',
+                    title: '틱톡 vs 유튜브 숏츠, 어떤 플랫폼이 효과적?',
+                    meta: '2026.02.10 · 6분 읽기',
+                    body: '<p>숏폼 마케팅을 시작할 때 가장 고민되는 부분은 바로 플랫폼 선정입니다. 각 플랫폼의 특징과 장단점을 비교 분석해 보았습니다.</p><h4>1. 틱톡 (TikTok)</h4><p>Z세대 유저 층이 탄탄하며, 챌린지와 밈(Meme) 확산 속도가 가장 빠릅니다. B2C 브랜드의 초기 인지도 확장에 극적인 효과를 발휘합니다.</p><h4>2. 유튜브 숏츠 (YouTube Shorts)</h4><p>다양한 연령층을 커버할 수 있으며, 기존 롱폼 영상 충성 시청자들을 숏폼 구매 채널로 연결하기 좋습니다. 리뷰나 정보 습득형 콘텐츠가 강세를 보입니다.</p><h4>3. 인스타그램 릴스 (Instagram Reels)</h4><p>시각적인 아름다움과 트렌디한 라이프스타일을 중시하는 유저들의 체류 시간이 깁니다. 뷰티, 패션, F&B 업종에서 퍼포먼스 마케팅과 연계하기 매우 유리합니다.</p><p>THE PANG은 브랜드 타겟과 목적을 정밀 분석하여 단일 플랫폼 집중 또는 멀티 플랫폼 최적화 전략을 정확히 제시해 드립니다.</p>'
+                }
+            ];
+
+            const cards = document.querySelectorAll('#newsGrid .news-card');
+            const modal = document.getElementById('newsModal');
+            const closeBtn = document.getElementById('newsModalClose');
+            
+            if (cards.length > 0 && modal && closeBtn) {
+                cards.forEach((card, index) => {
+                    card.addEventListener('click', () => {
+                        const data = newsData[index];
+                        if(!data) return;
+                        
+                        document.getElementById('newsModalBadge').className = 'news-modal-badge ' + data.badgeClass;
+                        document.getElementById('newsModalBadge').innerText = data.badgeText;
+                        document.getElementById('newsModalTitle').innerText = data.title;
+                        document.getElementById('newsModalMeta').innerText = data.meta;
+                        document.getElementById('newsModalBodyText').innerHTML = data.body;
+                        
+                        modal.classList.add('open');
+                        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                    });
+                });
+
+                const closeModal = () => {
+                    modal.classList.remove('open');
+                    document.body.style.overflow = '';
+                };
+
+                closeBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if(e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+                });
+            }
+        })();
+        </script>
     </section>
 
 
