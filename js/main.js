@@ -82,11 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.PangData) {
                 const items = await PangData.getTestimonials();
                 if (items && items.length > 0 && testimonialTrack) {
-                    testimonialTrack.innerHTML = items.map(t => `
+                    testimonialTrack.innerHTML = items.map((t, i) => `
                         <div class="testimonial-card">
                             <div class="testimonial-card__inner">
                                 <div class="testimonial-card__photo">
-                                    <img src="${t.photo || 'https://picsum.photos/seed/pang1/200/200'}" alt="${t.author || ''}">
+                                    <img src="${t.photo || `images/testimonials/testi${(i % 4) + 1}.png`}" alt="${t.author || ''}">
                                 </div>
                                 <div class="testimonial-card__content">
                                     <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:20px;">${'★'.repeat(t.stars || 5)}</div>
