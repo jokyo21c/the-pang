@@ -11,10 +11,10 @@ const PANG_CONFIG = {
     SUPABASE_URL:  'https://trrbnqsoonntafpeamkf.supabase.co',
     SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycmJucXNvb25udGFmcGVhbWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODkxMDIsImV4cCI6MjA5MDc2NTEwMn0.4ePv08u88njYJojFivO8zbz9DH68iGbrPbtozQ5m1xc',
 
-    // Storage (Supabase — 기존 레거시, 참고용 유지)
+    // Supabase Storage (파일 저장소 — 원본 보관)
     STORAGE_BUCKET: 'media',
 
-    // Bunny.net CDN
+    // Bunny.net CDN (트래픽 전달 — Supabase Storage를 Origin으로 사용)
     BUNNY_STORAGE_ZONE: 'the-pang',
     BUNNY_API_KEY: '78beea97-9596-4b51-8186f73a204d-3ae5-443f',
     BUNNY_PULL_ZONE_URL: 'https://the-pang.b-cdn.net',

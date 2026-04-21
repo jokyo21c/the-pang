@@ -182,12 +182,12 @@ async function handleHeroMediaFile(file) {
         const isVideo = file.type.startsWith('video/');
 
         if (isVideo && AdminStorage.uploadFileWithProgress) {
-            // 영상: 진행률 표시 업로드 (Bunny.net XHR)
+            // 영상: 진행률 표시 업로드 (Supabase Storage XHR)
             result = await AdminStorage.uploadFileWithProgress(file, 'hero', (percent) => {
                 showToast(`히어로 영상 업로드 중... ${percent}%`);
             });
         } else {
-            // 이미지: 일반 업로드 (Bunny.net fetch)
+            // 이미지: 일반 업로드 (Supabase Storage)
             result = await AdminStorage.uploadFile(file, 'hero');
         }
 
@@ -261,10 +261,13 @@ function renderPortfolioEditor() {
                     const url = typeof item === 'string' ? item : item.url;
                     const itemId = typeof item === 'object' ? item.id : null;
                     const isVid = isVideoUrl(url) || (typeof item === 'object' && item.type === 'video');
-                    const vidUrl = isVid && !url.includes('#') ? url + '#t=0.001' : url;
+                    // 관리자 미리보기: 업로드 직후 blob URL 우선 사용 (CDN 캐시 대기 없이 즉시 표시)
+                    const displayUrl = (typeof item === 'object' && item.previewUrl) ? item.previewUrl : url;
+                    const vidUrl = isVid && !displayUrl.includes('#') && !displayUrl.startsWith('blob:') ? displayUrl + '#t=0.001' : displayUrl;
                     const mediaTag = isVid 
                         ? `<video src="${vidUrl}" loop muted playsinline style="width:100%;height:100%;object-fit:cover; transition: transform 0.3s;" onmouseenter="this.play()" onmouseleave="this.pause()"></video>`
-                        : `<img src="${url}" alt="${meta.name} ${i+1}" onerror="this.src='https://picsum.photos/seed/${key}${i}/200/355'">`;
+                        : `<img src="${displayUrl}" alt="${meta.name} ${i+1}" onerror="this.src='https://picsum.photos/seed/${key}${i}/200/355'">`;
+
                     return `
                         <div class="image-card">
                             ${mediaTag}
@@ -331,21 +334,25 @@ async function processPortfolioFiles(files, category) {
             const isVideo = file.type.startsWith('video/');
 
             if (isVideo && AdminStorage.uploadFileWithProgress) {
-                // 영상: 진행률 표시 업로드 (Bunny.net XHR)
+                // 영상: 진행률 표시 업로드 (Supabase Storage XHR)
                 result = await AdminStorage.uploadFileWithProgress(file, `portfolio/${category}`, (percent) => {
                     showToast(`영상 업로드 중... ${percent}% (${uploadedCount + 1}/${totalFiles})`);
                 });
             } else {
-                // 이미지: 일반 업로드 (Bunny.net fetch)
+                // 이미지: 일반 업로드 (Supabase Storage)
                 result = await AdminStorage.uploadFile(file, `portfolio/${category}`);
             }
 
-            // DB에 항목 추가
+            // 관리자 미리보기용 Blob URL 생성 (CDN 캐시 대기 없이 즉시 표시)
+            const previewUrl = URL.createObjectURL(file);
+
+            // DB에 항목 추가 (Bunny CDN URL 저장)
             const dbItem = await AdminContent.addPortfolioItem(category, result.url, result.type);
 
             content.portfolio[category].push({
                 id: dbItem.id,
-                url: result.url,
+                url: result.url,        // Bunny CDN URL (DB 저장용, 메인 사이트용)
+                previewUrl: previewUrl, // Blob URL (관리자 미리보기 전용, 새로고침 시 소멸)
                 type: result.type,
                 order_index: dbItem.order_index
             });
@@ -386,7 +393,10 @@ async function removePortfolioItem(category, index, itemId) {
 // ── Testimonial ──────────────────────────────────────────
 function renderTestimonialEditor() {
     const container = document.getElementById('testimonial-editor');
-    container.innerHTML = content.testimonials.map((t, i) => `
+    container.innerHTML = content.testimonials.map((t, i) => {
+        const photoVal = t.photo || t.photo_url || '';
+        const imgSrc = photoVal ? (photoVal.startsWith('http') || photoVal.startsWith('data:') || photoVal.startsWith('/') ? photoVal : '/' + photoVal) : '';
+        return `
         <div class="testimonial-item editor-card" style="position:relative; margin-bottom: 20px;">
             <div style="font-size:14px;font-weight:700;color:var(--text-primary);
                         margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);
@@ -400,13 +410,17 @@ function renderTestimonialEditor() {
             <div class="editor-row">
                 <label>고객 사진 (정방형 권장)</label>
                 <div style="display:flex; gap:16px; align-items:flex-start;">
-                     <div style="flex-shrink:0; position:relative;">
-                         <img src="${t.photo || t.photo_url || ''}" style="width:100px;height:100px;border-radius:8px;object-fit:cover;border:1px solid var(--border); background: var(--bg-secondary); display: ${t.photo || t.photo_url ? 'block' : 'none'};" id="testi-preview-${i}" onerror="this.style.display='none'">
-                         ${!(t.photo || t.photo_url) ? `<div style="width:100px;height:100px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:24px;" id="testi-empty-${i}"><i class="ri-image-add-line"></i></div>` : ''}
+                     <div style="flex-shrink:0; position:relative;" 
+                          id="testi-dropzone-${i}"
+                          ondragover="handleTestimonialDragOver(event)" 
+                          ondragleave="handleTestimonialDragLeave(event)" 
+                          ondrop="handleTestimonialDrop(event, ${i})">
+                         <img src="${imgSrc}" style="width:100px;height:100px;border-radius:8px;object-fit:cover;border:1px solid var(--border); background: var(--bg-secondary); display: ${photoVal ? 'block' : 'none'}; pointer-events:none;" id="testi-preview-${i}">
+                         ${!photoVal ? `<div style="width:100px;height:100px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:24px; pointer-events:none;" id="testi-empty-${i}"><i class="ri-image-add-line"></i></div>` : ''}
                      </div>
                      <div style="flex-grow:1;">
-                         <input type="url" class="form-control" id="testi-photo-${i}" value="${t.photo || t.photo_url || ''}" placeholder="이미지 URL 직접 입력 또는 파일 업로드" style="margin-bottom: 8px;">
-                         <label class="btn-preview" style="display:inline-flex; align-items:center; gap:4px; padding:8px 12px; border-radius:6px; cursor:pointer; background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-primary); font-size:13px; font-weight:500;">
+                         <input type="url" class="form-control" id="testi-photo-${i}" value="${photoVal}" placeholder="이미지 URL 직접 입력 또는 파일 업로드" style="margin-bottom: 8px;">
+                         <label class="btn-preview" id="testi-upload-btn-${i}" style="display:inline-flex; align-items:center; gap:4px; padding:8px 12px; border-radius:6px; cursor:pointer; background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-primary); font-size:13px; font-weight:500; width:auto; white-space:nowrap;">
                              <i class="ri-upload-cloud-2-line"></i> 직접 사진 업로드
                              <input type="file" accept="image/*" hidden onchange="handleTestimonialUpload(event, ${i})">
                          </label>
@@ -433,7 +447,7 @@ function renderTestimonialEditor() {
                 </div>
             </div>
         </div>
-    `).join('') + `
+    `}).join('') + `
         <button class="btn-save" style="width:100%; background: transparent; color: var(--text-primary); border: 2px dashed var(--border); box-shadow: none;" onclick="addTestimonialEditor()">
             <i class="ri-add-line"></i> 새 후기 추가
         </button>
@@ -447,7 +461,8 @@ function renderTestimonialEditor() {
                 const preview = document.getElementById(`testi-preview-${i}`);
                 const emptySlot = document.getElementById(`testi-empty-${i}`);
                 if (photoInput.value) {
-                    preview.src = photoInput.value;
+                    const val = photoInput.value;
+                    preview.src = val.startsWith('http') || val.startsWith('data:') || val.startsWith('/') ? val : '/' + val;
                     preview.style.display = 'block';
                     if (emptySlot) emptySlot.style.display = 'none';
                 } else {
@@ -497,20 +512,48 @@ window.removeTestimonialEditor = function(index) {
     }
 };
 
-window.handleTestimonialUpload = async function(event, index) {
-    const file = event.target.files[0];
-    if (!file) return;
+window.handleTestimonialDragOver = function(e) {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = 'var(--purple)';
+    e.currentTarget.style.backgroundColor = 'rgba(123,47,255,0.05)';
+};
 
+window.handleTestimonialDragLeave = function(e) {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = 'var(--border)';
+    e.currentTarget.style.backgroundColor = 'transparent';
+};
+
+window.handleTestimonialDrop = function(e, index) {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = 'var(--border)';
+    e.currentTarget.style.backgroundColor = 'transparent';
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processTestimonialFile(e.dataTransfer.files[0], index);
+    }
+};
+
+window.handleTestimonialUpload = function(event, index) {
+    const file = event.target.files[0];
+    if (file) {
+        processTestimonialFile(file, index);
+    }
+    event.target.value = '';
+};
+
+async function processTestimonialFile(file, index) {
     if (!file.type.startsWith('image/')) {
         alert('이미지 파일만 업로드 가능합니다.');
         return;
     }
 
     showToast('사진 설정 업로드 중...');
-    const btnParams = event.target.parentElement;
-    const oldText = btnParams.innerHTML;
-    btnParams.innerHTML = '<i class="ri-loader-4-line" style="animation:spin .6s linear infinite;display:inline-block;"></i> 업로드 중...';
-    btnParams.style.pointerEvents = 'none';
+    const btnParams = document.getElementById(`testi-upload-btn-${index}`);
+    const oldText = btnParams ? btnParams.innerHTML : '';
+    if (btnParams) {
+        btnParams.innerHTML = '<i class="ri-loader-4-line" style="animation:spin .6s linear infinite;display:inline-block;"></i> 업로드 중...';
+        btnParams.style.pointerEvents = 'none';
+    }
 
     try {
         const result = await AdminStorage.uploadFile(file, 'testimonials');
@@ -521,11 +564,12 @@ window.handleTestimonialUpload = async function(event, index) {
     } catch (err) {
         console.error('후기 사진 업로드 실패:', err);
         showToast('❌ 업로드 실패: ' + err.message);
-        btnParams.innerHTML = oldText;
-        btnParams.style.pointerEvents = 'auto';
+        if (btnParams) {
+            btnParams.innerHTML = oldText;
+            btnParams.style.pointerEvents = 'auto';
+        }
     }
-    event.target.value = '';
-};
+}
 
 // ── Pricing ──────────────────────────────────────────────
 function renderPricingEditor() {

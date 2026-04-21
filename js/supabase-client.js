@@ -79,13 +79,12 @@ const PangData = {
         return data || [];
     },
 
-    /** 미디어 공개 URL 가져오기 */
+    /** 미디어 공개 URL 가져오기 (Bunny CDN 경유) */
     getMediaUrl(path) {
-        const { data } = _supabaseClient
-            .storage
-            .from(PANG_CONFIG.STORAGE_BUCKET)
-            .getPublicUrl(path);
-        return data?.publicUrl || '';
+        if (!path) return '';
+        // 이미 절대 URL이면 그대로 반환 (기존 데이터 호환)
+        if (path.startsWith('http')) return path;
+        return `${PANG_CONFIG.BUNNY_PULL_ZONE_URL}/${path}`;
     }
 };
 

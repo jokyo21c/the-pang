@@ -263,17 +263,29 @@ const AdminContent = {
 
 
 /* ═══════════════════════════════════════════════════════
-   미디어 업로드 — 기존 Supabase Storage (주석 처리)
+   미디어 업로드 (Supabase Storage)
+   ───────────────────────────────────────────────────────
+   Supabase Storage = 파일 저장소 (원본 보관)
+   Bunny.net       = CDN / 트래픽 전달용
+   반환 객체 구조 { path, url, type } 유지
    ═══════════════════════════════════════════════════════ */
-/*
-// [LEGACY] Supabase Storage 기반 업로드 — Bunny.net 마이그레이션으로 비활성화 (2026-04-19)
-const AdminStorage_Supabase = {
+const AdminStorage = {
+
+    /**
+     * 파일 업로드 → Supabase Storage 저장 → Bunny CDN URL 반환
+     * 저장: Supabase Storage (원본 보관)
+     * URL: Bunny CDN (트래픽 전달용)
+     * @param {File} file - 업로드할 파일 객체
+     * @param {string} folder - 저장 폴더 (예: 'portfolio/meokpang', 'hero', 'testimonials')
+     * @returns {{ path: string, url: string, type: 'image'|'video' }}
+     */
     async uploadFile(file, folder = 'portfolio') {
         const ext = file.name.split('.').pop();
         const timestamp = Date.now();
         const random = Math.random().toString(36).substring(2, 8);
         const filePath = `${folder}/${timestamp}_${random}.${ext}`;
 
+        // 1. Supabase Storage에 파일 저장 (원본 보관)
         const { data, error } = await _adminSupabase.storage
             .from(PANG_CONFIG.STORAGE_BUCKET)
             .upload(filePath, file, {
@@ -283,74 +295,11 @@ const AdminStorage_Supabase = {
 
         if (error) throw error;
 
-        const { data: urlData } = _adminSupabase.storage
-            .from(PANG_CONFIG.STORAGE_BUCKET)
-            .getPublicUrl(data.path);
+        // 2. DB에는 Bunny CDN URL 저장 (트래픽은 Bunny가 처리)
+        const cdnUrl = `${PANG_CONFIG.BUNNY_PULL_ZONE_URL}/${data.path}`;
 
         return {
             path: data.path,
-            url: urlData.publicUrl,
-            type: file.type.startsWith('video/') ? 'video' : 'image'
-        };
-    },
-
-    async deleteFile(path) {
-        const { error } = await _adminSupabase.storage
-            .from(PANG_CONFIG.STORAGE_BUCKET)
-            .remove([path]);
-        if (error) throw error;
-    },
-
-    async uploadDataUrl(dataUrl, filename, folder = 'portfolio') {
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-        const file = new File([blob], filename, { type: blob.type });
-        return this.uploadFile(file, folder);
-    }
-};
-*/
-
-
-/* ═══════════════════════════════════════════════════════
-   미디어 업로드 (Bunny.net Storage)
-   ───────────────────────────────────────────────────────
-   기존 Supabase Storage 로직에서 마이그레이션 (2026-04-19)
-   반환 객체 구조 { path, url, type } 100% 유지
-   ═══════════════════════════════════════════════════════ */
-const AdminStorage = {
-
-    /**
-     * 파일 업로드 → Bunny CDN URL 반환
-     * @param {File} file - 업로드할 파일 객체
-     * @param {string} folder - 저장 폴더 (예: 'portfolio/meokpang', 'hero')
-     * @returns {{ path: string, url: string, type: 'image'|'video' }}
-     */
-    async uploadFile(file, folder = 'portfolio') {
-        const ext = file.name.split('.').pop();
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2, 8);
-        const fileName = `${timestamp}_${random}.${ext}`;
-        const filePath = `${folder}/${fileName}`;
-
-        const storageUrl = `https://storage.bunnycdn.com/${PANG_CONFIG.BUNNY_STORAGE_ZONE}/${filePath}`;
-
-        const response = await fetch(storageUrl, {
-            method: 'PUT',
-            headers: {
-                'AccessKey': PANG_CONFIG.BUNNY_API_KEY,
-                'Content-Type': 'application/octet-stream',
-            },
-            body: file,
-        });
-
-        if (!response.ok) {
-            throw new Error(`Bunny.net 업로드 실패: ${response.status} ${response.statusText}`);
-        }
-
-        const cdnUrl = `${PANG_CONFIG.BUNNY_PULL_ZONE_URL}/${filePath}`;
-
-        return {
-            path: filePath,
             url: cdnUrl,
             type: file.type.startsWith('video/') ? 'video' : 'image'
         };
@@ -361,42 +310,46 @@ const AdminStorage = {
      * @param {string} path - Storage 내 파일 경로
      */
     async deleteFile(path) {
-        const storageUrl = `https://storage.bunnycdn.com/${PANG_CONFIG.BUNNY_STORAGE_ZONE}/${path}`;
-
-        const response = await fetch(storageUrl, {
-            method: 'DELETE',
-            headers: {
-                'AccessKey': PANG_CONFIG.BUNNY_API_KEY,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Bunny.net 삭제 실패: ${response.status}`);
-        }
+        const { error } = await _adminSupabase.storage
+            .from(PANG_CONFIG.STORAGE_BUCKET)
+            .remove([path]);
+        if (error) throw error;
     },
 
     /**
      * 진행률 표시 업로드 (대용량 영상용)
-     * XMLHttpRequest 기반으로 upload.onprogress 이벤트 활용
+     * Supabase Storage 대상, XHR 기반 upload.onprogress 활용
      * @param {File} file - 업로드할 파일 객체
      * @param {string} folder - 저장 폴더
      * @param {function(number)} onProgress - 진행률 콜백 (0~100)
      * @returns {Promise<{ path: string, url: string, type: 'image'|'video' }>}
      */
     uploadFileWithProgress(file, folder = 'portfolio', onProgress) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const ext = file.name.split('.').pop();
             const timestamp = Date.now();
             const random = Math.random().toString(36).substring(2, 8);
             const fileName = `${timestamp}_${random}.${ext}`;
             const filePath = `${folder}/${fileName}`;
 
-            const storageUrl = `https://storage.bunnycdn.com/${PANG_CONFIG.BUNNY_STORAGE_ZONE}/${filePath}`;
+            const storageUrl = `${PANG_CONFIG.SUPABASE_URL}/storage/v1/object/${PANG_CONFIG.STORAGE_BUCKET}/${filePath}`;
+
+            // Supabase v2: getSession()으로 현재 세션 토큰 획득
+            let accessToken = '';
+            try {
+                const { data: { session } } = await _adminSupabase.auth.getSession();
+                accessToken = session?.access_token || '';
+            } catch (e) {
+                console.warn('[AdminStorage] 세션 토큰 획득 실패, anon key로 시도:', e.message);
+            }
 
             const xhr = new XMLHttpRequest();
-            xhr.open('PUT', storageUrl, true);
-            xhr.setRequestHeader('AccessKey', PANG_CONFIG.BUNNY_API_KEY);
-            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+            xhr.open('POST', storageUrl, true);
+            xhr.setRequestHeader('Authorization', `Bearer ${accessToken || PANG_CONFIG.SUPABASE_ANON_KEY}`);
+            xhr.setRequestHeader('apikey', PANG_CONFIG.SUPABASE_ANON_KEY);
+            xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+            xhr.setRequestHeader('x-upsert', 'false');
+            xhr.setRequestHeader('Cache-Control', 'max-age=31536000');
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable && onProgress) {
@@ -407,14 +360,16 @@ const AdminStorage = {
 
             xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
+                    // DB에는 Bunny CDN URL 저장 (트래픽은 Bunny가 처리)
                     const cdnUrl = `${PANG_CONFIG.BUNNY_PULL_ZONE_URL}/${filePath}`;
+
                     resolve({
                         path: filePath,
                         url: cdnUrl,
                         type: file.type.startsWith('video/') ? 'video' : 'image'
                     });
                 } else {
-                    reject(new Error(`Bunny.net 업로드 실패: ${xhr.status}`));
+                    reject(new Error(`Supabase Storage 업로드 실패: ${xhr.status}`));
                 }
             };
 
