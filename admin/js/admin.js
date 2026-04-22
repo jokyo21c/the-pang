@@ -559,7 +559,9 @@ async function processTestimonialFile(file, index) {
         const result = await AdminStorage.uploadFile(file, 'testimonials');
         saveTestimonials(); 
         content.testimonials[index].photo = result.url;
-        renderTestimonialEditor(); 
+        renderTestimonialEditor();
+        // 포트폴리오와 동일하게 DB에 즉시 저장 (저장 버튼 안 눌러도 유실 방지)
+        try { await ContentStore.save(content); } catch(e) { console.warn('후기 자동저장 실패:', e); }
         showToast('사진이 업로드되었습니다!');
     } catch (err) {
         console.error('후기 사진 업로드 실패:', err);
