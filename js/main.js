@@ -1009,10 +1009,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (vw < 200) {
                 if (window.innerWidth > 768 && wrap.closest('.pang-slide')) {
                     const container = wrap.closest('.container');
-                    vw = container ? (container.offsetWidth - 40) / 2 : window.innerWidth / 3;
+                    vw = (container && container.offsetWidth > 0) ? (container.offsetWidth - 40) / 2 : window.innerWidth / 3;
                 } else {
                     const gridCol = wrap.closest('.category-thumbnails');
-                    vw = gridCol ? gridCol.offsetWidth : (wrap.closest('.container') ? wrap.closest('.container').offsetWidth / 2 : window.innerWidth / 2);
+                    const isMobile = window.innerWidth <= 768;
+                    let fallbackVw = isMobile ? window.innerWidth : window.innerWidth / 2;
+                    
+                    const container = wrap.closest('.container');
+                    if (container && container.offsetWidth > 0) {
+                        // 모바일에서는 컨테이너 전체 폭 사용, PC에서는 절반 사용
+                        fallbackVw = isMobile ? container.offsetWidth : container.offsetWidth / 2;
+                        // 모바일에서 패딩을 고려하여 보정 (필요한 경우)
+                        if (isMobile && getComputedStyle(container).paddingLeft) {
+                            const pl = parseFloat(getComputedStyle(container).paddingLeft) || 0;
+                            const pr = parseFloat(getComputedStyle(container).paddingRight) || 0;
+                            fallbackVw = fallbackVw - pl - pr;
+                        }
+                    }
+                    
+                    vw = (gridCol && gridCol.offsetWidth > 0) ? gridCol.offsetWidth : fallbackVw;
                 }
             }
             return vw;
@@ -1102,15 +1117,23 @@ document.addEventListener('DOMContentLoaded', () => {
             Array.from(track.children).forEach(el => { el.style.width = itemWidth + 'px'; });
             // firstClone은 항상 position total+1 (lastClone=0, items=1..N, firstClone=N+1)
             const firstClonePos = total + 1;
-            // firstClone을 is-center로 표시
+            // firstClone을 is-center로 표시 및 비디오 재생
             const fc = track.lastElementChild;
-            if (fc) { fc.classList.remove('is-side', 'is-far'); fc.classList.add('is-center'); }
+            if (fc) { 
+                fc.classList.remove('is-side', 'is-far'); 
+                fc.classList.add('is-center'); 
+                const v = fc.querySelector('video');
+                if (v) { v.muted = true; v.loop = true; v.play().catch(()=>{}); }
+            }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
             track.style.transform = `translateX(${vw / 2 - itemWidth * (firstClonePos + 0.5)}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
                 // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
                 Array.from(track.children).forEach(el => { el.style.transition = 'none'; });
+                // 클론 비디오 정지
+                if (fc) { const v = fc.querySelector('video'); if (v) { v.pause(); v.currentTime = 0; } }
+                
                 // item0(position 1)로 순간이동
                 currentIndex = 0;
                 cloneIdx = 1;
@@ -1138,15 +1161,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const vw = getVw();
             const itemWidth = vw / 3;
             Array.from(track.children).forEach(el => { el.style.width = itemWidth + 'px'; });
-            // lastClone을 is-center로 표시
+            // lastClone을 is-center로 표시 및 비디오 재생
             const lc = track.firstElementChild;
-            if (lc) { lc.classList.remove('is-side', 'is-far'); lc.classList.add('is-center'); }
+            if (lc) { 
+                lc.classList.remove('is-side', 'is-far'); 
+                lc.classList.add('is-center'); 
+                const v = lc.querySelector('video');
+                if (v) { v.muted = true; v.loop = true; v.play().catch(()=>{}); }
+            }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
             track.style.transform = `translateX(${vw / 2 - itemWidth * 0.5}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
                 // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
                 Array.from(track.children).forEach(el => { el.style.transition = 'none'; });
+                // 클론 비디오 정지
+                if (lc) { const v = lc.querySelector('video'); if (v) { v.pause(); v.currentTime = 0; } }
+                
                 // itemN-1(position N)로 순간이동
                 currentIndex = total - 1;
                 cloneIdx = total;
