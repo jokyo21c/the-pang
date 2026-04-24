@@ -1096,6 +1096,8 @@ document.addEventListener('DOMContentLoaded', () => {
             track.style.transform = `translateX(${vw / 2 - itemWidth * (firstClonePos + 0.5)}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
+                // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
+                Array.from(track.children).forEach(el => { el.style.transition = 'none'; });
                 // item0(position 1)로 순간이동
                 currentIndex = 0;
                 cloneIdx = 1;
@@ -1104,7 +1106,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyItemStates(0);
                 updateDots(0);
                 wrap.dataset.slideIndex = 0;
-                isAnimating = false;
+                // 다음 프레임에 아이템 전환 복원
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        Array.from(track.children).forEach(el => { el.style.transition = ''; });
+                        isAnimating = false;
+                    });
+                });
             });
         }
 
@@ -1124,6 +1132,8 @@ document.addEventListener('DOMContentLoaded', () => {
             track.style.transform = `translateX(${vw / 2 - itemWidth * 0.5}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
+                // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
+                Array.from(track.children).forEach(el => { el.style.transition = 'none'; });
                 // itemN-1(position N)로 순간이동
                 currentIndex = total - 1;
                 cloneIdx = total;
@@ -1132,7 +1142,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyItemStates(total - 1);
                 updateDots(total - 1);
                 wrap.dataset.slideIndex = total - 1;
-                isAnimating = false;
+                // 다음 프레임에 아이템 전환 복원
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        Array.from(track.children).forEach(el => { el.style.transition = ''; });
+                        isAnimating = false;
+                    });
+                });
             });
         }
 
