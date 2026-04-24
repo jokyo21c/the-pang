@@ -1000,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const iw = vw / 3;
             Array.from(track.children).forEach(el => { el.style.width = iw + 'px'; });
             track.style.transition = 'none';
-            track.style.transform = `translateX(${vw / 2 - iw * (cloneIdx + 0.5)}px)`;
+            track.style.transform = `translateX(${getCenterOffset() - iw * (cloneIdx + 0.5)}px)`;
             applyItemStates(safeIdx);
         };
 
@@ -1013,24 +1013,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     const gridCol = wrap.closest('.category-thumbnails');
                     const isMobile = window.innerWidth <= 768;
+                    // 모바일에서는 화면 전체 폭, PC에서는 절반 사용
                     let fallbackVw = isMobile ? window.innerWidth : window.innerWidth / 2;
-                    
-                    const container = wrap.closest('.container');
-                    if (container && container.offsetWidth > 0) {
-                        // 모바일에서는 컨테이너 전체 폭 사용, PC에서는 절반 사용
-                        fallbackVw = isMobile ? container.offsetWidth : container.offsetWidth / 2;
-                        // 모바일에서 패딩을 고려하여 보정 (필요한 경우)
-                        if (isMobile && getComputedStyle(container).paddingLeft) {
-                            const pl = parseFloat(getComputedStyle(container).paddingLeft) || 0;
-                            const pr = parseFloat(getComputedStyle(container).paddingRight) || 0;
-                            fallbackVw = fallbackVw - pl - pr;
-                        }
-                    }
-                    
                     vw = (gridCol && gridCol.offsetWidth > 0) ? gridCol.offsetWidth : fallbackVw;
+                    // 모바일의 경우 화면 밖으로 넘어가더라도 vw를 화면 전체 폭으로 유지하여 아이템 크기 보장
+                    if (isMobile) vw = window.innerWidth; 
                 }
+            } else if (window.innerWidth <= 768) {
+                // 모바일 환경이면 viewport.offsetWidth가 패딩 때문에 작더라도 화면 전체 너비로 보정
+                vw = window.innerWidth;
             }
             return vw;
+        }
+
+        // 모바일 환경에서 컨테이너의 패딩(ex. 63px) 때문에 화면 중앙과 래퍼 중앙이 불일치하는 문제 해결
+        function getCenterOffset() {
+            if (window.innerWidth <= 768) {
+                const wrapLeft = wrap.getBoundingClientRect().left || 0;
+                return (window.innerWidth / 2) - wrapLeft;
+            }
+            return getVw() / 2;
         }
 
         function updateDots(realIdx) {
@@ -1090,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 클론 포함 전체 아이템 너비 설정
             Array.from(track.children).forEach(el => { el.style.width = itemWidth + 'px'; });
 
-            const translateX = vw / 2 - itemWidth * (cloneIdx + 0.5);
+            const translateX = getCenterOffset() - itemWidth * (cloneIdx + 0.5);
             track.style.transition = animate ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
             track.style.transform = `translateX(${translateX}px)`;
 
@@ -1126,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (v) { v.muted = true; v.loop = true; v.play().catch(()=>{}); }
             }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-            track.style.transform = `translateX(${vw / 2 - itemWidth * (firstClonePos + 0.5)}px)`;
+            track.style.transform = `translateX(${getCenterOffset() - itemWidth * (firstClonePos + 0.5)}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
                 // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
@@ -1138,7 +1140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentIndex = 0;
                 cloneIdx = 1;
                 track.style.transition = 'none';
-                track.style.transform = `translateX(${vw / 2 - itemWidth * 1.5}px)`;
+                track.style.transform = `translateX(${getCenterOffset() - itemWidth * 1.5}px)`;
                 applyItemStates(0);
                 updateDots(0);
                 wrap.dataset.slideIndex = 0;
@@ -1170,7 +1172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (v) { v.muted = true; v.loop = true; v.play().catch(()=>{}); }
             }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-            track.style.transform = `translateX(${vw / 2 - itemWidth * 0.5}px)`;
+            track.style.transform = `translateX(${getCenterOffset() - itemWidth * 0.5}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
                 // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
@@ -1182,7 +1184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentIndex = total - 1;
                 cloneIdx = total;
                 track.style.transition = 'none';
-                track.style.transform = `translateX(${vw / 2 - itemWidth * (total + 0.5)}px)`;
+                track.style.transform = `translateX(${getCenterOffset() - itemWidth * (total + 0.5)}px)`;
                 applyItemStates(total - 1);
                 updateDots(total - 1);
                 wrap.dataset.slideIndex = total - 1;
