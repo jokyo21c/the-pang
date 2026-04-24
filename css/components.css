@@ -1263,11 +1263,20 @@
         display: none !important;
     }
 
-    /* 팡 섹션 안의 지금 견적 받기 버튼 현재 크기에서 10% 추가 축소 (모바일엔 영향 없음) */
+    /* 1. 왼쪽 텍스트 영역을 전체 높이에 맞게 확장 */
+    .pang-slide .category-info {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        align-items: flex-start; /* 요소들이 가로로 늘어나는 현상 방지 */
+    }
+
+    /* 2. 팡 섹션 안의 지금 견적 받기 버튼 위치를 자동으로 화살표 라인에 맞춤 */
     .pang-slide .category-info .btn--primary.btn--small {
         transform: scale(0.72);
         transform-origin: left center;
-        margin-top: 5px; /* list(margin-bottom:15px) + 5px = 20px */
+        margin-top: auto;      /* 위쪽 공간을 자동으로 채워 버튼을 아래로 밈 */
+        margin-bottom: 58px;   /* 화살표 아랫면과 완벽히 일치하도록 4px 추가 보정 (기존 62px -> 58px) */
         border-width: 2.7px; /* 10% 축소(scale 0.72) 환경에서 테두리 두께 보정 */
     }
 }
