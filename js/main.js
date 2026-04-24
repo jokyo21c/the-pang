@@ -971,6 +971,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const cl = items[items.length - 1].cloneNode(true);
             cf.classList.add('pang-loop-clone');
             cl.classList.add('pang-loop-clone');
+            // cloneNode(true)는 원본의 is-center 등 클래스까지 복사 → 반드시 초기화
+            [cf, cl].forEach(clone => {
+                clone.classList.remove('is-center', 'is-side', 'is-far'); // 복사된 클래스 제거
+                clone.classList.add('is-side'); // 클론은 항상 비활성 대기 상태
+                const v = clone.querySelector('video');
+                if (v) { v.pause(); v.currentTime = 0; v.muted = true; v.autoplay = false; }
+            });
             track.appendChild(cf);           // 맨 뒤: 첫 아이템 클론 대기
             track.insertBefore(cl, track.firstChild); // 맨 앞: 마지막 아이템 클론 대기
         }
@@ -986,9 +993,15 @@ document.addEventListener('DOMContentLoaded', () => {
         wrap._reinitItems = function(reset) {
             _origReinit.call(wrap, reset);
             setupLoopClones();
+            // 클론 재설정 후 위치와 재생 상태를 명시적으로 복원
+            const safeIdx = Math.min(Math.max(currentIndex, 0), total - 1);
+            cloneIdx = safeIdx + 1;
             const vw = getVw();
             const iw = vw / 3;
             Array.from(track.children).forEach(el => { el.style.width = iw + 'px'; });
+            track.style.transition = 'none';
+            track.style.transform = `translateX(${vw / 2 - iw * (cloneIdx + 0.5)}px)`;
+            applyItemStates(safeIdx);
         };
 
         function getVw() {
