@@ -1251,10 +1251,15 @@
 }
 
 @media (min-width: 769px) {
+    /* 팡 섹션 시작점 → 탭 버튼 간격: 150px에서 170px로 확대 */
+    .section.pang-slide {
+        padding-top: 170px !important;
+    }
+
     .pc-pang-tabs-wrapper {
         display: block;
         padding-top: 0px; 
-        margin-bottom: 50px; /* 탭 → 제목 간격: 50px */
+        margin-bottom: 100px; /* 탭 버튼 → 내용 간격: 50px에서 100px로 2배 확대 */
         position: relative;
         z-index: 10;
     }

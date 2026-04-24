@@ -437,8 +437,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = document.querySelector(targetId);
             if (target) {
                 e.preventDefault();
-                const offset = 80;
-                const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                let top = target.getBoundingClientRect().top + window.pageYOffset - 72;
+                
+                // PC 팡 섹션 중앙 정렬 특수 로직
+                if (window.innerWidth > 768 && target.classList.contains('pang-slide')) {
+                    const tabs = target.querySelector('.pc-pang-tabs-wrapper');
+                    const btn = target.querySelector('.btn--primary');
+                    if (tabs && btn) {
+                        const tabsTop = tabs.getBoundingClientRect().top;
+                        const btnBottom = btn.getBoundingClientRect().bottom;
+                        const contentMidpoint = tabsTop + (btnBottom - tabsTop) / 2;
+                        const viewportMidpoint = window.innerHeight / 2;
+                        top = window.pageYOffset + contentMidpoint - viewportMidpoint;
+                    }
+                }
+                
                 window.scrollTo({ top, behavior: 'smooth' });
             }
         });
@@ -1508,8 +1521,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 3. 부드러운 스크롤 이동 (팡 통합 슬라이더 래퍼 기준)
                     const sliderNode = document.getElementById('pangSectionSlider');
                     if (sliderNode) {
-                        const top = sliderNode.getBoundingClientRect().top + window.pageYOffset - 70;
-                        window.scrollTo({ top: top, behavior: 'smooth' });
+                        setTimeout(() => {
+                            const activeSection = document.getElementById(targetId);
+                            let finalTop = sliderNode.getBoundingClientRect().top + window.pageYOffset - 72;
+                            if (activeSection) {
+                                const tabs = activeSection.querySelector('.pc-pang-tabs-wrapper');
+                                const btn = activeSection.querySelector('.btn--primary');
+                                if (tabs && btn) {
+                                    const tabsTop = tabs.getBoundingClientRect().top;
+                                    const btnBottom = btn.getBoundingClientRect().bottom;
+                                    const contentMidpoint = tabsTop + (btnBottom - tabsTop) / 2;
+                                    const viewportMidpoint = window.innerHeight / 2;
+                                    finalTop = window.pageYOffset + contentMidpoint - viewportMidpoint;
+                                }
+                            }
+                            window.scrollTo({ top: finalTop, behavior: 'smooth' });
+                        }, 60);
                     }
                     return;
                 }
@@ -1885,11 +1912,29 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 }
             });
             setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
-            // 팡 슬라이더 영역으로 스크롤
+            // 팡 슬라이더 영역으로 스크롤 (헤더 높이 72px에 맞춰 정렬)
             const sliderNode = document.getElementById('pangSectionSlider');
             if (sliderNode) {
-                const top = sliderNode.getBoundingClientRect().top + window.pageYOffset - 70;
-                window.scrollTo({ top, behavior: 'smooth' });
+                let top = sliderNode.getBoundingClientRect().top + window.pageYOffset - 72;
+                
+                // PC 팡 섹션 중앙 정렬 특수 로직
+                const activeSection = document.getElementById(pangId);
+                if (activeSection) {
+                    setTimeout(() => {
+                        const tabs = activeSection.querySelector('.pc-pang-tabs-wrapper');
+                        const btn = activeSection.querySelector('.btn--primary');
+                        let finalTop = sliderNode.getBoundingClientRect().top + window.pageYOffset - 72;
+                        if (tabs && btn) {
+                            const tabsTop = tabs.getBoundingClientRect().top;
+                            const btnBottom = btn.getBoundingClientRect().bottom;
+                            const contentMidpoint = tabsTop + (btnBottom - tabsTop) / 2;
+                            const viewportMidpoint = window.innerHeight / 2;
+                            finalTop = window.pageYOffset + contentMidpoint - viewportMidpoint;
+                        }
+                        window.scrollTo({ top: finalTop, behavior: 'smooth' });
+                    }, 60); // resize 이벤트(50ms) 이후 실행되도록 60ms 대기
+                    return;
+                }
             }
         } else {
             // 모바일: 슬라이드 이동 로직
@@ -1909,9 +1954,9 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                     if (link.getAttribute('href') === `#${pangId}`) link.classList.add('active');
                 });
             }
-            // 팡 슬라이더 영역으로 스크롤
+            // 팡 슬라이더 영역으로 스크롤 (헤더 높이 72px에 맞춰 정렬)
             if (slider) {
-                const top = slider.getBoundingClientRect().top + window.pageYOffset - 70;
+                const top = slider.getBoundingClientRect().top + window.pageYOffset - 72;
                 window.scrollTo({ top, behavior: 'smooth' });
             }
         }
