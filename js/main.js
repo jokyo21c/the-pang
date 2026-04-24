@@ -1013,25 +1013,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     const gridCol = wrap.closest('.category-thumbnails');
                     const isMobile = window.innerWidth <= 768;
-                    // 모바일에서는 화면 전체 폭, PC에서는 절반 사용
                     let fallbackVw = isMobile ? window.innerWidth : window.innerWidth / 2;
+                    
+                    const container = wrap.closest('.container');
+                    if (container && container.offsetWidth > 0) {
+                        fallbackVw = isMobile ? container.offsetWidth : container.offsetWidth / 2;
+                        if (isMobile && getComputedStyle(container).paddingLeft) {
+                            const pl = parseFloat(getComputedStyle(container).paddingLeft) || 0;
+                            const pr = parseFloat(getComputedStyle(container).paddingRight) || 0;
+                            fallbackVw = fallbackVw - pl - pr;
+                        }
+                    }
+                    
                     vw = (gridCol && gridCol.offsetWidth > 0) ? gridCol.offsetWidth : fallbackVw;
-                    // 모바일의 경우 화면 밖으로 넘어가더라도 vw를 화면 전체 폭으로 유지하여 아이템 크기 보장
-                    if (isMobile) vw = window.innerWidth; 
                 }
-            } else if (window.innerWidth <= 768) {
-                // 모바일 환경이면 viewport.offsetWidth가 패딩 때문에 작더라도 화면 전체 너비로 보정
-                vw = window.innerWidth;
             }
             return vw;
         }
 
-        // 모바일 환경에서 컨테이너의 패딩(ex. 63px) 때문에 화면 중앙과 래퍼 중앙이 불일치하는 문제 해결
         function getCenterOffset() {
-            if (window.innerWidth <= 768) {
-                const wrapLeft = wrap.getBoundingClientRect().left || 0;
-                return (window.innerWidth / 2) - wrapLeft;
-            }
             return getVw() / 2;
         }
 

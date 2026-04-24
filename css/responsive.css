@@ -1173,6 +1173,11 @@
     /* ── 공통 모바일 네비게이션 포맷 (하단 한 줄: < dots >) ── */
     /* 대상: 팡 내 썸네일(thumb-all), 서비스, 가격, 뉴스 슬라이더 */
     /* ※ 팡 이동 예고카드(pang-next-preview)는 이 규칙과 무관 */
+    .thumb-all-wrap {
+        width: 100vw;
+        margin-left: -63px;
+    }
+
     .thumb-all-wrap,
     .service-slider-container,
     .pricing-slider-container,
