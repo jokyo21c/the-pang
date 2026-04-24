@@ -920,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wrap._reinitItems = function (resetPosition) {
             if (resetPosition === undefined) resetPosition = true;
 
-            items = Array.from(track.querySelectorAll('.portfolio-carousel-item'));
+            items = Array.from(track.querySelectorAll('.portfolio-carousel-item:not(.pang-loop-clone)'));
             total = items.length;
 
             // 클릭 이벤트만 등록 (onended 자동이동 제거 - 무작위 점프 방지)
