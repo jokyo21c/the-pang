@@ -958,10 +958,38 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         let isAnimating = false;
+        // cloneIdx: 클론 포함 트랙에서의 절대 위치 (lastClone=0, item0=1, ..., itemN-1=N, firstClone=N+1)
+        let cloneIdx = 1;
+
+        // ── 영구 클론 설정 ──────────────────────────────────────────
+        // 트랙 구조: [lastClone] [item0] [item1] ... [itemN-1] [firstClone]
+        // 마지막 뒤에 첫 아이템이, 첫 앞에 마지막 아이템이 항상 대기
+        function setupLoopClones() {
+            track.querySelectorAll('.pang-loop-clone').forEach(c => c.remove());
+            if (items.length < 1) return;
+            const cf = items[0].cloneNode(true);
+            const cl = items[items.length - 1].cloneNode(true);
+            cf.classList.add('pang-loop-clone');
+            cl.classList.add('pang-loop-clone');
+            track.appendChild(cf);           // 맨 뒤: 첫 아이템 클론 대기
+            track.insertBefore(cl, track.firstChild); // 맨 앞: 마지막 아이템 클론 대기
+        }
+
+        // 클론 먼저 설정, 이후 _reinitItems 호출 시 updateCarousel이 클론 인식
+        setupLoopClones();
 
         // 처음 아이템 바인딩 실행 (초기화이므로 0번 인덱스로 설정)
         wrap._reinitItems(true);
 
+        // Supabase 재로드 시 클론도 갱신되도록 _reinitItems 래핑
+        const _origReinit = wrap._reinitItems;
+        wrap._reinitItems = function(reset) {
+            _origReinit.call(wrap, reset);
+            setupLoopClones();
+            const vw = getVw();
+            const iw = vw / 3;
+            Array.from(track.children).forEach(el => { el.style.width = iw + 'px'; });
+        };
 
         function getVw() {
             let vw = (viewport || wrap).offsetWidth;
@@ -992,9 +1020,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        function applyItemStates(centerIdx) {
+        function applyItemStates(centerRealIdx) {
+            // 실제 아이템 상태
             items.forEach((item, i) => {
-                let dist = Math.abs(i - centerIdx);
+                let dist = Math.abs(i - centerRealIdx);
                 if (total >= 3 && dist > total / 2) dist = total - dist;
                 item.classList.remove('is-center', 'is-side', 'is-far');
                 const video = item.querySelector('video');
@@ -1007,27 +1036,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         video.play().catch(e => console.warn('Autoplay prevented:', e));
                     }
                 } else {
-                    if (dist === 1) item.classList.add('is-side');
-                    else item.classList.add('is-far');
+                    item.classList.add(dist === 1 ? 'is-side' : 'is-far');
                     if (video) { video.pause(); video.currentTime = 0; }
                 }
             });
+            // 클론: 항상 is-side (경계 인근에 대기 중인 상태)
+            track.querySelectorAll('.pang-loop-clone').forEach(c => {
+                c.classList.remove('is-center', 'is-side', 'is-far');
+                c.classList.add('is-side');
+            });
         }
 
-        function updateCarousel(index, animate) {
+        function updateCarousel(realIdx, animate) {
             if (animate === undefined) animate = true;
             if (isAnimating && animate) return;
             if (animate) isAnimating = true;
 
-            if (index < 0) index = total - 1;
-            if (index >= total) index = 0;
-            currentIndex = index;
+            if (realIdx < 0) realIdx = total - 1;
+            if (realIdx >= total) realIdx = 0;
+            currentIndex = realIdx;
+            cloneIdx = realIdx + 1; // lastClone이 position 0이므로 실제 아이템은 +1 offset
 
             const vw = getVw();
             const itemWidth = vw / 3;
-            items.forEach(item => { item.style.width = itemWidth + 'px'; });
+            // 클론 포함 전체 아이템 너비 설정
+            Array.from(track.children).forEach(el => { el.style.width = itemWidth + 'px'; });
 
-            const translateX = vw / 2 - itemWidth * (currentIndex + 0.5);
+            const translateX = vw / 2 - itemWidth * (cloneIdx + 0.5);
             track.style.transition = animate ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
             track.style.transform = `translateX(${translateX}px)`;
 
@@ -1043,28 +1078,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 경계에서 같은 방향으로 계속 슬라이딩 (클론 삽입 방식)
+        // 다음 슬라이드: 마지막 뒤에 대기 중인 firstClone으로 자연스럽게 슬라이딩
         function slideNext() {
             if (isAnimating) return;
             if (currentIndex < total - 1) { updateCarousel(currentIndex + 1); return; }
-            // 마지막 → 첫 번째: 오른쪽으로 계속 슬라이딩
+            // 마지막 아이템 → firstClone(N+1 위치) 으로 오른쪽 슬라이딩
             isAnimating = true;
             const vw = getVw();
             const itemWidth = vw / 3;
-            const clone = items[0].cloneNode(true);
-            clone.style.width = itemWidth + 'px';
-            clone.classList.add('wrap-clone');
-            track.appendChild(clone);
-            items.forEach(item => { item.style.width = itemWidth + 'px'; });
-            const targetX = vw / 2 - itemWidth * (total + 0.5);
+            Array.from(track.children).forEach(el => { el.style.width = itemWidth + 'px'; });
+            // firstClone은 항상 position total+1 (lastClone=0, items=1..N, firstClone=N+1)
+            const firstClonePos = total + 1;
+            // firstClone을 is-center로 표시
+            const fc = track.lastElementChild;
+            if (fc) { fc.classList.remove('is-side', 'is-far'); fc.classList.add('is-center'); }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-            track.style.transform = `translateX(${targetX}px)`;
+            track.style.transform = `translateX(${vw / 2 - itemWidth * (firstClonePos + 0.5)}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
-                clone.remove();
+                // item0(position 1)로 순간이동
                 currentIndex = 0;
+                cloneIdx = 1;
                 track.style.transition = 'none';
-                track.style.transform = `translateX(${vw / 2 - itemWidth * 0.5}px)`;
+                track.style.transform = `translateX(${vw / 2 - itemWidth * 1.5}px)`;
                 applyItemStates(0);
                 updateDots(0);
                 wrap.dataset.slideIndex = 0;
@@ -1072,31 +1108,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // 이전 슬라이드: 첫 앞에 대기 중인 lastClone으로 자연스럽게 슬라이딩
         function slidePrev() {
             if (isAnimating) return;
             if (currentIndex > 0) { updateCarousel(currentIndex - 1); return; }
-            // 첫 번째 → 마지막: 왼쪽으로 계속 슬라이딩
+            // 첫 번째 아이템 → lastClone(position 0) 으로 왼쪽 슬라이딩
             isAnimating = true;
             const vw = getVw();
             const itemWidth = vw / 3;
-            const clone = items[total - 1].cloneNode(true);
-            clone.style.width = itemWidth + 'px';
-            clone.classList.add('wrap-clone');
-            track.insertBefore(clone, track.firstChild);
-            // 클론이 삽입되었으므로 현재 위치를 1칸 오른쪽으로 즉시 보정(transition 없이)
-            items.forEach(item => { item.style.width = itemWidth + 'px'; });
-            track.style.transition = 'none';
-            track.style.transform = `translateX(${vw / 2 - itemWidth * 1.5}px)`;
-            track.getBoundingClientRect(); // reflow 강제
-            // 클론(위치 0)으로 왼쪽 방향 슬라이딩
+            Array.from(track.children).forEach(el => { el.style.width = itemWidth + 'px'; });
+            // lastClone을 is-center로 표시
+            const lc = track.firstElementChild;
+            if (lc) { lc.classList.remove('is-side', 'is-far'); lc.classList.add('is-center'); }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
             track.style.transform = `translateX(${vw / 2 - itemWidth * 0.5}px)`;
             track.addEventListener('transitionend', function onEnd() {
                 track.removeEventListener('transitionend', onEnd);
-                clone.remove();
+                // itemN-1(position N)로 순간이동
                 currentIndex = total - 1;
+                cloneIdx = total;
                 track.style.transition = 'none';
-                track.style.transform = `translateX(${vw / 2 - itemWidth * (total - 0.5)}px)`;
+                track.style.transform = `translateX(${vw / 2 - itemWidth * (total + 0.5)}px)`;
                 applyItemStates(total - 1);
                 updateDots(total - 1);
                 wrap.dataset.slideIndex = total - 1;
@@ -1106,14 +1138,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         wrap._updateCarousel = (index, animate) => updateCarousel(index, animate);
 
-        // 레이아웃 후 초기화 (offsetWidth 확보)
         requestAnimationFrame(() => updateCarousel(0, false));
         setTimeout(() => updateCarousel(currentIndex, false), 300);
 
         if (prevBtn) prevBtn.addEventListener('click', () => slidePrev());
         if (nextBtn) nextBtn.addEventListener('click', () => slideNext());
 
-        // Dots 클릭
         if (dotsContainer) {
             dotsContainer.addEventListener('click', (e) => {
                 const dot = e.target.closest('.thumb-all-dot');
@@ -1127,7 +1157,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 터치 스와이프
         let touchStartX = 0;
         let touchStartY = 0;
         const touchTarget = viewport || wrap;
@@ -1147,9 +1176,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 리사이즈 시 재계산
         window.addEventListener('resize', () => updateCarousel(currentIndex, false));
     };
+
 
 
 
