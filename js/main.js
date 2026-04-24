@@ -599,19 +599,21 @@ document.addEventListener('DOMContentLoaded', () => {
             setTransform(currentIndex);
             updateDots(currentIndex);
             wrap.dataset.slideIndex = currentIndex - 1;
-
-            clearTimeout(wrap._fallbackTimer);
-            wrap._fallbackTimer = setTimeout(() => {
-                isTransitioning = false;
-                if (currentIndex === 0) {
-                    currentIndex = totalPages;
-                    setTransform(currentIndex, false);
-                } else if (currentIndex === totalPages + 1) {
-                    currentIndex = 1;
-                    setTransform(currentIndex, false);
-                }
-            }, 450);
         };
+
+        // transitionend 이벤트로 정확한 타이밍에 무한루프 처리 (항상 같은 방향으로 슬라이딩)
+        track.addEventListener('transitionend', () => {
+            if (currentIndex === 0) {
+                // 첫 번째 clone(맨앞)에 도달 → 실제 마지막 슬라이드로 순간이동
+                currentIndex = totalPages;
+                setTransform(currentIndex, false);
+            } else if (currentIndex === totalPages + 1) {
+                // 마지막 clone(맨뒤)에 도달 → 실제 첫 번째 슬라이드로 순간이동
+                currentIndex = 1;
+                setTransform(currentIndex, false);
+            }
+            isTransitioning = false;
+        });
 
         // Initial setup
         setTransform(currentIndex, false);
@@ -955,37 +957,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+        let isAnimating = false;
+
         // 처음 아이템 바인딩 실행 (초기화이므로 0번 인덱스로 설정)
         wrap._reinitItems(true);
 
-        function updateDots(idx) {
-            if (!dotsContainer) return;
-            const dots = dotsContainer.querySelectorAll('.thumb-all-dot');
-            if (!dots.length) return;
-            if (total <= MAX_DOTS) {
-                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-            } else {
-                const half = Math.floor(MAX_DOTS / 2);
-                let winStart = idx - half;
-                winStart = Math.max(0, Math.min(winStart, total - MAX_DOTS));
-                const activeDotIdx = idx - winStart;
-                dots.forEach((d, i) => d.classList.toggle('active', i === activeDotIdx));
-            }
-        }
 
-        function updateCarousel(index, animate) {
-            if (animate === undefined) animate = true;
-            // 무한 루프
-            if (index < 0) index = total - 1;
-            if (index >= total) index = 0;
-            currentIndex = index;
-
+        function getVw() {
             let vw = (viewport || wrap).offsetWidth;
-            // PC 팡 섹션: 그리드 레이아웃이 아직 계산되지 않아 viewport 너비가 작을 수 있음
-            // threshold를 200으로 높여서 더 넓은 범위에서 폴백 적용
             if (vw < 200) {
                 if (window.innerWidth > 768 && wrap.closest('.pang-slide')) {
-                    // PC 팡 섹션: container의 grid 1fr 1fr 우측열 너비 추정
                     const container = wrap.closest('.container');
                     vw = container ? (container.offsetWidth - 40) / 2 : window.innerWidth / 3;
                 } else {
@@ -993,35 +974,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     vw = gridCol ? gridCol.offsetWidth : (wrap.closest('.container') ? wrap.closest('.container').offsetWidth / 2 : window.innerWidth / 2);
                 }
             }
+            return vw;
+        }
 
-            const itemWidth = vw / 3;
+        function updateDots(realIdx) {
+            if (!dotsContainer) return;
+            const dots = dotsContainer.querySelectorAll('.thumb-all-dot');
+            if (!dots.length) return;
+            if (total <= MAX_DOTS) {
+                dots.forEach((d, i) => d.classList.toggle('active', i === realIdx));
+            } else {
+                const half = Math.floor(MAX_DOTS / 2);
+                let winStart = realIdx - half;
+                winStart = Math.max(0, Math.min(winStart, total - MAX_DOTS));
+                const activeDotIdx = realIdx - winStart;
+                dots.forEach((d, i) => d.classList.toggle('active', i === activeDotIdx));
+            }
+        }
 
-            // 모든 아이템 너비 동일하게 설정
-            items.forEach(item => { item.style.width = itemWidth + 'px'; });
-
-            // 중앙 정렬 translateX
-            const translateX = vw / 2 - itemWidth * (currentIndex + 0.5);
-            track.style.transition = animate
-                ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)'
-                : 'none';
-            track.style.transform = `translateX(${translateX}px)`;
-
-            // 아이템 상태 클래스 적용 및 영상 재생 제어
+        function applyItemStates(centerIdx) {
             items.forEach((item, i) => {
-                let dist = Math.abs(i - currentIndex);
-                // 양방향 무한 루프 고려 최단 거리 (아이템이 3개 이상일 때)
+                let dist = Math.abs(i - centerIdx);
                 if (total >= 3 && dist > total / 2) dist = total - dist;
-
                 item.classList.remove('is-center', 'is-side', 'is-far');
-
                 const video = item.querySelector('video');
-
                 if (dist === 0) {
                     item.classList.add('is-center');
-                    // 실제 모바일 기기에서 autoplay를 위해 muted + playsinline 강제 설정
                     if (video) {
-                        video.muted = true;
-                        video.loop = true;
+                        video.muted = true; video.loop = true;
                         video.setAttribute('playsinline', '');
                         video.setAttribute('webkit-playsinline', '');
                         video.play().catch(e => console.warn('Autoplay prevented:', e));
@@ -1029,28 +1009,109 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     if (dist === 1) item.classList.add('is-side');
                     else item.classList.add('is-far');
-
-                    if (video) {
-                        video.pause();
-                        video.currentTime = 0; // 배경으로 갈 때 첫 프레임으로 초기화
-                    }
+                    if (video) { video.pause(); video.currentTime = 0; }
                 }
             });
-
-            updateDots(currentIndex);
-            wrap.dataset.slideIndex = currentIndex;
         }
 
-        wrap._updateCarousel = updateCarousel; // 외부(재초기화) 등에서 호출할 수 있도록 노출
+        function updateCarousel(index, animate) {
+            if (animate === undefined) animate = true;
+            if (isAnimating && animate) return;
+            if (animate) isAnimating = true;
+
+            if (index < 0) index = total - 1;
+            if (index >= total) index = 0;
+            currentIndex = index;
+
+            const vw = getVw();
+            const itemWidth = vw / 3;
+            items.forEach(item => { item.style.width = itemWidth + 'px'; });
+
+            const translateX = vw / 2 - itemWidth * (currentIndex + 0.5);
+            track.style.transition = animate ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
+            track.style.transform = `translateX(${translateX}px)`;
+
+            applyItemStates(currentIndex);
+            updateDots(currentIndex);
+            wrap.dataset.slideIndex = currentIndex;
+
+            if (animate) {
+                track.addEventListener('transitionend', function onEnd() {
+                    track.removeEventListener('transitionend', onEnd);
+                    isAnimating = false;
+                });
+            }
+        }
+
+        // 경계에서 같은 방향으로 계속 슬라이딩 (클론 삽입 방식)
+        function slideNext() {
+            if (isAnimating) return;
+            if (currentIndex < total - 1) { updateCarousel(currentIndex + 1); return; }
+            // 마지막 → 첫 번째: 오른쪽으로 계속 슬라이딩
+            isAnimating = true;
+            const vw = getVw();
+            const itemWidth = vw / 3;
+            const clone = items[0].cloneNode(true);
+            clone.style.width = itemWidth + 'px';
+            clone.classList.add('wrap-clone');
+            track.appendChild(clone);
+            items.forEach(item => { item.style.width = itemWidth + 'px'; });
+            const targetX = vw / 2 - itemWidth * (total + 0.5);
+            track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+            track.style.transform = `translateX(${targetX}px)`;
+            track.addEventListener('transitionend', function onEnd() {
+                track.removeEventListener('transitionend', onEnd);
+                clone.remove();
+                currentIndex = 0;
+                track.style.transition = 'none';
+                track.style.transform = `translateX(${vw / 2 - itemWidth * 0.5}px)`;
+                applyItemStates(0);
+                updateDots(0);
+                wrap.dataset.slideIndex = 0;
+                isAnimating = false;
+            });
+        }
+
+        function slidePrev() {
+            if (isAnimating) return;
+            if (currentIndex > 0) { updateCarousel(currentIndex - 1); return; }
+            // 첫 번째 → 마지막: 왼쪽으로 계속 슬라이딩
+            isAnimating = true;
+            const vw = getVw();
+            const itemWidth = vw / 3;
+            const clone = items[total - 1].cloneNode(true);
+            clone.style.width = itemWidth + 'px';
+            clone.classList.add('wrap-clone');
+            track.insertBefore(clone, track.firstChild);
+            // 클론이 삽입되었으므로 현재 위치를 1칸 오른쪽으로 즉시 보정(transition 없이)
+            items.forEach(item => { item.style.width = itemWidth + 'px'; });
+            track.style.transition = 'none';
+            track.style.transform = `translateX(${vw / 2 - itemWidth * 1.5}px)`;
+            track.getBoundingClientRect(); // reflow 강제
+            // 클론(위치 0)으로 왼쪽 방향 슬라이딩
+            track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+            track.style.transform = `translateX(${vw / 2 - itemWidth * 0.5}px)`;
+            track.addEventListener('transitionend', function onEnd() {
+                track.removeEventListener('transitionend', onEnd);
+                clone.remove();
+                currentIndex = total - 1;
+                track.style.transition = 'none';
+                track.style.transform = `translateX(${vw / 2 - itemWidth * (total - 0.5)}px)`;
+                applyItemStates(total - 1);
+                updateDots(total - 1);
+                wrap.dataset.slideIndex = total - 1;
+                isAnimating = false;
+            });
+        }
+
+        wrap._updateCarousel = (index, animate) => updateCarousel(index, animate);
 
         // 레이아웃 후 초기화 (offsetWidth 확보)
         requestAnimationFrame(() => updateCarousel(0, false));
-        // PC에서 그리드 레이아웃이 늦게 계산될 수 있으므로 지연 재계산
         setTimeout(() => updateCarousel(currentIndex, false), 300);
 
-        // 버튼
-        if (prevBtn) prevBtn.addEventListener('click', () => updateCarousel(currentIndex - 1));
-        if (nextBtn) nextBtn.addEventListener('click', () => updateCarousel(currentIndex + 1));
+        if (prevBtn) prevBtn.addEventListener('click', () => slidePrev());
+        if (nextBtn) nextBtn.addEventListener('click', () => slideNext());
 
         // Dots 클릭
         if (dotsContainer) {
@@ -1079,16 +1140,18 @@ document.addEventListener('DOMContentLoaded', () => {
         touchTarget.addEventListener('touchend', (e) => {
             const diffX = e.changedTouches[0].clientX - touchStartX;
             const diffY = e.changedTouches[0].clientY - touchStartY;
-            if (Math.abs(diffY) > Math.abs(diffX)) return; // 수직 스크롤 무시
+            if (Math.abs(diffY) > Math.abs(diffX)) return;
             if (Math.abs(diffX) > 30) {
-                if (diffX < 0) updateCarousel(currentIndex + 1);
-                else updateCarousel(currentIndex - 1);
+                if (diffX < 0) slideNext();
+                else slidePrev();
             }
         });
 
         // 리사이즈 시 재계산
         window.addEventListener('resize', () => updateCarousel(currentIndex, false));
     };
+
+
 
     // ── Dynamic Portfolio Categories from Supabase ─────────────────
     const _isVideoUrl = (url) => {
