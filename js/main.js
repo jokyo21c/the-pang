@@ -208,61 +208,132 @@ document.addEventListener('DOMContentLoaded', () => {
     const serviceDots = document.querySelectorAll('.service-dot');
 
     if (serviceGrid && serviceDots.length > 0) {
-        const updateServiceNav = () => {
+        let isInfiniteSetup = false;
+        let originalCount = serviceDots.length;
+
+        const setupInfiniteSlider = () => {
+            if (window.innerWidth <= 768 && !isInfiniteSetup) {
+                // 원본 카드들을 배열로 추출
+                const cards = Array.from(serviceGrid.querySelectorAll('.service-card'));
+                
+                if (cards.length === originalCount) {
+                    // 첫번째 카드 복사 후 맨 뒤에 추가
+                    const firstClone = cards[0].cloneNode(true);
+                    firstClone.classList.add('clone');
+                    firstClone.setAttribute('aria-hidden', 'true');
+                    serviceGrid.appendChild(firstClone);
+                    
+                    // 마지막 카드 복사 후 맨 앞에 추가
+                    const lastClone = cards[cards.length - 1].cloneNode(true);
+                    lastClone.classList.add('clone');
+                    lastClone.setAttribute('aria-hidden', 'true');
+                    serviceGrid.insertBefore(lastClone, cards[0]);
+
+                    // 클론이 추가되었으므로 초기 위치를 진짜 첫 번째 카드(index 1)로 강제 조정
+                    setTimeout(() => {
+                        serviceGrid.style.scrollBehavior = 'auto'; // 스무스 스크롤 끄기
+                        serviceGrid.scrollTo({ left: serviceGrid.clientWidth, behavior: 'auto' });
+                        setTimeout(() => { serviceGrid.style.scrollBehavior = 'smooth'; }, 50);
+                    }, 50);
+                }
+                isInfiniteSetup = true;
+            }
+        };
+
+        setupInfiniteSlider();
+
+        const updateDots = () => {
             if (window.innerWidth > 768) return;
             const scrollLeft = serviceGrid.scrollLeft;
             const cardWidth = serviceGrid.clientWidth;
+            if (cardWidth === 0) return;
+            
+            // 현재 보여지는 카드의 인덱스 계산 (0: 마지막 클론, 1~N: 진짜 카드, N+1: 첫 번째 클론)
             const index = Math.round(scrollLeft / cardWidth);
-
-            // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
-            // if (servicePrev) servicePrev.classList.toggle('hidden', index === 0);
-            // if (serviceNext) serviceNext.classList.toggle('hidden', index === serviceDots.length - 1);
+            
+            // 진짜 카드 인덱스로 변환 (dot은 0부터 시작하므로 index - 1)
+            let realIndex = index - 1;
+            
+            // 클론에 있을 경우 dot 활성화 보정
+            if (realIndex < 0) realIndex = originalCount - 1; // 마지막 카드 클론 위치일 때 마지막 dot 활성화
+            if (realIndex >= originalCount) realIndex = 0; // 첫번째 카드 클론 위치일 때 첫번째 dot 활성화
 
             serviceDots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
+                dot.classList.toggle('active', i === realIndex);
             });
         };
 
+        let scrollTimeout;
         serviceGrid.addEventListener('scroll', () => {
-            requestAnimationFrame(updateServiceNav);
+            requestAnimationFrame(updateDots);
+
+            if (window.innerWidth > 768) return;
+
+            window.clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const scrollLeft = serviceGrid.scrollLeft;
+                const cardWidth = serviceGrid.clientWidth;
+                if (cardWidth === 0) return;
+                
+                const index = Math.round(scrollLeft / cardWidth);
+
+                const instantJump = (targetLeft) => {
+                    // 순간이동을 위해 스무스 스크롤과 스냅을 끄기
+                    serviceGrid.style.scrollBehavior = 'auto';
+                    serviceGrid.style.scrollSnapType = 'none';
+                    
+                    // 강제 리플로우(Reflow)를 발생시켜 브라우저가 변경사항을 즉시 적용하도록 함
+                    void serviceGrid.offsetHeight;
+                    
+                    // 애니메이션 없이 즉시 위치 이동
+                    serviceGrid.scrollTo({ left: targetLeft, behavior: 'auto' });
+                    
+                    // 브라우저가 위치 이동을 렌더링할 시간을 준 뒤 원래 속성 복구
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            serviceGrid.style.scrollBehavior = '';
+                            serviceGrid.style.scrollSnapType = '';
+                        });
+                    });
+                };
+
+                // 맨 오른쪽의 [첫 번째 카드 클론]에 완벽히 도달했을 때 -> 실제 첫 번째 카드로 몰래 이동
+                if (index === originalCount + 1) {
+                    instantJump(cardWidth);
+                }
+                // 맨 왼쪽의 [마지막 카드 클론]에 완벽히 도달했을 때 -> 실제 마지막 카드로 몰래 이동
+                else if (index === 0) {
+                    instantJump(cardWidth * originalCount);
+                }
+            }, 100); // 스크롤이 완전히 멈춘 후 작동
         });
 
         if (servicePrev) {
             servicePrev.addEventListener('click', () => {
-                const scrollLeft = serviceGrid.scrollLeft;
                 const cardWidth = serviceGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
-
-                if (index === 0) {
-                    serviceGrid.scrollTo({ left: cardWidth * (serviceDots.length - 1), behavior: 'smooth' });
-                } else {
-                    serviceGrid.scrollBy({ left: -cardWidth, behavior: 'smooth' });
-                }
+                serviceGrid.scrollBy({ left: -cardWidth, behavior: 'smooth' });
             });
         }
 
         if (serviceNext) {
             serviceNext.addEventListener('click', () => {
-                const scrollLeft = serviceGrid.scrollLeft;
                 const cardWidth = serviceGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
-
-                if (index === serviceDots.length - 1) {
-                    serviceGrid.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    serviceGrid.scrollBy({ left: cardWidth, behavior: 'smooth' });
-                }
+                serviceGrid.scrollBy({ left: cardWidth, behavior: 'smooth' });
             });
         }
 
         serviceDots.forEach((dot, i) => {
             dot.addEventListener('click', () => {
-                serviceGrid.scrollTo({ left: serviceGrid.clientWidth * i, behavior: 'smooth' });
+                // 진짜 카드들은 index 1부터 시작하므로 (i + 1)을 곱해줌
+                serviceGrid.scrollTo({ left: serviceGrid.clientWidth * (i + 1), behavior: 'smooth' });
             });
         });
 
-        window.addEventListener('resize', updateServiceNav);
-        updateServiceNav();
+        window.addEventListener('resize', () => {
+            setupInfiniteSlider();
+            updateDots();
+        });
+        updateDots();
     }
 
     // ── Mobile Process Slider Logic ─────────────────────────
