@@ -1339,6 +1339,11 @@
         display: none !important;
     }
 
+    /* 모바일 무한 스크롤을 위해 복제된 슬라이드가 PC 화면에 중복 노출되어 거대한 공백을 만드는 현상 차단 */
+    .pang-slide-clone {
+        display: none !important;
+    }
+
     /* 1. 왼쪽 텍스트 영역을 전체 높이에 맞게 확장 */
     .pang-slide .category-info {
         display: flex;
