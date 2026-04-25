@@ -343,60 +343,125 @@ document.addEventListener('DOMContentLoaded', () => {
     const processDots = document.querySelectorAll('.process-dot');
 
     if (processGrid && processDots.length > 0) {
+        let isProcessInfiniteSetup = false;
+        let originalProcessCount = processDots.length;
+        let processScrollTimeout;
+
+        const setupInfiniteProcess = () => {
+            if (window.innerWidth <= 768 && !isProcessInfiniteSetup) {
+                // 원본 스텝들을 배열로 추출
+                const steps = Array.from(processGrid.querySelectorAll('.process-step'));
+                
+                if (steps.length === originalProcessCount) {
+                    // 첫 번째 스텝 복제 후 맨 뒤에 추가
+                    const firstClone = steps[0].cloneNode(true);
+                    firstClone.classList.add('clone');
+                    firstClone.setAttribute('aria-hidden', 'true');
+                    processGrid.appendChild(firstClone);
+                    
+                    // 마지막 스텝 복제 후 맨 앞에 추가
+                    const lastClone = steps[steps.length - 1].cloneNode(true);
+                    lastClone.classList.add('clone');
+                    lastClone.setAttribute('aria-hidden', 'true');
+                    processGrid.insertBefore(lastClone, steps[0]);
+
+                    // 클론 추가 후 초기 위치를 진짜 첫 번째 스텝(index 1)으로 강제 조정
+                    setTimeout(() => {
+                        processGrid.style.scrollBehavior = 'auto';
+                        processGrid.style.scrollSnapType = 'none';
+                        void processGrid.offsetHeight; // 강제 리플로우
+                        processGrid.scrollTo({ left: processGrid.clientWidth, behavior: 'auto' });
+                        setTimeout(() => { 
+                            processGrid.style.scrollBehavior = '';
+                            processGrid.style.scrollSnapType = '';
+                        }, 50);
+                    }, 50);
+                }
+                isProcessInfiniteSetup = true;
+            }
+        };
+
+        setupInfiniteProcess();
+
         const updateProcessNav = () => {
             if (window.innerWidth > 768) return;
             const scrollLeft = processGrid.scrollLeft;
             const cardWidth = processGrid.clientWidth;
+            if (cardWidth === 0) return;
+            
             const index = Math.round(scrollLeft / cardWidth);
-
-            // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
-            // if (processPrev) processPrev.classList.toggle('hidden', index === 0);
-            // if (processNext) processNext.classList.toggle('hidden', index === processDots.length - 1);
+            let realIndex = index - 1;
+            
+            if (realIndex < 0) realIndex = originalProcessCount - 1;
+            if (realIndex >= originalProcessCount) realIndex = 0;
 
             processDots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
+                dot.classList.toggle('active', i === realIndex);
+            });
+        };
+
+        const instantProcessJump = (targetLeft) => {
+            processGrid.style.scrollBehavior = 'auto';
+            processGrid.style.scrollSnapType = 'none';
+            void processGrid.offsetHeight;
+            processGrid.scrollTo({ left: targetLeft, behavior: 'auto' });
+            
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    processGrid.style.scrollBehavior = '';
+                    processGrid.style.scrollSnapType = '';
+                });
             });
         };
 
         processGrid.addEventListener('scroll', () => {
             requestAnimationFrame(updateProcessNav);
+            if (window.innerWidth > 768) return;
+
+            window.clearTimeout(processScrollTimeout);
+            processScrollTimeout = setTimeout(() => {
+                const scrollLeft = processGrid.scrollLeft;
+                const cardWidth = processGrid.clientWidth;
+                if (cardWidth === 0) return;
+                
+                const index = Math.round(scrollLeft / cardWidth);
+
+                // 맨 오른쪽의 [첫 번째 스텝 클론]에 도달했을 때 -> 실제 첫 번째 스텝으로 몰래 이동
+                if (index === originalProcessCount + 1) {
+                    instantProcessJump(cardWidth);
+                }
+                // 맨 왼쪽의 [마지막 스텝 클론]에 도달했을 때 -> 실제 마지막 스텝으로 몰래 이동
+                else if (index === 0) {
+                    instantProcessJump(cardWidth * originalProcessCount);
+                }
+            }, 100);
         });
 
         if (processPrev) {
             processPrev.addEventListener('click', () => {
-                const scrollLeft = processGrid.scrollLeft;
                 const cardWidth = processGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
-
-                if (index === 0) {
-                    processGrid.scrollTo({ left: cardWidth * (processDots.length - 1), behavior: 'smooth' });
-                } else {
-                    processGrid.scrollBy({ left: -cardWidth, behavior: 'smooth' });
-                }
+                processGrid.scrollBy({ left: -cardWidth, behavior: 'smooth' });
             });
         }
 
         if (processNext) {
             processNext.addEventListener('click', () => {
-                const scrollLeft = processGrid.scrollLeft;
                 const cardWidth = processGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
-
-                if (index === processDots.length - 1) {
-                    processGrid.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    processGrid.scrollBy({ left: cardWidth, behavior: 'smooth' });
-                }
+                processGrid.scrollBy({ left: cardWidth, behavior: 'smooth' });
             });
         }
 
         processDots.forEach((dot, i) => {
             dot.addEventListener('click', () => {
-                processGrid.scrollTo({ left: processGrid.clientWidth * i, behavior: 'smooth' });
+                // 진짜 스텝들은 index 1부터 시작하므로 (i + 1)
+                processGrid.scrollTo({ left: processGrid.clientWidth * (i + 1), behavior: 'smooth' });
             });
         });
 
-        window.addEventListener('resize', updateProcessNav);
+        window.addEventListener('resize', () => {
+            setupInfiniteProcess();
+            updateProcessNav();
+        });
         updateProcessNav();
     }
 
