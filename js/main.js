@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dotsContainer = document.getElementById('sliderDots');
     const prevBtn = document.getElementById('sliderPrev');
     const nextBtn = document.getElementById('sliderNext');
-    let currentSlide = 0;
+    let currentSlide = 1;
     let totalSlides = 0;
     let autoSlideInterval;
 
@@ -46,15 +46,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const goToSlide = (index) => {
         const dots = getDots();
-        totalSlides = document.querySelectorAll('.testimonial-card').length;
         if (totalSlides === 0) return;
-        if (index < 0) index = totalSlides - 1;
-        if (index >= totalSlides) index = 0;
+        
         currentSlide = index;
-        if (testimonialTrack) testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+        if (testimonialTrack) {
+            testimonialTrack.style.transition = 'transform 0.5s ease';
+            testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+        
+        let dotIndex = currentSlide - 1;
+        if (dotIndex < 0) dotIndex = totalSlides - 1;
+        if (dotIndex >= totalSlides) dotIndex = 0;
+
         dots.forEach(dot => dot.classList.remove('active'));
-        if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+        if (dots[dotIndex]) dots[dotIndex].classList.add('active');
     };
+
+    if (testimonialTrack) {
+        testimonialTrack.addEventListener('transitionend', () => {
+            if (currentSlide === totalSlides + 1) {
+                testimonialTrack.style.transition = 'none';
+                currentSlide = 1;
+                testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+                void testimonialTrack.offsetHeight;
+            } else if (currentSlide === 0) {
+                testimonialTrack.style.transition = 'none';
+                currentSlide = totalSlides;
+                testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+                void testimonialTrack.offsetHeight;
+            }
+        });
+    }
 
     const startAutoSlide = () => {
         autoSlideInterval = setInterval(() => goToSlide(currentSlide + 1), 3000);
@@ -67,7 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dots.forEach(dot => {
             dot.addEventListener('click', () => {
                 stopAutoSlide();
-                goToSlide(parseInt(dot.dataset.index));
+                // dot.dataset.index는 0부터 시작하므로 +1
+                goToSlide(parseInt(dot.dataset.index) + 1);
                 startAutoSlide();
             });
         });
@@ -75,6 +98,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (prevBtn) prevBtn.addEventListener('click', () => { stopAutoSlide(); goToSlide(currentSlide - 1); startAutoSlide(); });
     if (nextBtn) nextBtn.addEventListener('click', () => { stopAutoSlide(); goToSlide(currentSlide + 1); startAutoSlide(); });
+
+    // Touch swipe logic for testimonials
+    if (testimonialTrack) {
+        let startX = 0;
+        let startY = 0;
+        let isDragging = false;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+
+        testimonialTrack.addEventListener('touchstart', (e) => {
+            stopAutoSlide();
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isDragging = true;
+            
+            prevTranslate = -(currentSlide * 100);
+            testimonialTrack.style.transition = 'none';
+        }, { passive: true });
+
+        testimonialTrack.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            
+            const diffX = currentX - startX;
+            const diffY = currentY - startY;
+            
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (e.cancelable) e.preventDefault();
+                
+                const trackWidth = testimonialTrack.clientWidth || 1;
+                const percentageMoved = (diffX / trackWidth) * 100;
+                
+                currentTranslate = prevTranslate + percentageMoved;
+                testimonialTrack.style.transform = `translateX(${currentTranslate}%)`;
+            } else {
+                isDragging = false;
+            }
+        }, { passive: false });
+
+        testimonialTrack.addEventListener('touchend', (e) => {
+            if (!isDragging) {
+                startAutoSlide();
+                return;
+            }
+            isDragging = false;
+            
+            const endX = e.changedTouches[0].clientX;
+            const diffX = endX - startX;
+            
+            if (diffX > 50) {
+                goToSlide(currentSlide - 1);
+            } else if (diffX < -50) {
+                goToSlide(currentSlide + 1);
+            } else {
+                goToSlide(currentSlide);
+            }
+            
+            startAutoSlide();
+        });
+    }
+
+    const setupInfiniteTestimonial = () => {
+        if (!testimonialTrack) return;
+        const cards = Array.from(testimonialTrack.querySelectorAll('.testimonial-card:not(.clone)'));
+        totalSlides = cards.length;
+        if (totalSlides === 0) return;
+
+        testimonialTrack.querySelectorAll('.clone').forEach(el => el.remove());
+
+        const firstClone = cards[0].cloneNode(true);
+        firstClone.classList.add('clone');
+        firstClone.setAttribute('aria-hidden', 'true');
+        
+        const lastClone = cards[cards.length - 1].cloneNode(true);
+        lastClone.classList.add('clone');
+        lastClone.setAttribute('aria-hidden', 'true');
+
+        testimonialTrack.insertBefore(lastClone, cards[0]);
+        testimonialTrack.appendChild(firstClone);
+
+        testimonialTrack.style.transition = 'none';
+        currentSlide = 1;
+        testimonialTrack.style.transform = `translateX(-100%)`;
+        void testimonialTrack.offsetHeight;
+    };
 
     // [FIX] localStorage 대신 Supabase PangData.getTestimonials() 사용
     async function loadTestimonials() {
@@ -94,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <div class="testimonial-card__footer">
                                         <div class="testimonial-card__info">
                                             <p class="testimonial-card__author">${t.author || ''}</p>
-                                            <span class="testimonial-card__badge" style="background:${t.badge_color || 'var(--color-brand-purple)'}">${t.badge || ''}</span>
+                                            <span class="testimonial-card__badge" style="background:var(--color-brand-purple)">${t.badge || ''}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -107,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`
                         ).join('');
                     }
-                    totalSlides = items.length;
+                    setupInfiniteTestimonial();
                     bindSliderControls();
                 }
             }
@@ -117,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 초기 HTML 데이터로 먼저 setup, 이후 Supabase로 교체
-    totalSlides = document.querySelectorAll('.testimonial-card').length;
+    setupInfiniteTestimonial();
     bindSliderControls();
     loadTestimonials();
     startAutoSlide();
