@@ -943,15 +943,20 @@
     /* ── Mobile News Slider ─────────────────────── */
     .grid--3#newsGrid {
         display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
+        overflow-x: visible; /* JS transform을 위해 visible로 변경 */
+        scroll-snap-type: none;
+        scroll-behavior: auto;
         scrollbar-width: none;
         -ms-overflow-style: none;
         gap: 16px;
         grid-template-columns: unset;
         padding-bottom: 24px;
         margin-top: -8px;
+        flex-wrap: nowrap;
+    }
+    
+    .news-slider-container {
+        overflow: hidden; /* 모바일에서 트랙 밖으로 나가는 요소 숨김 */
     }
     
     .grid--3#newsGrid::-webkit-scrollbar {
@@ -961,7 +966,7 @@
     .grid--3#newsGrid .news-card {
         flex: 0 0 calc(100% - 20px);
         max-width: 100%;
-        scroll-snap-align: center;
+        scroll-snap-align: none;
         transform: scale(1) !important;
     }
     

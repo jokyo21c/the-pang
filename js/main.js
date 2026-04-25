@@ -40,14 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSlide = 1;
     let totalSlides = 0;
     let autoSlideInterval;
+    let isTestimonialTransitioning = false;
 
     // [FIX] dots는 항상 최신 DOM에서 재조회 (stale closure 방지)
     const getDots = () => document.querySelectorAll('.slider-dot');
 
     const goToSlide = (index) => {
         const dots = getDots();
-        if (totalSlides === 0) return;
+        if (totalSlides === 0 || isTestimonialTransitioning) return;
         
+        isTestimonialTransitioning = true;
         currentSlide = index;
         if (testimonialTrack) {
             testimonialTrack.style.transition = 'transform 0.5s ease';
@@ -64,12 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (testimonialTrack) {
         testimonialTrack.addEventListener('transitionend', () => {
-            if (currentSlide === totalSlides + 1) {
+            isTestimonialTransitioning = false;
+            if (currentSlide >= totalSlides + 1) {
                 testimonialTrack.style.transition = 'none';
                 currentSlide = 1;
                 testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
                 void testimonialTrack.offsetHeight;
-            } else if (currentSlide === 0) {
+            } else if (currentSlide <= 0) {
                 testimonialTrack.style.transition = 'none';
                 currentSlide = totalSlides;
                 testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
@@ -662,61 +665,137 @@ document.addEventListener('DOMContentLoaded', () => {
     const newsDots = document.querySelectorAll('.news-dot');
 
     if (newsGrid && newsDots.length > 0) {
-        const updateNewsNav = () => {
-            if (window.innerWidth > 768) return;
-            const scrollLeft = newsGrid.scrollLeft;
-            const cardWidth = newsGrid.clientWidth;
-            const index = Math.round(scrollLeft / cardWidth);
+        let currentNewsSlide = 1;
+        let isNewsTransitioning = false;
+        let totalNewsSlides = 0;
+        let newsStartX = 0;
+        let newsStartY = 0;
+        let isNewsDragging = false;
+        let prevNewsTranslate = 0;
 
-            // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
-            // if (newsPrev) newsPrev.classList.toggle('hidden', index === 0);
-            // if (newsNext) newsNext.classList.toggle('hidden', index === newsDots.length - 1);
+        const setupNewsSlider = () => {
+            const cards = Array.from(newsGrid.querySelectorAll('.news-card:not(.clone)'));
+            totalNewsSlides = cards.length;
+            if (totalNewsSlides === 0) return;
+
+            newsGrid.querySelectorAll('.clone').forEach(el => el.remove());
+
+            const firstClone = cards[0].cloneNode(true);
+            firstClone.classList.add('clone');
+            firstClone.setAttribute('aria-hidden', 'true');
+
+            const lastClone = cards[cards.length - 1].cloneNode(true);
+            lastClone.classList.add('clone');
+            lastClone.setAttribute('aria-hidden', 'true');
+
+            newsGrid.insertBefore(lastClone, cards[0]);
+            newsGrid.appendChild(firstClone);
+
+            applyNewsTransform(false);
+        };
+
+        const applyNewsTransform = (animate = true) => {
+            if (window.innerWidth > 768) {
+                newsGrid.style.transform = 'none';
+                newsGrid.style.transition = 'none';
+                return;
+            }
+
+            const cardWidth = newsGrid.children[0].offsetWidth;
+            const gap = parseFloat(window.getComputedStyle(newsGrid).gap) || 0;
+            const step = cardWidth + gap;
+            
+            const containerWidth = newsGrid.parentElement.clientWidth;
+            const offset = (containerWidth - cardWidth) / 2;
+
+            newsGrid.style.transition = animate ? 'transform 0.4s ease' : 'none';
+            newsGrid.style.transform = `translateX(${offset - (currentNewsSlide * step)}px)`;
+
+            let dotIndex = currentNewsSlide - 1;
+            if (dotIndex < 0) dotIndex = totalNewsSlides - 1;
+            if (dotIndex >= totalNewsSlides) dotIndex = 0;
 
             newsDots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
+                dot.classList.toggle('active', i === dotIndex);
             });
         };
 
-        newsGrid.addEventListener('scroll', () => {
-            requestAnimationFrame(updateNewsNav);
+        const goToNewsSlide = (index) => {
+            if (isNewsTransitioning || totalNewsSlides === 0 || window.innerWidth > 768) return;
+            isNewsTransitioning = true;
+            currentNewsSlide = index;
+            applyNewsTransform(true);
+        };
+
+        newsGrid.addEventListener('transitionend', (e) => {
+            if (e.target !== newsGrid) return;
+            isNewsTransitioning = false;
+            
+            if (currentNewsSlide >= totalNewsSlides + 1) {
+                currentNewsSlide = 1;
+                applyNewsTransform(false);
+            } else if (currentNewsSlide <= 0) {
+                currentNewsSlide = totalNewsSlides;
+                applyNewsTransform(false);
+            }
         });
 
-        if (newsPrev) {
-            newsPrev.addEventListener('click', () => {
-                const scrollLeft = newsGrid.scrollLeft;
-                const cardWidth = newsGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
+        newsGrid.addEventListener('touchstart', (e) => {
+            if (window.innerWidth > 768 || isNewsTransitioning) return;
+            newsStartX = e.touches[0].clientX;
+            newsStartY = e.touches[0].clientY;
+            isNewsDragging = true;
+            
+            const cardWidth = newsGrid.children[0].offsetWidth;
+            const gap = parseFloat(window.getComputedStyle(newsGrid).gap) || 0;
+            const step = cardWidth + gap;
+            const containerWidth = newsGrid.parentElement.clientWidth;
+            const offset = (containerWidth - cardWidth) / 2;
+            
+            prevNewsTranslate = offset - (currentNewsSlide * step);
+            newsGrid.style.transition = 'none';
+        }, { passive: true });
 
-                if (index === 0) {
-                    newsGrid.scrollTo({ left: cardWidth * (newsDots.length - 1), behavior: 'smooth' });
-                } else {
-                    newsGrid.scrollBy({ left: -cardWidth, behavior: 'smooth' });
-                }
-            });
-        }
+        newsGrid.addEventListener('touchmove', (e) => {
+            if (!isNewsDragging || window.innerWidth > 768) return;
+            const diffX = e.touches[0].clientX - newsStartX;
+            const diffY = e.touches[0].clientY - newsStartY;
+            
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (e.cancelable) e.preventDefault();
+                newsGrid.style.transform = `translateX(${prevNewsTranslate + diffX}px)`;
+            } else {
+                isNewsDragging = false;
+            }
+        }, { passive: false });
 
-        if (newsNext) {
-            newsNext.addEventListener('click', () => {
-                const scrollLeft = newsGrid.scrollLeft;
-                const cardWidth = newsGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
+        newsGrid.addEventListener('touchend', (e) => {
+            if (!isNewsDragging || window.innerWidth > 768) return;
+            isNewsDragging = false;
+            
+            const diffX = e.changedTouches[0].clientX - newsStartX;
+            if (diffX > 50) goToNewsSlide(currentNewsSlide - 1);
+            else if (diffX < -50) goToNewsSlide(currentNewsSlide + 1);
+            else applyNewsTransform(true);
+        });
 
-                if (index === newsDots.length - 1) {
-                    newsGrid.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    newsGrid.scrollBy({ left: cardWidth, behavior: 'smooth' });
-                }
-            });
-        }
-
+        if (newsPrev) newsPrev.addEventListener('click', () => goToNewsSlide(currentNewsSlide - 1));
+        if (newsNext) newsNext.addEventListener('click', () => goToNewsSlide(currentNewsSlide + 1));
+        
         newsDots.forEach((dot, i) => {
-            dot.addEventListener('click', () => {
-                newsGrid.scrollTo({ left: newsGrid.clientWidth * i, behavior: 'smooth' });
-            });
+            dot.addEventListener('click', () => goToNewsSlide(i + 1));
         });
 
-        window.addEventListener('resize', updateNewsNav);
-        updateNewsNav();
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                newsGrid.style.transform = 'none';
+                newsGrid.style.transition = 'none';
+            } else {
+                applyNewsTransform(false);
+            }
+        });
+
+        setupNewsSlider();
     }
 
 
@@ -2539,8 +2618,9 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 }
             }
             // 팡 슬라이더 영역으로 스크롤 (헤더 높이 72px에 맞춰 정렬)
-            if (slider) {
-                const top = slider.getBoundingClientRect().top + window.pageYOffset - 72;
+            const sliderNodeMobile = document.getElementById('pangSectionSlider');
+            if (sliderNodeMobile) {
+                const top = sliderNodeMobile.getBoundingClientRect().top + window.pageYOffset - 72;
                 window.scrollTo({ top, behavior: 'smooth' });
             }
         }
