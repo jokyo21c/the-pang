@@ -718,6 +718,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // [FIX] 이전 초기화의 이벤트 리스너 일괄 정리 (필터 변경 시 중복 리스너 방지)
+        if (wrap._carouselAbort) {
+            wrap._carouselAbort.abort();
+        }
+        const abortCtrl = new AbortController();
+        wrap._carouselAbort = abortCtrl;
+        const evtOpts = { signal: abortCtrl.signal };
+        const evtOptsPassive = { signal: abortCtrl.signal, passive: true };
+
         const track = wrap.querySelector('.thumb-all-track');
         const viewport = wrap.querySelector('.thumb-all-viewport');
         const prevBtn = wrap.querySelector('.thumb-all-nav--prev');
@@ -1000,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const iw = vw / 3;
             Array.from(track.children).forEach(el => { el.style.width = iw + 'px'; });
             track.style.transition = 'none';
-            track.style.transform = `translateX(${getCenterOffset() - iw * (cloneIdx + 0.5)}px)`;
+            track.style.transform = `translateX(${getCenterX() - iw * (cloneIdx + 0.5)}px)`;
             applyItemStates(safeIdx);
         };
 
@@ -1017,7 +1026,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const container = wrap.closest('.container');
                     if (container && container.offsetWidth > 0) {
+                        // 모바일에서는 컨테이너 전체 폭 사용, PC에서는 절반 사용
                         fallbackVw = isMobile ? container.offsetWidth : container.offsetWidth / 2;
+                        // 모바일에서 패딩을 고려하여 보정 (필요한 경우)
                         if (isMobile && getComputedStyle(container).paddingLeft) {
                             const pl = parseFloat(getComputedStyle(container).paddingLeft) || 0;
                             const pr = parseFloat(getComputedStyle(container).paddingRight) || 0;
@@ -1031,8 +1042,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return vw;
         }
 
-        function getCenterOffset() {
-            return getVw() / 2;
+        // 모바일: 화면 정중앙을 컨테이너-로컬 좌표로 환산
+        // 컨테이너에 padding-left:pl 이 있으면 wrap의 left = pl
+        // 따라서 화면중앙(window.innerWidth/2)을 wrap 기준으로 표현하면 (window.innerWidth/2 - pl)
+        // PC: 기존처럼 vw/2
+        function getCenterX() {
+            const vw = getVw();
+            if (window.innerWidth <= 768) {
+                const container = wrap.closest('.container');
+                const pl = container ? (parseFloat(getComputedStyle(container).paddingLeft) || 0) : 0;
+                return (window.innerWidth / 2) - pl;
+            }
+            return vw / 2;
         }
 
         function updateDots(realIdx) {
@@ -1092,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 클론 포함 전체 아이템 너비 설정
             Array.from(track.children).forEach(el => { el.style.width = itemWidth + 'px'; });
 
-            const translateX = getCenterOffset() - itemWidth * (cloneIdx + 0.5);
+            const translateX = getCenterX() - itemWidth * (cloneIdx + 0.5);
             track.style.transition = animate ? 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
             track.style.transform = `translateX(${translateX}px)`;
 
@@ -1101,7 +1122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             wrap.dataset.slideIndex = currentIndex;
 
             if (animate) {
-                track.addEventListener('transitionend', function onEnd() {
+                track.addEventListener('transitionend', function onEnd(e) {
+                    if (e.target !== track) return; // 자식 요소의 transition 이벤트 무시
                     track.removeEventListener('transitionend', onEnd);
                     isAnimating = false;
                 });
@@ -1128,8 +1150,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (v) { v.muted = true; v.loop = true; v.play().catch(()=>{}); }
             }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-            track.style.transform = `translateX(${getCenterOffset() - itemWidth * (firstClonePos + 0.5)}px)`;
-            track.addEventListener('transitionend', function onEnd() {
+            track.style.transform = `translateX(${getCenterX() - itemWidth * (firstClonePos + 0.5)}px)`;
+            track.addEventListener('transitionend', function onEnd(e) {
+                if (e.target !== track) return; // 자식 요소의 transition 이벤트 무시
                 track.removeEventListener('transitionend', onEnd);
                 // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
                 Array.from(track.children).forEach(el => { el.style.transition = 'none'; });
@@ -1140,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentIndex = 0;
                 cloneIdx = 1;
                 track.style.transition = 'none';
-                track.style.transform = `translateX(${getCenterOffset() - itemWidth * 1.5}px)`;
+                track.style.transform = `translateX(${getCenterX() - itemWidth * 1.5}px)`;
                 applyItemStates(0);
                 updateDots(0);
                 wrap.dataset.slideIndex = 0;
@@ -1172,8 +1195,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (v) { v.muted = true; v.loop = true; v.play().catch(()=>{}); }
             }
             track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-            track.style.transform = `translateX(${getCenterOffset() - itemWidth * 0.5}px)`;
-            track.addEventListener('transitionend', function onEnd() {
+            track.style.transform = `translateX(${getCenterX() - itemWidth * 0.5}px)`;
+            track.addEventListener('transitionend', function onEnd(e) {
+                if (e.target !== track) return; // 자식 요소의 transition 이벤트 무시
                 track.removeEventListener('transitionend', onEnd);
                 // 스냅 전: 아이템 CSS 전환 비활성화 (깜빡임 방지)
                 Array.from(track.children).forEach(el => { el.style.transition = 'none'; });
@@ -1184,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentIndex = total - 1;
                 cloneIdx = total;
                 track.style.transition = 'none';
-                track.style.transform = `translateX(${getCenterOffset() - itemWidth * (total + 0.5)}px)`;
+                track.style.transform = `translateX(${getCenterX() - itemWidth * (total + 0.5)}px)`;
                 applyItemStates(total - 1);
                 updateDots(total - 1);
                 wrap.dataset.slideIndex = total - 1;
@@ -1203,8 +1227,9 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(() => updateCarousel(0, false));
         setTimeout(() => updateCarousel(currentIndex, false), 300);
 
-        if (prevBtn) prevBtn.addEventListener('click', () => slidePrev());
-        if (nextBtn) nextBtn.addEventListener('click', () => slideNext());
+        // [FIX] AbortController로 관리되는 이벤트 리스너 등록 (필터 변경 시 일괄 해제)
+        if (prevBtn) prevBtn.addEventListener('click', () => slidePrev(), evtOpts);
+        if (nextBtn) nextBtn.addEventListener('click', () => slideNext(), evtOpts);
 
         if (dotsContainer) {
             dotsContainer.addEventListener('click', (e) => {
@@ -1216,7 +1241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let winStart = currentIndex - half;
                 winStart = Math.max(0, Math.min(winStart, total - Math.min(total, MAX_DOTS)));
                 updateCarousel(winStart + idx);
-            });
+            }, evtOpts);
         }
 
         let touchStartX = 0;
@@ -1226,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         touchTarget.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-        }, { passive: true });
+        }, evtOptsPassive);
 
         touchTarget.addEventListener('touchend', (e) => {
             const diffX = e.changedTouches[0].clientX - touchStartX;
@@ -1236,9 +1261,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (diffX < 0) slideNext();
                 else slidePrev();
             }
-        });
+        }, evtOpts);
 
-        window.addEventListener('resize', () => updateCarousel(currentIndex, false));
+        window.addEventListener('resize', () => updateCarousel(currentIndex, false), evtOpts);
     };
 
 
@@ -1436,30 +1461,69 @@ document.addEventListener('DOMContentLoaded', () => {
     (function initPangSectionSlider() {
         const slider = document.getElementById('pangSectionSlider');
         const track = document.getElementById('pangSliderTrack');
-        const slides = slider ? Array.from(slider.querySelectorAll('.pang-slide')) : [];
+        
+        if (!slider || !track) return;
 
-        if (!slider || !track || slides.length === 0) return;
+        // 리사이즈 등으로 중복 실행되는 것을 방지하기 위해 기존 clone을 먼저 제거
+        track.querySelectorAll('.pang-slide-clone').forEach(el => el.remove());
+
+        const originalSlides = Array.from(slider.querySelectorAll('.pang-slide'));
+        if (originalSlides.length === 0) return;
+
+        const TOTAL_ORIGINAL = originalSlides.length;
+
+        // 첫 번째 먹팡 섹션을 복제하여 맨 뒤에 추가 (무한 슬라이딩용)
+        const firstClone = originalSlides[0].cloneNode(true);
+        firstClone.classList.add('pang-slide-clone');
+        firstClone.removeAttribute('id'); // ID 중복 방지
+        track.appendChild(firstClone);
+
+        const slides = Array.from(slider.querySelectorAll('.pang-slide'));
+        const TOTAL = slides.length; // 6
 
         let currentPang = 0;
         let autoTimer = null;
         let manualStop = false;    // 수동 조작으로 인한 일시 중지 플래그
         let navJustClicked = false; // 네비 클릭 직후 스크롤 중 자동 재개 방지 플래그
-        const TOTAL = slides.length;
+        let isTransitioning = false; // 연속 스와이프 방지용 플래그
         const AUTO_INTERVAL = 2000; // 2초간 대기 (사용자 수정 요청)
+
+        // 모바일 환경에 맞춰 트랙과 슬라이드 너비를 동적으로 조정
+        const updateSliderLayout = () => {
+            if (window.innerWidth <= 768) {
+                track.style.width = `${TOTAL * 100}%`;
+                slides.forEach(slide => {
+                    slide.style.flex = `0 0 ${100 / TOTAL}%`;
+                    slide.style.width = `${100 / TOTAL}%`;
+                });
+            } else {
+                track.style.width = '';
+                slides.forEach(slide => {
+                    slide.style.flex = '';
+                    slide.style.width = '';
+                });
+            }
+        };
+
+        window.addEventListener('resize', updateSliderLayout);
+        updateSliderLayout();
 
         // 슬라이드 인덱스 ↔ 팡 섹션 ID 매핑
         const pangIdMap = ['meokpang', 'nolpang', 'swimpang', 'salpang', 'meotpang'];
 
         // 모든 슬라이드에 있는 팡 네비게이션 dots 동기화
         const syncAllPangDots = (index) => {
+            // 클론에 도달했다면(index >= TOTAL_ORIGINAL), 원본(0)의 닷 활성화
+            const dotIndex = index >= TOTAL_ORIGINAL ? 0 : index;
             document.querySelectorAll('.pang-nav-dot').forEach(dot => {
-                dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === index);
+                dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === dotIndex);
             });
         };
 
         // 사이드바 active 아이콘 동기화
         const syncSidebarActive = (index) => {
-            const targetId = pangIdMap[index];
+            const dotIndex = index >= TOTAL_ORIGINAL ? 0 : index;
+            const targetId = pangIdMap[dotIndex];
             if (!targetId) return;
             const sidebarLinks = document.querySelectorAll('.floating-sidebar__link[href^="#"]');
             sidebarLinks.forEach(link => {
@@ -1479,15 +1543,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 무한 루프 처리
-            if (index < 0) index = TOTAL - 1;
-            if (index >= TOTAL) index = 0;
+            if (isTransitioning && smooth) return;
+
+            // 역방향: 첫 슬라이드에서 이전으로 갈 때
+            if (index < 0) {
+                // 트랜지션 없이 클론으로 순간이동
+                track.style.transition = 'none';
+                currentPang = TOTAL_ORIGINAL;
+                track.style.transform = `translateX(-${currentPang * (100 / TOTAL)}%)`;
+                
+                // 리플로우 강제 발생 (순간이동 적용)
+                void track.offsetWidth;
+                
+                // 이후 마지막 원본(TOTAL_ORIGINAL - 1)으로 부드럽게 이동
+                index = TOTAL_ORIGINAL - 1;
+                smooth = true;
+            }
+
+            // 정방향: 범위를 초과하면 클론으로 강제 지정 (이후 transitionend에서 원본 0으로 복귀)
+            if (index > TOTAL_ORIGINAL) {
+                index = TOTAL_ORIGINAL;
+            }
 
             currentPang = index;
 
-            // CSS transform으로 500% 너비의 트랙 이동 (한 슬라이드당 20%)
+            if (smooth) isTransitioning = true;
+            
+            // CSS transform으로 비율에 맞게 트랙 이동
             track.style.transition = smooth ? 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
-            track.style.transform = `translateX(-${currentPang * 20}%)`;
+            track.style.transform = `translateX(-${currentPang * (100 / TOTAL)}%)`;
 
             // dot 표시자 동기화
             syncAllPangDots(currentPang);
@@ -1497,6 +1581,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 syncSidebarActive(currentPang);
             }
         };
+
+        // 트랜지션이 끝났을 때 영구 무한 슬라이딩 처리 (클론 도착 -> 원본 복귀)
+        track.addEventListener('transitionend', (e) => {
+            if (e.target !== track) return; // 자식 요소(캐러셀 아이템 등)의 transition 이벤트 무시
+            isTransitioning = false;
+            if (currentPang === TOTAL_ORIGINAL) {
+                currentPang = 0;
+                track.style.transition = 'none';
+                track.style.transform = `translateX(0%)`;
+            }
+        });
 
         // 자동 슬라이딩
         const startAuto = () => {
