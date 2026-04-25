@@ -141,63 +141,144 @@ document.addEventListener('DOMContentLoaded', () => {
     const pricingDots = document.querySelectorAll('.pricing-dot');
 
     if (pricingGrid && pricingDots.length > 0) {
-        const updatePricingNav = () => {
-            if (window.innerWidth > 768) return; // Only run on mobile
-            const scrollLeft = pricingGrid.scrollLeft;
-            const cardWidth = pricingGrid.clientWidth;
-            // index based on scroll position
-            const index = Math.round(scrollLeft / cardWidth);
+        let isPricingInfiniteSetup = false;
+        let originalPricingCount = pricingDots.length;
+        let pricingScrollTimeout;
 
-            // 무한 루프로 변경됨에 따라 버튼 숨김 로직 제거
-            // if (pricingPrev) pricingPrev.classList.toggle('hidden', index === 0);
-            // if (pricingNext) pricingNext.classList.toggle('hidden', index === pricingDots.length - 1);
+        const getPricingSnapPos = (idx) => {
+            const child = pricingGrid.children[idx];
+            if (!child) return 0;
+            return child.offsetLeft - (pricingGrid.clientWidth - child.offsetWidth) / 2;
+        };
+
+        const getPricingCurrentIndex = () => {
+            let closest = 0;
+            let minDiff = Infinity;
+            Array.from(pricingGrid.children).forEach((child, i) => {
+                if (child.classList.contains('pricing-nav') || child.classList.contains('pricing-dots')) return;
+                const snapPos = child.offsetLeft - (pricingGrid.clientWidth - child.offsetWidth) / 2;
+                const diff = Math.abs(pricingGrid.scrollLeft - snapPos);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = i;
+                }
+            });
+            return closest;
+        };
+
+        const setupInfinitePricing = () => {
+            if (window.innerWidth <= 768 && !isPricingInfiniteSetup) {
+                // 원본 카드들을 배열로 추출
+                const cards = Array.from(pricingGrid.querySelectorAll('.pricing-card'));
+                
+                if (cards.length === originalPricingCount) {
+                    // 첫 번째 카드 복사 후 맨 뒤에 추가
+                    const firstClone = cards[0].cloneNode(true);
+                    firstClone.classList.add('clone');
+                    firstClone.setAttribute('aria-hidden', 'true');
+                    pricingGrid.appendChild(firstClone);
+                    
+                    // 마지막 카드 복사 후 맨 앞에 추가
+                    const lastClone = cards[cards.length - 1].cloneNode(true);
+                    lastClone.classList.add('clone');
+                    lastClone.setAttribute('aria-hidden', 'true');
+                    pricingGrid.insertBefore(lastClone, cards[0]);
+
+                    // 클론이 추가되었으므로 초기 위치를 진짜 첫 번째 카드(index 1)로 강제 조정
+                    setTimeout(() => {
+                        pricingGrid.style.scrollBehavior = 'auto'; // 스무스 스크롤 끄기
+                        pricingGrid.style.scrollSnapType = 'none';
+                        void pricingGrid.offsetHeight; // 강제 리플로우
+                        pricingGrid.scrollTo({ left: getPricingSnapPos(1), behavior: 'auto' });
+                        setTimeout(() => { 
+                            pricingGrid.style.scrollBehavior = ''; 
+                            pricingGrid.style.scrollSnapType = '';
+                        }, 50);
+                    }, 50);
+                }
+                isPricingInfiniteSetup = true;
+            }
+        };
+
+        setupInfinitePricing();
+
+        const updatePricingNav = () => {
+            if (window.innerWidth > 768) return;
+            const index = getPricingCurrentIndex();
+            
+            let realIndex = index - 1;
+            
+            if (realIndex < 0) realIndex = originalPricingCount - 1; 
+            if (realIndex >= originalPricingCount) realIndex = 0; 
 
             pricingDots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
+                dot.classList.toggle('active', i === realIndex);
+            });
+        };
+
+        const instantPricingJump = (targetLeft) => {
+            pricingGrid.style.scrollBehavior = 'auto';
+            pricingGrid.style.scrollSnapType = 'none';
+            void pricingGrid.offsetHeight;
+            pricingGrid.scrollTo({ left: targetLeft, behavior: 'auto' });
+            
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    pricingGrid.style.scrollBehavior = '';
+                    pricingGrid.style.scrollSnapType = '';
+                });
             });
         };
 
         pricingGrid.addEventListener('scroll', () => {
-            // throttle or debounce if needed, but for dots simple scroll is usually fine
             requestAnimationFrame(updatePricingNav);
+
+            if (window.innerWidth > 768) return;
+
+            window.clearTimeout(pricingScrollTimeout);
+            pricingScrollTimeout = setTimeout(() => {
+                const index = getPricingCurrentIndex();
+
+                // 맨 오른쪽의 [첫 번째 카드 클론]에 완벽히 도달했을 때 -> 실제 첫 번째 카드로 몰래 이동
+                if (index === originalPricingCount + 1) {
+                    instantPricingJump(getPricingSnapPos(1));
+                }
+                // 맨 왼쪽의 [마지막 카드 클론]에 완벽히 도달했을 때 -> 실제 마지막 카드로 몰래 이동
+                else if (index === 0) {
+                    instantPricingJump(getPricingSnapPos(originalPricingCount));
+                }
+            }, 100); 
         });
 
         if (pricingPrev) {
             pricingPrev.addEventListener('click', () => {
-                const scrollLeft = pricingGrid.scrollLeft;
-                const cardWidth = pricingGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
-
-                if (index === 0) {
-                    pricingGrid.scrollTo({ left: cardWidth * (pricingDots.length - 1), behavior: 'smooth' });
-                } else {
-                    pricingGrid.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+                const index = getPricingCurrentIndex();
+                if (index > 0) {
+                    pricingGrid.scrollTo({ left: getPricingSnapPos(index - 1), behavior: 'smooth' });
                 }
             });
         }
 
         if (pricingNext) {
             pricingNext.addEventListener('click', () => {
-                const scrollLeft = pricingGrid.scrollLeft;
-                const cardWidth = pricingGrid.clientWidth;
-                const index = Math.round(scrollLeft / cardWidth);
-
-                if (index === pricingDots.length - 1) {
-                    pricingGrid.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    pricingGrid.scrollBy({ left: cardWidth, behavior: 'smooth' });
+                const index = getPricingCurrentIndex();
+                if (index < pricingGrid.children.length - 1) {
+                    pricingGrid.scrollTo({ left: getPricingSnapPos(index + 1), behavior: 'smooth' });
                 }
             });
         }
 
         pricingDots.forEach((dot, i) => {
             dot.addEventListener('click', () => {
-                pricingGrid.scrollTo({ left: pricingGrid.clientWidth * i, behavior: 'smooth' });
+                // 진짜 카드들은 index 1부터 시작하므로 (i + 1)
+                pricingGrid.scrollTo({ left: getPricingSnapPos(i + 1), behavior: 'smooth' });
             });
         });
 
-        // Initialize on load and resize
-        window.addEventListener('resize', updatePricingNav);
+        window.addEventListener('resize', () => {
+            setupInfinitePricing();
+            updatePricingNav();
+        });
         updatePricingNav();
     }
 
