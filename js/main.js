@@ -1801,10 +1801,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
 
+        // 전역 접근 허용 (푸터 외부 링크 연동용)
+        window.goToPangMobile = goToPang;
+
         // 뷰포트 교차 관찰자 — 화면 밖으로 나갔다가 돌아오면 자동 재개 (manualStop 리셋)
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
+                    // 모바일 진입 시 사이드바 동기화
+                    if (window.matchMedia('(max-width: 768px)').matches) {
+                        syncSidebarActive(currentPang);
+                    }
                     // 네비 클릭 직후 스크롤 중이면 자동 재개 건너뜀
                     if (navJustClicked) return;
                     // 스크롤로 다시 진입하면 상태 리셋 후 자동 재개
@@ -2186,22 +2193,24 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 }
             }
         } else {
-            // 모바일: 슬라이드 이동 로직
-            const track = document.getElementById('pangSliderTrack');
-            const slider = document.getElementById('pangSectionSlider');
-            if (track) {
-                track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
-                track.style.transform = `translateX(-${slideIndex * 20}%)`;
-                // dot 동기화
-                document.querySelectorAll('.pang-nav-dot').forEach(dot => {
-                    dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === slideIndex);
-                });
-                // 사이드바 동기화
-                document.querySelectorAll('.floating-sidebar__link[href^="#"]').forEach(link => {
-                    if (link.closest('.floating-sidebar__item--kakao')) return;
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${pangId}`) link.classList.add('active');
-                });
+            // 모바일: 슬라이드 이동 로직 (무한 슬라이더 함수 호출)
+            if (typeof window.goToPangMobile === 'function') {
+                window.goToPangMobile(slideIndex);
+            } else {
+                // 폴백 (안전망)
+                const track = document.getElementById('pangSliderTrack');
+                if (track) {
+                    track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
+                    track.style.transform = `translateX(-${slideIndex * 20}%)`;
+                    document.querySelectorAll('.pang-nav-dot').forEach(dot => {
+                        dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === slideIndex);
+                    });
+                    document.querySelectorAll('.floating-sidebar__link[href^="#"]').forEach(link => {
+                        if (link.closest('.floating-sidebar__item--kakao')) return;
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${pangId}`) link.classList.add('active');
+                    });
+                }
             }
             // 팡 슬라이더 영역으로 스크롤 (헤더 높이 72px에 맞춰 정렬)
             if (slider) {

@@ -20,12 +20,23 @@ if ($existingPid -and $existingPid -ne $PID) {
 
 $listener = [System.Net.HttpListener]::new()
 $listener.Prefixes.Add("http://localhost:$port/")
+$listener.Prefixes.Add("http://127.0.0.1:$port/")
+
+# Get local IP and add to prefixes for mobile/external access
+$localIp = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notmatch 'Loopback|Virtual' } | Select-Object -First 1).IPAddress
+if ($localIp) {
+    $listener.Prefixes.Add("http://$($localIp):$port/")
+}
 $listener.Prefixes.Add("http://+:$port/")
 
 try {
     $listener.Start()
     Write-Host "====================================================" -ForegroundColor Green
-    Write-Host "  Server started at http://localhost:$port/"         -ForegroundColor Green
+    Write-Host "  Server started!"                                     -ForegroundColor Green
+    Write-Host "  Local:  http://localhost:$port/"                     -ForegroundColor Green
+    if ($localIp) {
+    Write-Host "  Mobile: http://$($localIp):$port/"                   -ForegroundColor Yellow
+    }
     Write-Host "  Upload endpoint: POST http://localhost:$port/upload" -ForegroundColor Cyan
     Write-Host "====================================================" -ForegroundColor Green
 } catch {
