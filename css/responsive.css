@@ -471,38 +471,54 @@
     .pang-next-preview.mobile-only {
         display: flex !important;
         flex-direction: column;
-        width: 68px; /* Slightly wider */
-        align-self: center; /* Stop it from stretching to fill height */
-        height: 105px; /* Shorter than the full list height */
-        background: linear-gradient(180deg, #ff9533 0%, #eb5b00 100%); /* Strong contrast orange */
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-bottom: 4px solid #b34500; /* Thick 3D button lip */
-        border-radius: 12px;
-        overflow: hidden;
+        width: 80px; /* 여유있는 너비 */
+        height: 80px; /* 더 정사각형에 가깝게 하여 둥근 느낌 강조 */
+        background: #e53c11; /* 사용자가 요청한 강조색 */
+        border: none;
+        border-radius: 22px; /* 아주 둥글게 */
+        overflow: visible; /* 화살표 촉 노출 */
         position: relative;
         cursor: pointer;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 2px;
+        margin-right: 20px;
         flex-shrink: 0;
-        padding: 4px;
-        box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.6), 0 6px 16px rgba(0, 0, 0, 0.4);
-        transition: transform 0.15s, border-bottom-width 0.15s, margin-top 0.15s, box-shadow 0.15s;
+        padding: 5px;
+        /* 외부 그림자는 filter로 이동하여 전체 형태에 적용 */
+        box-shadow: 
+            inset 0 8px 12px rgba(255,255,255,0.6), /* 강한 입체 하이라이트 */
+            inset 0 -8px 12px rgba(0,0,0,0.3); /* 강한 입체 음영 */
+        filter: drop-shadow(0 12px 15px rgba(0,0,0,0.6));
+        transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+        /* 요청하신 위치 이동: 좌측 50px, 하단 70px */
+        transform: translate(-50px, 70px);
+    }
+
+    /* 화살표 촉 (더 둥글게) */
+    .pang-next-preview.mobile-only::after {
+        content: '';
+        position: absolute;
+        right: -18px; /* 몸통 밖으로 빼기 */
+        top: 50%;
+        margin-top: -22.5px; /* 세로 중앙 보정 */
+        width: 45px;
+        height: 45px;
+        background: #e53c11; /* 사용자가 요청한 강조색 */
+        border-radius: 12px; /* 촉도 매우 둥글게 */
+        z-index: -1;
+        transform: rotate(45deg);
+        /* 마름모에도 몸체와 완벽히 동일한 볼륨감 부여 (텍스트 깨짐 해결) */
+        box-shadow: 
+            inset 0 8px 12px rgba(255,255,255,0.6), /* 회전 시 우상단 하이라이트 */
+            inset -8px 0 12px rgba(0,0,0,0.3); /* 회전 시 우하단 그림자 */
     }
 
     .pang-next-preview.mobile-only:active {
-        transform: translateY(3px);
-        border-bottom-width: 1px;
-        margin-top: 3px;
-        box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.5);
-    }
-
-    .pang-next-preview::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-        z-index: 0;
+        /* 클릭 시 원래 위치에서 추가로 이동 */
+        transform: translate(-50px, 74px); 
+        box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+        filter: drop-shadow(0 5px 8px rgba(0,0,0,0.7));
     }
 
     .pang-next-preview > * {
@@ -511,35 +527,27 @@
     }
 
     .pang-next-preview__icon {
-        font-size: 24px;
+        font-size: 28px; /* 아이콘 조금 확대 */
         line-height: 1;
         margin-bottom: 2px;
-        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+        color: #ffffff;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); /* 텍스트, 아이콘도 입체감 있게 */
     }
 
     .pang-next-preview__title {
-        font-size: 11px;
-        font-weight: var(--fw-bold);
+        font-size: 13px;
+        font-weight: 800;
         color: #ffffff;
         font-family: var(--font-kr);
         text-align: center;
-        line-height: 1.25;
+        line-height: 1.2;
         word-break: keep-all;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* 텍스트 입체감 */
     }
 
+    /* 사용자가 완전히 삭제(숨김) 요청한 하부 동그라미 화살표 */
     .pang-next-preview__arrow {
-        font-size: 13px;
-        color: #fff;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.25);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 2px;
-        text-shadow: none;
+        display: none !important;
     }
 
     /* 모바일 전용: 썸네일 아래로 이동한 견적 버튼 스타일 */
