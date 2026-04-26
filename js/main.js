@@ -2015,21 +2015,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // 팡 섹션 새 네비게이션 버튼 (< dots >)
-        document.querySelectorAll('.pang-nav-btn--prev').forEach(btn => {
-            btn.addEventListener('click', () => {
-                manualStop = true;
-                stopAuto();
-                goToPang(currentPang - 1);
-            });
-        });
 
-        document.querySelectorAll('.pang-nav-btn--next').forEach(btn => {
-            btn.addEventListener('click', () => {
-                manualStop = true;
-                stopAuto();
-                goToPang(currentPang + 1);
-            });
-        });
 
         // dot 클릭 이벤트
         document.querySelectorAll('.pang-nav-dot').forEach(dot => {

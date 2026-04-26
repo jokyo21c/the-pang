@@ -936,23 +936,7 @@
     display: block;
 }
 
-.pang-next-preview.mobile-only {
-    display: none;
-}
 
-.pang-next-preview__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    color: #ffffff;
-}
-
-.pang-next-preview__icon i {
-    font-size: 24px;
-    line-height: 1;
-}
 
 /* PC 환경 먹팡(첫번째 팡) 섹션만 아이콘과 텍스트가 우측으로 치우쳐보이는 현상 보정 */
 @media (min-width: 769px) {
