@@ -1946,6 +1946,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.pang-nav-dot').forEach(dot => {
                 dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === dotIndex);
             });
+            
+            // 모바일 탭 버튼 활성화 동기화
+            const pangId = pangIdMap[dotIndex];
+            document.querySelectorAll('.mobile-pang-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-target') === pangId);
+            });
         };
 
         // 사이드바 active 아이콘 동기화
@@ -2549,6 +2555,19 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 setTimeout(() => {
                     window.dispatchEvent(new Event('resize'));
                 }, 50);
+            });
+        });
+    }
+
+    // ── 모바일 전용 팡 섹션 탭 로직 ──
+    const mobilePangTabs = document.querySelectorAll('.mobile-pang-tab-btn');
+    if (mobilePangTabs.length > 0) {
+        mobilePangTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetId = tab.getAttribute('data-target');
+                if (window.navigateToPang) {
+                    window.navigateToPang(targetId);
+                }
             });
         });
     }

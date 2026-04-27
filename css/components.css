@@ -1208,6 +1208,10 @@
     display: none; /* 모바일 환경에서는 절대 노출 안 함 */
 }
 
+.mobile-pang-tabs-wrapper {
+    display: none; /* PC 환경에선 안 보임 */
+}
+
 /* 포트폴리오 탭 클래스(portfolio-filter)와의 간섭 방지용 독립 스타일 */
 .pc-pang-tabs {
     display: flex;

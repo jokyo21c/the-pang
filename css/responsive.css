@@ -19,6 +19,46 @@
 
     /* ══ PANG SECTION SLIDER ══════════════════════════════ */
     
+    /* 모바일 팡 섹션 탭 */
+    .mobile-pang-tabs-wrapper {
+        display: block !important;
+        padding-top: 10px;
+        padding-bottom: 24px;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE and Edge */
+    }
+    .mobile-pang-tabs-wrapper::-webkit-scrollbar {
+        display: none; /* Chrome, Safari and Opera */
+    }
+    .mobile-pang-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+    .mobile-pang-tab-btn {
+        flex: 1 1 auto;
+        white-space: nowrap;
+        background-color: var(--color-bg-card);
+        color: var(--color-text-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: 20px;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    .mobile-pang-tab-btn.active {
+        background-color: #e53c11 !important;
+        color: #ffffff !important;
+        border-color: #e53c11 !important;
+    }
+
     /* 슬라이더 래퍼: 뷰포트 너비 전체 사용, overflow hidden */
     .pang-section-slider {
         overflow: hidden;
