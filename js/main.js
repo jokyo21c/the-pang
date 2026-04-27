@@ -1648,11 +1648,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const touchTarget = viewport || wrap;
 
         touchTarget.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }, evtOptsPassive);
 
+        touchTarget.addEventListener('touchmove', (e) => {
+            e.stopPropagation();
+        }, evtOptsPassive);
+
         touchTarget.addEventListener('touchend', (e) => {
+            e.stopPropagation();
             const diffX = e.changedTouches[0].clientX - touchStartX;
             const diffY = e.changedTouches[0].clientY - touchStartY;
             if (Math.abs(diffY) > Math.abs(diffX)) return;
