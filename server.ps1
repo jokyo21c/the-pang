@@ -154,6 +154,11 @@ while ($listener.IsListening) {
 
                 $response.ContentType    = $contentType
                 $response.ContentLength64 = $bytes.Length
+                # JS/CSS/HTML 파일은 캐시 방지 (개발 편의성)
+                if ($ext -in @('.js', '.css', '.html')) {
+                    $response.Headers.Add("Cache-Control", "no-store, no-cache, must-revalidate")
+                    $response.Headers.Add("Pragma", "no-cache")
+                }
                 try {
                     $response.OutputStream.Write($bytes, 0, $bytes.Length)
                 } catch {
