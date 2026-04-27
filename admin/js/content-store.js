@@ -56,6 +56,15 @@ const DEFAULT_CONTENT = {
         salpang: [],
         meotpang: [],
     },
+    addons: [
+        { name: '드론 촬영 추가', price: '+150,000원/회' },
+        { name: '다국어 자막 (영어)', price: '+50,000원/편' },
+        { name: 'AI 가상 모델 생성', price: '+80,000원/편' },
+        { name: 'SNS 직접 업로드 대행', price: '+100,000원/월' },
+        { name: '광고 집행 세팅 대행', price: '+200,000원/회' },
+        { name: '모델 섭외 (일반)', price: '+300,000원~' },
+        { name: '모델 섭외 (인플루언서)', price: '별도 견적' }
+    ],
     footer: {
         brandName: 'THE PANG',
         slogan: '숏츠 광고, \n한방으로 바이럴',
@@ -83,12 +92,13 @@ const ContentStore = {
     async get() {
         try {
             // 병렬로 모든 데이터 로드
-            const [hero, footer, testimonials, pricing, portfolioItems] = await Promise.all([
+            const [hero, footer, testimonials, pricing, portfolioItems, addons] = await Promise.all([
                 AdminContent.getSection('hero'),
                 AdminContent.getSection('footer'),
                 AdminContent.getTestimonials(),
                 AdminContent.getPricing(),
-                AdminContent.getPortfolio()
+                AdminContent.getPortfolio(),
+                AdminContent.getSection('addons')
             ]);
 
             // 포트폴리오를 카테고리별로 그룹화
@@ -136,6 +146,7 @@ const ContentStore = {
                 footer: footer || DEFAULT_CONTENT.footer,
                 testimonials: formattedTestimonials.length ? formattedTestimonials : DEFAULT_CONTENT.testimonials,
                 pricing: formattedPricing.length ? formattedPricing : DEFAULT_CONTENT.pricing,
+                addons: addons || DEFAULT_CONTENT.addons,
                 portfolio
             };
 
@@ -159,7 +170,8 @@ const ContentStore = {
                 AdminContent.saveSection('hero', data.hero),
                 AdminContent.saveSection('footer', data.footer),
                 AdminContent.saveTestimonials(data.testimonials),
-                AdminContent.savePricing(data.pricing)
+                AdminContent.savePricing(data.pricing),
+                AdminContent.saveSection('addons', data.addons)
             ]);
             // 포트폴리오는 개별 CRUD로 처리되므로 여기서는 저장하지 않음
 

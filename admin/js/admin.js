@@ -50,6 +50,7 @@ async function initApp() {
     renderPortfolioEditor();
     renderTestimonialEditor();
     renderPricingEditor();
+    renderAddonsEditor();
     loadFooter();
     updateStats();
 
@@ -647,6 +648,54 @@ function savePricing() {
     });
 }
 
+// ── Addons (추가 옵션) ──────────────────────────────────
+function renderAddonsEditor() {
+    const container = document.getElementById('addons-editor');
+    if (!container) return;
+    
+    if (!content.addons) {
+        content.addons = [];
+    }
+
+    container.innerHTML = content.addons.map((addon, i) => `
+        <div class="editor-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label>옵션명 (예: 드론 촬영 추가)</label>
+                <input type="text" class="form-control" id="addon-name-${i}" value="${addon.name || ''}">
+            </div>
+            <div style="flex: 1;">
+                <label>가격 (예: +150,000원/회)</label>
+                <input type="text" class="form-control" id="addon-price-${i}" value="${addon.price || ''}">
+            </div>
+            <button class="btn" style="background: rgba(230,57,70,0.1); color: #e63946; padding: 12px; border-radius: 8px;" onclick="removeAddon(${i})" title="삭제">
+                <i class="ri-delete-bin-line"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function addAddon() {
+    saveAddons(); // 현재 입력된 값 보존
+    content.addons.push({ name: '', price: '' });
+    renderAddonsEditor();
+}
+
+function removeAddon(index) {
+    if(confirm('이 추가 옵션을 삭제하시겠습니까?')) {
+        saveAddons();
+        content.addons.splice(index, 1);
+        renderAddonsEditor();
+    }
+}
+
+function saveAddons() {
+    if (!content.addons) return;
+    content.addons = content.addons.map((addon, i) => ({
+        name: document.getElementById(`addon-name-${i}`)?.value || addon.name,
+        price: document.getElementById(`addon-price-${i}`)?.value || addon.price
+    }));
+}
+
 // ── Footer ──────────────────────────────────────────────
 function loadFooter() {
     if(!content.footer) content.footer = { sns: {}, contact: {}, companyLinks: [] };
@@ -716,6 +765,7 @@ async function saveAll() {
     saveHero();
     saveTestimonials();
     savePricing();
+    saveAddons();
     saveFooter();
 
     const btn = document.getElementById('saveBtn');

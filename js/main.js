@@ -2750,6 +2750,23 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 dotsContainer.innerHTML = plans.map((_, i) => `<span class="pricing-dot ${i===0?'active':''}" data-index="${i}"></span>`).join('');
             }
 
+            try {
+                const addons = await PangData.getSection('addons');
+                if (addons && Array.isArray(addons)) {
+                    const addonTable = document.querySelector('.addon-table');
+                    if (addonTable) {
+                        addonTable.innerHTML = addons.map(addon => `
+                            <div class="addon-table__row">
+                                <span class="addon-table__name">${addon.name || ''}</span>
+                                <span class="addon-table__price">${addon.price || ''}</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.warn('Addons fetch failed:', err);
+            }
+
             // DOM이 완전히 반영된 후 슬라이더 초기화 (rAF보다 setTimeout이 더 안정적)
             setTimeout(() => initPricingSlider(), 100);
         } catch (e) {
