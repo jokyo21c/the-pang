@@ -1411,6 +1411,16 @@
         margin: 0;
     }
 
+    .pang-slide .thumb-all-dot {
+        transition: background 0.25s ease, width 0.25s ease, border-radius 0.25s ease;
+    }
+
+    .pang-slide .thumb-all-dot.active {
+        width: 28px;
+        border-radius: 5px;
+        transform: none;
+    }
+
     .pang-slide .thumb-all-nav--next {
         grid-row: 2;
         grid-column: 3;
