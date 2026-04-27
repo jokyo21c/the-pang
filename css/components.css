@@ -1983,6 +1983,37 @@
     margin-bottom: 4px;
 }
 
+.pricing-card__price-base {
+    position: relative;
+    display: inline-block;
+    color: var(--color-text-muted);
+    font-size: 0.7em;
+}
+
+.pricing-card__price-base::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    border-top: 3px double var(--color-brand-orange);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.pricing-card__discount-reason {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+}
+
+.pricing-card__discount-price {
+    color: var(--color-brand-orange);
+    font-weight: bold;
+    margin-top: 4px;
+    font-size: 1.1em;
+}
+
 .pricing-card--standard .pricing-card__price {
     font-size: 36px;
 }

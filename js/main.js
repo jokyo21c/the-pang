@@ -270,151 +270,159 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Mobile Pricing Slider Logic ─────────────────────────
-    const pricingGrid = document.getElementById('pricingGrid');
-    const pricingPrev = document.querySelector('.pricing-nav--prev');
-    const pricingNext = document.querySelector('.pricing-nav--next');
-    const pricingDots = document.querySelectorAll('.pricing-dot');
+    function initPricingSlider() {
+        const pricingGrid = document.getElementById('pricingGrid');
+        const pricingPrev = document.querySelector('.pricing-nav--prev');
+        const pricingNext = document.querySelector('.pricing-nav--next');
+        const pricingDots = document.querySelectorAll('.pricing-dot');
 
-    if (pricingGrid && pricingDots.length > 0) {
-        let isPricingInfiniteSetup = false;
-        let originalPricingCount = pricingDots.length;
-        let pricingScrollTimeout;
+        if (pricingGrid && pricingDots.length > 0) {
+            let isPricingInfiniteSetup = false;
+            let originalPricingCount = pricingDots.length;
+            let pricingScrollTimeout;
 
-        const getPricingSnapPos = (idx) => {
-            const child = pricingGrid.children[idx];
-            if (!child) return 0;
-            return child.offsetLeft - (pricingGrid.clientWidth - child.offsetWidth) / 2;
-        };
+            const getPricingSnapPos = (idx) => {
+                const child = pricingGrid.children[idx];
+                if (!child) return 0;
+                return child.offsetLeft - (pricingGrid.clientWidth - child.offsetWidth) / 2;
+            };
 
-        const getPricingCurrentIndex = () => {
-            let closest = 0;
-            let minDiff = Infinity;
-            Array.from(pricingGrid.children).forEach((child, i) => {
-                if (child.classList.contains('pricing-nav') || child.classList.contains('pricing-dots')) return;
-                const snapPos = child.offsetLeft - (pricingGrid.clientWidth - child.offsetWidth) / 2;
-                const diff = Math.abs(pricingGrid.scrollLeft - snapPos);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closest = i;
-                }
-            });
-            return closest;
-        };
+            const getPricingCurrentIndex = () => {
+                let closest = 0;
+                let minDiff = Infinity;
+                Array.from(pricingGrid.children).forEach((child, i) => {
+                    if (child.classList.contains('pricing-nav') || child.classList.contains('pricing-dots')) return;
+                    const snapPos = child.offsetLeft - (pricingGrid.clientWidth - child.offsetWidth) / 2;
+                    const diff = Math.abs(pricingGrid.scrollLeft - snapPos);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closest = i;
+                    }
+                });
+                return closest;
+            };
 
-        const setupInfinitePricing = () => {
-            if (window.innerWidth <= 768 && !isPricingInfiniteSetup) {
-                // 원본 카드들을 배열로 추출
-                const cards = Array.from(pricingGrid.querySelectorAll('.pricing-card'));
-                
-                if (cards.length === originalPricingCount) {
-                    // 첫 번째 카드 복사 후 맨 뒤에 추가
-                    const firstClone = cards[0].cloneNode(true);
-                    firstClone.classList.add('clone');
-                    firstClone.setAttribute('aria-hidden', 'true');
-                    pricingGrid.appendChild(firstClone);
+            const setupInfinitePricing = () => {
+                if (window.innerWidth <= 768 && !isPricingInfiniteSetup) {
+                    // 원본 카드들을 배열로 추출
+                    const cards = Array.from(pricingGrid.querySelectorAll('.pricing-card'));
                     
-                    // 마지막 카드 복사 후 맨 앞에 추가
-                    const lastClone = cards[cards.length - 1].cloneNode(true);
-                    lastClone.classList.add('clone');
-                    lastClone.setAttribute('aria-hidden', 'true');
-                    pricingGrid.insertBefore(lastClone, cards[0]);
+                    if (cards.length === originalPricingCount) {
+                        // 첫 번째 카드 복사 후 맨 뒤에 추가
+                        const firstClone = cards[0].cloneNode(true);
+                        firstClone.classList.add('clone');
+                        firstClone.setAttribute('aria-hidden', 'true');
+                        pricingGrid.appendChild(firstClone);
+                        
+                        // 마지막 카드 복사 후 맨 앞에 추가
+                        const lastClone = cards[cards.length - 1].cloneNode(true);
+                        lastClone.classList.add('clone');
+                        lastClone.setAttribute('aria-hidden', 'true');
+                        pricingGrid.insertBefore(lastClone, cards[0]);
 
-                    // 클론이 추가되었으므로 초기 위치를 진짜 첫 번째 카드(index 1)로 강제 조정
-                    setTimeout(() => {
-                        pricingGrid.style.scrollBehavior = 'auto'; // 스무스 스크롤 끄기
-                        pricingGrid.style.scrollSnapType = 'none';
-                        void pricingGrid.offsetHeight; // 강제 리플로우
-                        pricingGrid.scrollTo({ left: getPricingSnapPos(1), behavior: 'auto' });
-                        setTimeout(() => { 
-                            pricingGrid.style.scrollBehavior = ''; 
-                            pricingGrid.style.scrollSnapType = '';
+                        // 클론이 추가되었으므로 초기 위치를 진짜 첫 번째 카드(index 1)로 강제 조정
+                        setTimeout(() => {
+                            pricingGrid.style.scrollBehavior = 'auto'; // 스무스 스크롤 끄기
+                            pricingGrid.style.scrollSnapType = 'none';
+                            void pricingGrid.offsetHeight; // 강제 리플로우
+                            pricingGrid.scrollTo({ left: getPricingSnapPos(1), behavior: 'auto' });
+                            setTimeout(() => { 
+                                pricingGrid.style.scrollBehavior = ''; 
+                                pricingGrid.style.scrollSnapType = '';
+                            }, 50);
                         }, 50);
-                    }, 50);
+                    }
+                    isPricingInfiniteSetup = true;
                 }
-                isPricingInfiniteSetup = true;
+            };
+
+            setupInfinitePricing();
+
+            const updatePricingNav = () => {
+                if (window.innerWidth > 768) return;
+                const index = getPricingCurrentIndex();
+                
+                let realIndex = index - 1;
+                
+                if (realIndex < 0) realIndex = originalPricingCount - 1; 
+                if (realIndex >= originalPricingCount) realIndex = 0; 
+
+                pricingDots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === realIndex);
+                });
+            };
+
+            const instantPricingJump = (targetLeft) => {
+                pricingGrid.style.scrollBehavior = 'auto';
+                pricingGrid.style.scrollSnapType = 'none';
+                void pricingGrid.offsetHeight;
+                pricingGrid.scrollTo({ left: targetLeft, behavior: 'auto' });
+                
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        pricingGrid.style.scrollBehavior = '';
+                        pricingGrid.style.scrollSnapType = '';
+                    });
+                });
+            };
+
+            // 기존 리스너 제거 방식을 위해 클로저 외부에 선언해야 하지만, 여기서는 초기화 시 한 번만 바인딩하므로 그대로 사용
+            pricingGrid.addEventListener('scroll', () => {
+                requestAnimationFrame(updatePricingNav);
+
+                if (window.innerWidth > 768) return;
+
+                window.clearTimeout(pricingScrollTimeout);
+                pricingScrollTimeout = setTimeout(() => {
+                    const index = getPricingCurrentIndex();
+
+                    // 맨 오른쪽의 [첫 번째 카드 클론]에 완벽히 도달했을 때 -> 실제 첫 번째 카드로 몰래 이동
+                    if (index === originalPricingCount + 1) {
+                        instantPricingJump(getPricingSnapPos(1));
+                    }
+                    // 맨 왼쪽의 [마지막 카드 클론]에 완벽히 도달했을 때 -> 실제 마지막 카드로 몰래 이동
+                    else if (index === 0) {
+                        instantPricingJump(getPricingSnapPos(originalPricingCount));
+                    }
+                }, 100); 
+            });
+
+            if (pricingPrev) {
+                // 기존 이벤트 리스너가 중복 등록되지 않도록 주의해야 하지만, renderDynamicPricing에서 grid 자체를 덮어쓰므로 괜찮음
+                const newPrev = pricingPrev.cloneNode(true);
+                pricingPrev.parentNode.replaceChild(newPrev, pricingPrev);
+                newPrev.addEventListener('click', () => {
+                    const index = getPricingCurrentIndex();
+                    if (index > 0) {
+                        pricingGrid.scrollTo({ left: getPricingSnapPos(index - 1), behavior: 'smooth' });
+                    }
+                });
             }
-        };
 
-        setupInfinitePricing();
-
-        const updatePricingNav = () => {
-            if (window.innerWidth > 768) return;
-            const index = getPricingCurrentIndex();
-            
-            let realIndex = index - 1;
-            
-            if (realIndex < 0) realIndex = originalPricingCount - 1; 
-            if (realIndex >= originalPricingCount) realIndex = 0; 
+            if (pricingNext) {
+                const newNext = pricingNext.cloneNode(true);
+                pricingNext.parentNode.replaceChild(newNext, pricingNext);
+                newNext.addEventListener('click', () => {
+                    const index = getPricingCurrentIndex();
+                    if (index < pricingGrid.children.length - 1) {
+                        pricingGrid.scrollTo({ left: getPricingSnapPos(index + 1), behavior: 'smooth' });
+                    }
+                });
+            }
 
             pricingDots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === realIndex);
-            });
-        };
-
-        const instantPricingJump = (targetLeft) => {
-            pricingGrid.style.scrollBehavior = 'auto';
-            pricingGrid.style.scrollSnapType = 'none';
-            void pricingGrid.offsetHeight;
-            pricingGrid.scrollTo({ left: targetLeft, behavior: 'auto' });
-            
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    pricingGrid.style.scrollBehavior = '';
-                    pricingGrid.style.scrollSnapType = '';
+                dot.addEventListener('click', () => {
+                    // 진짜 카드들은 index 1부터 시작하므로 (i + 1)
+                    pricingGrid.scrollTo({ left: getPricingSnapPos(i + 1), behavior: 'smooth' });
                 });
             });
-        };
 
-        pricingGrid.addEventListener('scroll', () => {
-            requestAnimationFrame(updatePricingNav);
-
-            if (window.innerWidth > 768) return;
-
-            window.clearTimeout(pricingScrollTimeout);
-            pricingScrollTimeout = setTimeout(() => {
-                const index = getPricingCurrentIndex();
-
-                // 맨 오른쪽의 [첫 번째 카드 클론]에 완벽히 도달했을 때 -> 실제 첫 번째 카드로 몰래 이동
-                if (index === originalPricingCount + 1) {
-                    instantPricingJump(getPricingSnapPos(1));
-                }
-                // 맨 왼쪽의 [마지막 카드 클론]에 완벽히 도달했을 때 -> 실제 마지막 카드로 몰래 이동
-                else if (index === 0) {
-                    instantPricingJump(getPricingSnapPos(originalPricingCount));
-                }
-            }, 100); 
-        });
-
-        if (pricingPrev) {
-            pricingPrev.addEventListener('click', () => {
-                const index = getPricingCurrentIndex();
-                if (index > 0) {
-                    pricingGrid.scrollTo({ left: getPricingSnapPos(index - 1), behavior: 'smooth' });
-                }
+            window.addEventListener('resize', () => {
+                setupInfinitePricing();
+                updatePricingNav();
             });
-        }
-
-        if (pricingNext) {
-            pricingNext.addEventListener('click', () => {
-                const index = getPricingCurrentIndex();
-                if (index < pricingGrid.children.length - 1) {
-                    pricingGrid.scrollTo({ left: getPricingSnapPos(index + 1), behavior: 'smooth' });
-                }
-            });
-        }
-
-        pricingDots.forEach((dot, i) => {
-            dot.addEventListener('click', () => {
-                // 진짜 카드들은 index 1부터 시작하므로 (i + 1)
-                pricingGrid.scrollTo({ left: getPricingSnapPos(i + 1), behavior: 'smooth' });
-            });
-        });
-
-        window.addEventListener('resize', () => {
-            setupInfinitePricing();
             updatePricingNav();
-        });
-        updatePricingNav();
+        }
     }
 
     // ── Mobile Service Slider Logic ─────────────────────────
@@ -2658,7 +2666,92 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         }
     };
 
+    /* ── 요금표 (Supabase) 동적 렌더링 ── */
+    async function renderDynamicPricing() {
+        if (!window.PangData) {
+            // fallback for missing data: just init the slider with existing html
+            initPricingSlider();
+            return;
+        }
+        
+        try {
+            const plans = await PangData.getPricing();
+            if (!plans || plans.length === 0) {
+                initPricingSlider();
+                return;
+            }
+
+            const pricingGrid = document.getElementById('pricingGrid');
+            if (!pricingGrid) return;
+
+            const PLAN_STYLES = ['starter', 'standard', 'premium', 'enterprise'];
+
+            pricingGrid.innerHTML = plans.map((plan, i) => {
+                const style = PLAN_STYLES[i] || 'starter';
+                let basePrice = plan.price;
+                let discountReason = '';
+                let discountedPrice = '';
+
+                if (plan.price && plan.price.includes('|')) {
+                    const parts = plan.price.split('|');
+                    basePrice = parts[0] || '';
+                    discountReason = parts[1] || '';
+                    discountedPrice = parts[2] || '';
+                }
+
+                let priceHtml = '';
+                if (discountReason || discountedPrice) {
+                    priceHtml = `
+                        <div class="pricing-card__price-base">
+                            ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
+                        </div>
+                        <div class="pricing-card__discount-reason">
+                            ${discountReason}
+                        </div>
+                        <div class="pricing-card__discount-price">
+                            ${discountedPrice}<span style="font-size:16px;font-weight:400; color: var(--color-brand-orange);">원</span>
+                        </div>
+                    `;
+                } else {
+                    priceHtml = `
+                        ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
+                    `;
+                }
+
+                const btnText = plan.btn_text || plan.btnText || '시작하기';
+                const btnClass = (style === 'enterprise' || style === 'premium') ? 'btn--primary' : 'btn--purple';
+
+                return `
+                    <div class="pricing-card pricing-card--${style}">
+                        <div class="pricing-card__name">${plan.name}</div>
+                        <div class="pricing-card__tier">${plan.tier}</div>
+                        <div class="pricing-card__price">
+                            ${priceHtml}
+                        </div>
+                        <div class="pricing-card__period">${plan.period}</div>
+                        <ul class="pricing-card__features">
+                            ${Array.isArray(plan.features) ? plan.features.map(f => `<li><i class="ri-check-line"></i> ${f}</li>`).join('') : ''}
+                        </ul>
+                        <a href="#order" class="pricing-card__btn ${btnClass}">${btnText}</a>
+                    </div>
+                `;
+            }).join('');
+
+            // Generate new dots
+            const dotsContainer = document.getElementById('pricingDots');
+            if (dotsContainer) {
+                dotsContainer.innerHTML = plans.map((_, i) => `<span class="pricing-dot ${i===0?'active':''}" data-index="${i}"></span>`).join('');
+            }
+
+            initPricingSlider();
+        } catch (e) {
+            console.error('Pricing rendering failed:', e);
+            initPricingSlider();
+        }
+    }
+
     renderDynamicFooter();
+    renderDynamicPricing();
 });
 
 

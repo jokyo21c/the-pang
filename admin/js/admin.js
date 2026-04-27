@@ -576,7 +576,19 @@ async function processTestimonialFile(file, index) {
 // ── Pricing ──────────────────────────────────────────────
 function renderPricingEditor() {
     const container = document.getElementById('pricing-editor');
-    container.innerHTML = content.pricing.map((plan, i) => `
+    container.innerHTML = content.pricing.map((plan, i) => {
+        let basePrice = plan.price;
+        let discountReason = '';
+        let discountedPrice = '';
+
+        if (plan.price && plan.price.includes('|')) {
+            const parts = plan.price.split('|');
+            basePrice = parts[0] || '';
+            discountReason = parts[1] || '';
+            discountedPrice = parts[2] || '';
+        }
+
+        return `
         <div class="plan-editor">
             <div class="plan-editor__header">
                 <span style="font-size:15px;font-weight:700;">${plan.name}</span>
@@ -587,10 +599,17 @@ function renderPricingEditor() {
                 <input type="text" class="form-control" id="plan-name-${i}" value="${plan.name}">
             </div>
             <div class="editor-row">
-                <label>가격 (숫자만, 예: 190,000)</label>
-                <input type="text" class="form-control" id="plan-price-${i}" value="${plan.price}">
+                <label>기본 가격 (숫자만, 예: 190,000)</label>
+                <input type="text" class="form-control" id="plan-price-${i}" value="${basePrice}">
             </div>
-            <div class="editor-row">
+            <div class="editor-row" style="background: rgba(229,60,17,0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(229,60,17,0.3);">
+                <label style="color: #e53c11; font-weight: 600;">할인 이유 (예: 오픈 특가)</label>
+                <input type="text" class="form-control" id="plan-discount-reason-${i}" value="${discountReason}" placeholder="입력 시 할인가가 표시됩니다">
+                
+                <label style="color: #e53c11; font-weight: 600; margin-top: 12px;">할인 된 가격 (예: 150,000)</label>
+                <input type="text" class="form-control" id="plan-discount-price-${i}" value="${discountedPrice}" placeholder="할인된 최종 가격">
+            </div>
+            <div class="editor-row" style="margin-top: 16px;">
                 <label>기간 텍스트 (예: 1회 기준)</label>
                 <input type="text" class="form-control" id="plan-period-${i}" value="${plan.period}">
             </div>
@@ -603,19 +622,30 @@ function renderPricingEditor() {
                 <input type="text" class="form-control" id="plan-btn-${i}" value="${plan.btnText || plan.btn_text || ''}">
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function savePricing() {
-    content.pricing = content.pricing.map((plan, i) => ({
-        ...plan,
-        name:     document.getElementById(`plan-name-${i}`)?.value     || plan.name,
-        price:    document.getElementById(`plan-price-${i}`)?.value    || plan.price,
-        period:   document.getElementById(`plan-period-${i}`)?.value   || plan.period,
-        features: (document.getElementById(`plan-features-${i}`)?.value || '')
-                    .split('\n').map(s => s.trim()).filter(Boolean),
-        btnText:  document.getElementById(`plan-btn-${i}`)?.value      || plan.btnText,
-    }));
+    content.pricing = content.pricing.map((plan, i) => {
+        const basePrice = document.getElementById(`plan-price-${i}`)?.value || '';
+        const discountReason = document.getElementById(`plan-discount-reason-${i}`)?.value || '';
+        const discountPrice = document.getElementById(`plan-discount-price-${i}`)?.value || '';
+        
+        let finalPrice = basePrice;
+        if (discountReason.trim() !== '' || discountPrice.trim() !== '') {
+            finalPrice = `${basePrice}|${discountReason}|${discountPrice}`;
+        }
+
+        return {
+            ...plan,
+            name:     document.getElementById(`plan-name-${i}`)?.value     || plan.name,
+            price:    finalPrice || plan.price,
+            period:   document.getElementById(`plan-period-${i}`)?.value   || plan.period,
+            features: (document.getElementById(`plan-features-${i}`)?.value || '')
+                        .split('\n').map(s => s.trim()).filter(Boolean),
+            btnText:  document.getElementById(`plan-btn-${i}`)?.value      || plan.btnText,
+        };
+    });
 }
 
 // ── Footer ──────────────────────────────────────────────
