@@ -22,8 +22,8 @@
     /* 모바일 팡 섹션 탭 */
     .mobile-pang-tabs-wrapper {
         display: block !important;
-        padding-top: 40px;
-        padding-bottom: 30px;
+        padding-top: 50px;
+        padding-bottom: 40px;
         width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
