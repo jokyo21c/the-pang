@@ -45,6 +45,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // [FIX] dots는 항상 최신 DOM에서 재조회 (stale closure 방지)
     const getDots = () => document.querySelectorAll('.slider-dot');
 
+    const updateTestimonialDots = (slideIndex) => {
+        const dots = getDots();
+        if (!dots.length || totalSlides === 0) return;
+        
+        let dotIndex = slideIndex - 1;
+        if (dotIndex < 0) dotIndex = totalSlides - 1;
+        if (dotIndex >= totalSlides) dotIndex = 0;
+
+        const maxDots = window.innerWidth <= 768 ? 5 : totalSlides;
+        if (totalSlides <= maxDots) {
+            dots.forEach((dot, i) => {
+                dot.style.display = '';
+                dot.classList.toggle('active', i === dotIndex);
+            });
+        } else {
+            const half = Math.floor(maxDots / 2);
+            let winStart = dotIndex - half;
+            winStart = Math.max(0, Math.min(winStart, totalSlides - maxDots));
+
+            dots.forEach((dot, i) => {
+                dot.style.display = (i >= winStart && i < winStart + maxDots) ? '' : 'none';
+                dot.classList.toggle('active', i === dotIndex);
+            });
+        }
+    };
+
     const goToSlide = (index) => {
         const dots = getDots();
         if (totalSlides === 0 || isTestimonialTransitioning) return;
@@ -56,12 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             testimonialTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
         
-        let dotIndex = currentSlide - 1;
-        if (dotIndex < 0) dotIndex = totalSlides - 1;
-        if (dotIndex >= totalSlides) dotIndex = 0;
-
-        dots.forEach(dot => dot.classList.remove('active'));
-        if (dots[dotIndex]) dots[dotIndex].classList.add('active');
+        updateTestimonialDots(currentSlide);
     };
 
     if (testimonialTrack) {
@@ -187,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSlide = 1;
         testimonialTrack.style.transform = `translateX(-100%)`;
         void testimonialTrack.offsetHeight;
+        updateTestimonialDots(currentSlide);
     };
 
     // [FIX] localStorage 대신 Supabase PangData.getTestimonials() 사용
