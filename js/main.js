@@ -1987,14 +1987,26 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // 슬라이더 이동
-        const goToPang = (index, smooth = true) => {
+        const goToPang = (index, smooth = true, forceManual = false) => {
             // PC 환경에서는 수평 슬라이더 애니메이션을 동작시키지 않음
             if (window.innerWidth > 768) {
                 track.style.transform = '';
                 return;
             }
 
-            if (isTransitioning && smooth) return;
+            if (forceManual) {
+                manualStop = true;
+                stopAuto();
+                isTransitioning = false;
+            }
+
+            if (currentPang === index && track.style.transform) {
+                syncAllPangDots(currentPang);
+                if (window.matchMedia('(max-width: 768px)').matches) syncSidebarActive(currentPang);
+                return;
+            }
+
+            if (isTransitioning && smooth && !forceManual) return;
 
             // 역방향: 첫 슬라이드에서 이전으로 갈 때
             if (index < 0) {
@@ -2067,9 +2079,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.pang-nav-dot').forEach(dot => {
             dot.addEventListener('click', () => {
                 const idx = parseInt(dot.dataset.index, 10);
-                manualStop = true;
-                stopAuto();
-                goToPang(idx);
+                goToPang(idx, true, true);
             });
         });
 
@@ -2125,43 +2135,39 @@ document.addEventListener('DOMContentLoaded', () => {
             startAuto(); // manualStop=true 라면 동작하지 않음
         }, { passive: true });
 
-        // ── 사이드바 모든 링크 클릭 통합 처리 (모바일/PC 공통) ──────────────────
-        // nav.js의 이중 리스너 제거 후 이곳에서 단일 처리 (이벤트 순서 충돌 방지)
-        const allSidebarLinks = document.querySelectorAll('.floating-sidebar__link');
-        allSidebarLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const href = link.getAttribute('href') || '';
-                const isExternal = !href.startsWith('#');
-                const isKakao = link.closest('.floating-sidebar__item--kakao');
+        // ── 팡 슬라이드 앵커 링크 가로채기 (사이드바, 푸터 등 모든 링크 공통) ──────────────────
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href^="#"]');
+            if (!link) return;
+            const href = link.getAttribute('href');
+            if (!href || href === '#') return;
+            
+            const isKakao = link.closest('.floating-sidebar__item--kakao');
+            if (isKakao) return; // 카카오는 외부 링크
 
-                // 카카오(외부 링크)는 기본 동작 유지
-                if (isKakao || isExternal) return;
+            const targetId = href.replace('#', '');
+            const slideIndex = slides.findIndex(slide => slide.id === targetId);
 
-                const targetId = href.replace('#', '');
+            if (slideIndex !== -1) {
+                e.preventDefault(); // 기본 앵커 이동 차단 (수평 슬라이드 레이아웃 붕괴 방지)
+                
+                // ── Active 상태 업데이트 (사이드바인 경우) ─────────────
+                if (link.classList.contains('floating-sidebar__link')) {
+                    document.querySelectorAll('.floating-sidebar__link').forEach(l => {
+                        if (!l.closest('.floating-sidebar__item--kakao')) l.classList.remove('active');
+                    });
+                    link.classList.add('active');
+                }
 
-                // ── Active 상태 업데이트 (카카오 제외) ─────────────
-                document.querySelectorAll('.floating-sidebar__link').forEach(l => {
-                    if (!l.closest('.floating-sidebar__item--kakao')) {
-                        l.classList.remove('active');
-                    }
-                });
-                link.classList.add('active');
-
-                // ── 팡 슬라이드 (먹팡~멋팡) 처리 ────────────────────
-                const slideIndex = slides.findIndex(slide => slide.id === targetId);
-                if (slideIndex !== -1 && window.matchMedia('(max-width: 768px)').matches) {
-                    e.preventDefault(); // 앵커 기본 이동 완전 차단
+                if (window.innerWidth <= 768) {
+                    // 모바일 처리
                     e.stopImmediatePropagation();
-
-                    // 자동 슬라이드 즉시 정지 (navJustClicked로 IntersectionObserver 재개도 방지)
-                    manualStop = true;
                     navJustClicked = true;
-                    stopAuto();
+                    
+                    // 슬라이드 이동 (수동 강제 조작)
+                    goToPang(slideIndex, true, true);
 
-                    // 슬라이드 이동
-                    goToPang(slideIndex);
-
-                    // 팡 섹션(또는 모바일 탭)이 화면에 보이도록 스크롤
+                    // 팡 섹션이 화면에 보이도록 스크롤
                     const headerOffset = 70;
                     const tabsWrapper = document.querySelector('.mobile-pang-tabs-wrapper');
                     const targetEl = tabsWrapper && window.getComputedStyle(tabsWrapper).display !== 'none' ? tabsWrapper : slider;
@@ -2169,16 +2175,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const offsetPos = elementPos + window.pageYOffset - headerOffset;
                     window.scrollTo({ top: offsetPos, behavior: 'smooth' });
 
-                    // smooth scroll 완료(약 800ms) 후 플래그 해제 → 이후 이탈+재진입 시 정상 재개
                     setTimeout(() => { navJustClicked = false; }, 900);
-                    return;
-                }
-
-                // ── 팡 슬라이드 (먹팡~멋팡) 처리 (PC) ─────────────────
-                if (slideIndex !== -1 && window.innerWidth > 768) {
-                    e.preventDefault();
-                    
-                    // 1. PC 팡 탭 상태 동기화
+                } else {
+                    // PC 처리
                     const pcPangTabs = document.querySelectorAll('.pc-pang-tabs-wrapper .pc-pang-tab-btn');
                     pcPangTabs.forEach(t => {
                         t.classList.remove('active');
@@ -2187,7 +2186,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    // 2. 팡 섹션 노출 토글
                     const pcPangSections = [
                         document.getElementById('meokpang'),
                         document.getElementById('nolpang'),
@@ -2206,7 +2204,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    // 3. 부드러운 스크롤 이동 (팡 통합 슬라이더 래퍼 기준)
                     const sliderNode = document.getElementById('pangSectionSlider');
                     if (sliderNode) {
                         setTimeout(() => {
@@ -2226,22 +2223,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             window.scrollTo({ top: finalTop, behavior: 'smooth' });
                         }, 60);
                     }
-                    return;
                 }
-                // ── 일반 앵커(홈, 기타 섹션) 처리 ───────────────────
-                e.preventDefault();
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) {
-                    const headerOffset = 70;
-                    const offsetPos = targetEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
-                    window.scrollTo({ top: offsetPos, behavior: 'smooth' });
-                }
-            });
+            } else if (link.classList.contains('floating-sidebar__link')) {
+                 // 일반 사이드바 링크 (홈, 견적, 기타)
+                 e.preventDefault();
+                 const targetEl = document.getElementById(targetId);
+                 if (targetEl) {
+                     const headerOffset = 70;
+                     const offsetPos = targetEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+                     window.scrollTo({ top: offsetPos, behavior: 'smooth' });
+                 }
+            }
         });
 
 
         // 전역 접근 허용 (푸터 외부 링크 연동용)
-        window.goToPangMobile = goToPang;
+        window.goToPangMobile = (index) => goToPang(index, true, true);
 
         // 뷰포트 교차 관찰자 — 화면 밖으로 나갔다가 돌아오면 자동 재개 (manualStop 리셋)
         const observer = new IntersectionObserver((entries) => {
