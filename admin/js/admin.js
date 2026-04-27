@@ -598,13 +598,12 @@ function renderPricingEditor() {
                 <label>플랜 이름</label>
                 <input type="text" class="form-control" id="plan-name-${i}" value="${plan.name}">
             </div>
-            <div class="editor-row">
-                <label>기본 가격 (숫자만, 예: 190,000)</label>
-                <input type="text" class="form-control" id="plan-price-${i}" value="${basePrice}">
-            </div>
             <div class="editor-row" style="background: rgba(229,60,17,0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(229,60,17,0.3);">
                 <label style="color: #e53c11; font-weight: 600;">할인 이유 (예: 오픈 특가)</label>
                 <input type="text" class="form-control" id="plan-discount-reason-${i}" value="${discountReason}" placeholder="입력 시 할인가가 표시됩니다">
+
+                <label style="margin-top: 12px;">기본 가격 (숫자만, 예: 190,000)</label>
+                <input type="text" class="form-control" id="plan-price-${i}" value="${basePrice}">
                 
                 <label style="color: #e53c11; font-weight: 600; margin-top: 12px;">할인 된 가격 (예: 150,000)</label>
                 <input type="text" class="form-control" id="plan-discount-price-${i}" value="${discountedPrice}" placeholder="할인된 최종 가격">

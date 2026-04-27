@@ -2709,11 +2709,11 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 let priceHtml = '';
                 if (discountReason || discountedPrice) {
                     priceHtml = `
-                        <div class="pricing-card__price-base">
-                            ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
-                        </div>
                         <div class="pricing-card__discount-reason">
                             ${discountReason}
+                        </div>
+                        <div class="pricing-card__price-base">
+                            ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
                         </div>
                         <div class="pricing-card__discount-price">
                             ${discountedPrice}<span style="font-size:16px;font-weight:400; color: var(--color-brand-orange);">원</span>
