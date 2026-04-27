@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         testimonialTrack.addEventListener('touchstart', (e) => {
             stopAutoSlide();
+            isTestimonialTransitioning = false;
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             isDragging = true;
