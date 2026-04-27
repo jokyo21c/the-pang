@@ -578,11 +578,13 @@
         opacity: 0.6;
     }
 
-    /* 더 멀리 있는 아이템: 더 축소(50%) + 더 블러 */
+    /* 더 멀리 있는 아이템: 더 축소(50%) + 더 블러 (숨김 처리) */
     .portfolio-carousel-item.is-far {
         transform: scale(0.5);
         filter: blur(4px);
-        opacity: 0.3;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
     }
 
     .portfolio-carousel-item img,

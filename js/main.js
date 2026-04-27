@@ -1452,13 +1452,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 따라서 화면중앙(window.innerWidth/2)을 wrap 기준으로 표현하면 (window.innerWidth/2 - pl)
         // PC: 기존처럼 vw/2
         function getCenterX() {
-            const vw = getVw();
-            if (window.innerWidth <= 768) {
-                const container = wrap.closest('.container');
-                const pl = container ? (parseFloat(getComputedStyle(container).paddingLeft) || 0) : 0;
-                return (window.innerWidth / 2) - pl;
-            }
-            return vw / 2;
+            return getVw() / 2;
         }
 
         function updateDots(realIdx) {
