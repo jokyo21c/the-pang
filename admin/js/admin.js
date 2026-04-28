@@ -660,12 +660,12 @@ function renderAddonsEditor() {
     container.innerHTML = content.addons.map((addon, i) => `
         <div class="editor-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-end;">
             <div style="flex: 1;">
-                <label>옵션명 (예: 드론 촬영 추가)</label>
-                <input type="text" class="form-control" id="addon-name-${i}" value="${addon.name || ''}">
+                <label>옵션명 (Shift+Enter로 줄바꿈)</label>
+                <textarea class="form-control" id="addon-name-${i}" rows="2" style="resize:vertical;">${addon.name || ''}</textarea>
             </div>
             <div style="flex: 1;">
-                <label>가격 (예: +150,000원/회)</label>
-                <input type="text" class="form-control" id="addon-price-${i}" value="${addon.price || ''}">
+                <label>가격 (Shift+Enter로 줄바꿈)</label>
+                <textarea class="form-control" id="addon-price-${i}" rows="2" style="resize:vertical;">${addon.price || ''}</textarea>
             </div>
             <button class="btn" style="background: rgba(230,57,70,0.1); color: #e63946; padding: 12px; border-radius: 8px;" onclick="removeAddon(${i})" title="삭제">
                 <i class="ri-delete-bin-line"></i>

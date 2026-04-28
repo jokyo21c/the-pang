@@ -2757,8 +2757,8 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                     if (addonTable) {
                         addonTable.innerHTML = addons.map(addon => `
                             <div class="addon-table__row">
-                                <span class="addon-table__name">${addon.name || ''}</span>
-                                <span class="addon-table__price">${addon.price || ''}</span>
+                                <span class="addon-table__name">${(addon.name || '').replace(/\n/g, '<br>')}</span>
+                                <span class="addon-table__price">${(addon.price || '').replace(/\n/g, '<br>')}</span>
                             </div>
                         `).join('');
                     }

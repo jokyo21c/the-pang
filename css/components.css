@@ -2137,12 +2137,16 @@
 .addon-table__name {
     color: var(--color-text-secondary);
     font-size: 14px;
+    white-space: pre-wrap;
+    word-break: keep-all;
 }
 
 .addon-table__price {
     color: var(--color-brand-orange);
     font-weight: var(--fw-semibold);
     font-size: 14px;
+    white-space: pre-wrap;
+    text-align: right;
 }
 
 
