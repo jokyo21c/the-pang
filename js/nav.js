@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             entries.forEach(entry => {
                 isPangVisible = entry.isIntersecting;
                 if (!isPangVisible) {
+                    if (window.navJustClicked) return; // 네비게이션으로 인한 스크롤 중에는 초기화 방지
                     // 팡 섹션 벗어나면 모든 아이콘 흰색 초기화
                     clearSidebarActive();
                 }
@@ -83,12 +84,31 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(pangSlider);
     }
 
+    // 푸터 진입/이탈 감지 (IntersectionObserver) - 모바일에서 사이드바 숨김 처리
+    const footerElement = document.querySelector('.footer');
+    if (footerElement && window.IntersectionObserver) {
+        const floatingSidebar = document.querySelector('.floating-sidebar');
+        const footerObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (floatingSidebar) {
+                    if (entry.isIntersecting) {
+                        floatingSidebar.classList.add('hide-on-footer');
+                    } else {
+                        floatingSidebar.classList.remove('hide-on-footer');
+                    }
+                }
+            });
+        }, { threshold: 0.01 });
+        footerObserver.observe(footerElement);
+    }
+
     // 사이드바 아이콘 클릭 시 active 상태 변경은 main.js의 통합 리스너에서 처리
     // (이중 리스너로 인한 이벤트 순서 문제 방지)
 
 
     // 스크롤 기반: 일반 섹션 감지
     const activateLink = () => {
+        if (window.navJustClicked) return; // 네비게이션 클릭으로 인한 스크롤 중에는 상태 덮어쓰기 방지
         const scrollPos = window.scrollY + 150;
         let matchedId = null;
         let isHeroActive = false;

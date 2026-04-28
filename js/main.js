@@ -1929,7 +1929,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentPang = 0;
         let autoTimer = null;
         let manualStop = false;    // 수동 조작으로 인한 일시 중지 플래그
-        let navJustClicked = false; // 네비 클릭 직후 스크롤 중 자동 재개 방지 플래그
+        window.navJustClicked = false; // 네비 클릭 직후 스크롤 중 자동 재개 방지 플래그
         let isTransitioning = false; // 연속 스와이프 방지용 플래그
         const AUTO_INTERVAL = 2000; // 2초간 대기 (사용자 수정 요청)
 
@@ -2162,7 +2162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.innerWidth <= 768) {
                     // 모바일 처리
                     e.stopImmediatePropagation();
-                    navJustClicked = true;
+                    window.navJustClicked = true;
                     
                     // 슬라이드 이동 (수동 강제 조작)
                     goToPang(slideIndex, true, true);
@@ -2175,7 +2175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const offsetPos = elementPos + window.pageYOffset - headerOffset;
                     window.scrollTo({ top: offsetPos, behavior: 'smooth' });
 
-                    setTimeout(() => { navJustClicked = false; }, 900);
+                    setTimeout(() => { window.navJustClicked = false; }, 900);
                 } else {
                     // PC 처리
                     const pcPangTabs = document.querySelectorAll('.pc-pang-tabs-wrapper .pc-pang-tab-btn');
@@ -2249,7 +2249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         syncSidebarActive(currentPang);
                     }
                     // 네비 클릭 직후 스크롤 중이면 자동 재개 건너뜀
-                    if (navJustClicked) return;
+                    if (window.navJustClicked) return;
                     // 스크롤로 다시 진입하면 상태 리셋 후 자동 재개
                     manualStop = false;
                     if (window.matchMedia('(max-width: 768px)').matches) {
@@ -2642,6 +2642,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 }
             }
         } else {
+            window.navJustClicked = true;
             // 모바일: 슬라이드 이동 로직 (무한 슬라이더 함수 호출)
             if (typeof window.goToPangMobile === 'function') {
                 window.goToPangMobile(slideIndex);
@@ -2668,6 +2669,9 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 const targetEl = tabsWrapper && window.getComputedStyle(tabsWrapper).display !== 'none' ? tabsWrapper : sliderNodeMobile;
                 const top = targetEl.getBoundingClientRect().top + window.pageYOffset - 72;
                 window.scrollTo({ top, behavior: 'smooth' });
+                setTimeout(() => { window.navJustClicked = false; }, 900);
+            } else {
+                setTimeout(() => { window.navJustClicked = false; }, 900);
             }
         }
     };

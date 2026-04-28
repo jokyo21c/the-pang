@@ -1272,6 +1272,14 @@
         border-radius: 5px !important;
         transform: none !important;
     }
+
+    /* 푸터 도달 시 사이드바 숨김 */
+    .floating-sidebar.hide-on-footer {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateY(-50%) scale(0.9) !important;
+        transition: opacity 0.3s ease, transform 0.3s ease !important;
+    }
 }
 
 
