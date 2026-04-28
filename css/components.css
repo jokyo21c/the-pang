@@ -2464,7 +2464,45 @@
 .footer__slogan {
     font-size: 14px;
     color: var(--color-text-muted);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+}
+
+.footer__biz {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer__biz-desc {
+    font-size: 13px;
+    color: var(--color-text-primary);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.footer__biz-desc strong {
+    color: var(--color-brand-orange);
+    font-weight: var(--fw-semibold);
+}
+
+.footer__biz-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.footer__biz-details span {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.footer__biz-label {
+    display: inline-block;
+    width: 3em;
+    text-align: justify;
+    text-align-last: justify;
 }
 
 .footer__social {
