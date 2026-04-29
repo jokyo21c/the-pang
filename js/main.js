@@ -2533,6 +2533,31 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         }
     });
 
+    /* ── 비밀번호 재설정 폼 표시 헬퍼 ─────────── */
+    function showNewPasswordModal() {
+        overlay.classList.add('open');
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        if (authTabs) authTabs.style.display = 'none';
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'none';
+        if (resetForm) resetForm.style.display = 'none';
+        if (newPasswordForm) newPasswordForm.style.display = 'flex';
+    }
+
+    /* ── 조기 감지 플래그 또는 URL 해시로 복구 감지 (fallback) ── */
+    setTimeout(() => {
+        if (window._pangRecoveryDetected) {
+            showNewPasswordModal();
+            return;
+        }
+        /* URL 해시에 type=recovery 포함 여부 확인 */
+        const hash = window.location.hash;
+        if (hash && hash.includes('type=recovery')) {
+            showNewPasswordModal();
+        }
+    }, 300);
+
     /* ── 새 비밀번호 설정 (PASSWORD_RECOVERY 후) ── */
     if (newPasswordForm) {
         newPasswordForm.addEventListener('submit', async (e) => {

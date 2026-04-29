@@ -164,3 +164,11 @@ const PangAuth = {
 window.PangData = PangData;
 window.PangAuth = PangAuth;
 window._supabaseClient = _supabaseClient;
+
+/* ── 조기 PASSWORD_RECOVERY 감지 (DOMContentLoaded 전) ──── */
+window._pangRecoveryDetected = false;
+_supabaseClient.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+        window._pangRecoveryDetected = true;
+    }
+});
