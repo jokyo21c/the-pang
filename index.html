@@ -1759,6 +1759,26 @@
         <button type="submit" class="auth-form__submit" id="resetSubmitBtn">재설정 링크 보내기</button>
         <p class="auth-form__switch" style="margin-top:16px;"><button type="button" id="backToLogin">← 로그인으로 돌아가기</button></p>
     </form>
+
+    <!-- 새 비밀번호 입력 폼 (이메일 링크 클릭 후 표시) -->
+    <form class="auth-form" id="newPasswordForm" style="display:none;">
+        <div style="text-align:center; margin-bottom:20px;">
+            <i class="ri-key-2-line" style="font-size:40px; color:#34d399;"></i>
+            <h3 style="margin-top:12px; font-size:18px; font-weight:700; color:#fff;">새 비밀번호 설정</h3>
+            <p style="margin-top:8px; font-size:14px; color:#888; line-height:1.5;">새로운 비밀번호를 입력해 주세요.</p>
+        </div>
+        <div class="auth-form__group">
+            <label for="newPassword">새 비밀번호</label>
+            <input type="password" id="newPassword" placeholder="6자 이상 입력하세요" required>
+        </div>
+        <div class="auth-form__group">
+            <label for="newPasswordConfirm">새 비밀번호 확인</label>
+            <input type="password" id="newPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+        </div>
+        <p class="auth-form__error" id="newPasswordError"></p>
+        <p class="auth-form__success" id="newPasswordSuccess" style="display:none; color:#34d399; font-size:14px; text-align:center; margin-bottom:12px;"></p>
+        <button type="submit" class="auth-form__submit" id="newPasswordSubmitBtn">비밀번호 변경하기</button>
+    </form>
 </div>
 
 </body>

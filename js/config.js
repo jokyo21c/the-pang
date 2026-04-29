@@ -21,7 +21,7 @@ const PANG_CONFIG = {
 
     // 사이트 정보
     SITE_NAME: 'THE PANG',
-    SITE_URL:  'https://더팡.store',
+    SITE_URL:  'https://xn--9m1b261d.store',
 };
 
 // Global export

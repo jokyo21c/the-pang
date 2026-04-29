@@ -2511,13 +2511,68 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     })();
 
     /* ── 인증 상태 변화 리스너 ────────────────── */
+    const newPasswordForm = document.getElementById('newPasswordForm');
+    const newPasswordError = document.getElementById('newPasswordError');
+    const newPasswordSuccess = document.getElementById('newPasswordSuccess');
+
     PangAuth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
             applyLoggedInUI(session.user);
         } else if (event === 'SIGNED_OUT') {
             applyLoggedOutUI();
+        } else if (event === 'PASSWORD_RECOVERY') {
+            /* 비밀번호 재설정 링크 클릭 후 도착 → 새 비밀번호 입력 폼 표시 */
+            overlay.classList.add('open');
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            if (authTabs) authTabs.style.display = 'none';
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'none';
+            if (resetForm) resetForm.style.display = 'none';
+            if (newPasswordForm) newPasswordForm.style.display = 'flex';
         }
     });
+
+    /* ── 새 비밀번호 설정 (PASSWORD_RECOVERY 후) ── */
+    if (newPasswordForm) {
+        newPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            newPasswordError.textContent = '';
+            newPasswordSuccess.textContent = '';
+            newPasswordSuccess.style.display = 'none';
+
+            const pw = document.getElementById('newPassword').value;
+            const pw2 = document.getElementById('newPasswordConfirm').value;
+            const submitBtn = document.getElementById('newPasswordSubmitBtn');
+
+            if (pw.length < 6) { newPasswordError.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
+            if (pw !== pw2) { newPasswordError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '변경 중...';
+
+            try {
+                const { error } = await window._supabaseClient.auth.updateUser({ password: pw });
+                if (error) throw error;
+
+                newPasswordSuccess.textContent = '✅ 비밀번호가 성공적으로 변경되었습니다!';
+                newPasswordSuccess.style.display = 'block';
+                newPasswordForm.querySelector('#newPassword').value = '';
+                newPasswordForm.querySelector('#newPasswordConfirm').value = '';
+
+                setTimeout(() => {
+                    closeAuthModal();
+                    if (newPasswordForm) newPasswordForm.style.display = 'none';
+                    if (authTabs) authTabs.style.display = '';
+                }, 2000);
+            } catch (err) {
+                newPasswordError.textContent = err.message || '비밀번호 변경에 실패했습니다.';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '비밀번호 변경하기';
+            }
+        });
+    }
 
     /* ── 동적 푸터 렌더링 (Supabase) ─────────── */
     async function renderDynamicFooter() {
