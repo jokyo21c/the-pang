@@ -2137,19 +2137,19 @@
 }
 
 .addon-table__name {
+    flex: 1;
     color: var(--color-text-secondary);
     font-size: 14px;
-    white-space: normal; /* 관리자가 입력한 강제 엔터(\n) 무시, 한 줄로 연결 */
-    word-break: keep-all; /* 단어 단위로 자연스럽게 줄바꿈 */
-    flex: 1;
+    white-space: normal;
+    word-break: keep-all;
 }
 
 .addon-table__price {
+    flex-shrink: 0;
     color: var(--color-brand-orange);
     font-weight: var(--fw-semibold);
     font-size: 14px;
-    white-space: nowrap; /* 가격은 절대 줄바꿈 되지 않음 */
-    flex-shrink: 0; /* 가격 영역이 텍스트에 밀려 줄어들지 않음 */
+    white-space: nowrap;
     text-align: right;
 }
 
