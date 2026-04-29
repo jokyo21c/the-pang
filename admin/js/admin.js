@@ -593,7 +593,7 @@ function renderPricingEditor() {
         <div class="plan-editor">
             <div class="plan-editor__header">
                 <span style="font-size:15px;font-weight:700;">${plan.name}</span>
-                <span class="plan-badge plan-badge--${PLAN_STYLES[i]}">${plan.tier}</span>
+                <span class="plan-badge plan-badge--${PLAN_STYLES[i]}">${plan.tier === 'BRAND SUBSCRIPTION' ? 'HIGH-END' : plan.tier}</span>
             </div>
             <div class="editor-row">
                 <label>플랜 이름</label>
@@ -638,9 +638,10 @@ function savePricing() {
 
         return {
             ...plan,
+            tier:     plan.tier === 'BRAND SUBSCRIPTION' ? 'HIGH-END' : plan.tier,
             name:     document.getElementById(`plan-name-${i}`)?.value     || plan.name,
             price:    finalPrice || plan.price,
-            period:   document.getElementById(`plan-period-${i}`)?.value   || plan.period,
+            period:   document.getElementById(`plan-period-${i}`)?.value   ?? plan.period,
             features: (document.getElementById(`plan-features-${i}`)?.value || '')
                         .split('\n').map(s => s.trim()).filter(Boolean),
             btnText:  document.getElementById(`plan-btn-${i}`)?.value      || plan.btnText,
@@ -698,7 +699,7 @@ function saveAddons() {
 
 // ── Footer ──────────────────────────────────────────────
 function loadFooter() {
-    if(!content.footer) content.footer = { sns: {}, contact: {}, companyLinks: [] };
+    if(!content.footer) content.footer = { sns: {}, contact: {}, companyLinks: [], biz: {}, modals: {} };
     
     document.getElementById('footer-brand').value = content.footer.brandName || '';
     document.getElementById('footer-slogan').value = content.footer.slogan || '';
@@ -713,10 +714,19 @@ function loadFooter() {
     document.getElementById('footer-contact-kakao').value = content.footer.contact?.kakao || '';
     document.getElementById('footer-contact-email').value = content.footer.contact?.email || '';
     document.getElementById('footer-contact-time').value = content.footer.contact?.time || '';
+
+    document.getElementById('footer-biz-companyName').value = content.footer.biz?.companyName || '';
+    document.getElementById('footer-biz-ceo').value = content.footer.biz?.ceo || '';
+    document.getElementById('footer-biz-num').value = content.footer.biz?.bizNum || '';
+
+    document.getElementById('footer-modal-companyIntro').value = content.footer.modals?.companyIntro || '';
+    document.getElementById('footer-modal-terms').value = content.footer.modals?.terms || '';
+    document.getElementById('footer-modal-privacy').value = content.footer.modals?.privacy || '';
+    document.getElementById('footer-modal-notice').value = content.footer.modals?.notice || '';
 }
 
 function saveFooter() {
-    if(!content.footer) content.footer = { sns: {}, contact: {}, companyLinks: [] };
+    if(!content.footer) content.footer = { sns: {}, contact: {}, companyLinks: [], biz: {}, modals: {} };
     
     content.footer.brandName = document.getElementById('footer-brand').value;
     content.footer.slogan = document.getElementById('footer-slogan').value;
@@ -739,6 +749,17 @@ function saveFooter() {
     content.footer.contact.kakao = document.getElementById('footer-contact-kakao').value;
     content.footer.contact.email = document.getElementById('footer-contact-email').value;
     content.footer.contact.time = document.getElementById('footer-contact-time').value;
+
+    if (!content.footer.biz) content.footer.biz = {};
+    content.footer.biz.companyName = document.getElementById('footer-biz-companyName').value;
+    content.footer.biz.ceo = document.getElementById('footer-biz-ceo').value;
+    content.footer.biz.bizNum = document.getElementById('footer-biz-num').value;
+
+    if (!content.footer.modals) content.footer.modals = {};
+    content.footer.modals.companyIntro = document.getElementById('footer-modal-companyIntro').value;
+    content.footer.modals.terms = document.getElementById('footer-modal-terms').value;
+    content.footer.modals.privacy = document.getElementById('footer-modal-privacy').value;
+    content.footer.modals.notice = document.getElementById('footer-modal-notice').value;
 }
 
 // ── Stats ────────────────────────────────────────────────

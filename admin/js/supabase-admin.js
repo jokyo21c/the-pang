@@ -106,15 +106,21 @@ const AdminContent = {
 
     async saveSection(sectionKey, contentJson) {
         const { data: { user } } = await _adminSupabase.auth.getUser();
+        if (!user) throw new Error('관리자 인증 세션이 유효하지 않습니다. 다시 로그인해주세요.');
+
         const { error } = await _adminSupabase
             .from('site_content')
             .upsert({
                 section_key: sectionKey,
                 content_json: contentJson,
-                updated_at: new Date().toISOString(),
-                updated_by: user?.id
+                updated_at: new Date().toISOString()
+                // updated_by는 RLS policy(is_admin())에서 직접 체크하지 않으므로 제외하여 트러블슈팅
             }, { onConflict: 'section_key' });
-        if (error) throw error;
+        
+        if (error) {
+            console.error(`[AdminContent] saveSection(${sectionKey}) RLS violation or Error:`, error);
+            throw error;
+        }
     },
 
 

@@ -2321,6 +2321,10 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     const loginError = document.getElementById('loginError');
     const signupError = document.getElementById('signupError');
 
+    const resetForm = document.getElementById('resetForm');
+    const resetError = document.getElementById('resetError');
+    const resetSuccess = document.getElementById('resetSuccess');
+
     if (!overlay || !modal) return;
 
     /* ── 모달 열기/닫기 ─────────────────────────── */
@@ -2330,6 +2334,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         document.body.style.overflow = 'hidden';
         switchTab(tab === 'signup' ? 'signup' : 'login');
     }
+    window.openAuthModal = openAuthModal;
 
     function closeAuthModal() {
         overlay.classList.remove('open');
@@ -2337,6 +2342,8 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         document.body.style.overflow = '';
         if (loginError) loginError.textContent = '';
         if (signupError) signupError.textContent = '';
+        if (resetError) resetError.textContent = '';
+        if (resetSuccess) { resetSuccess.textContent = ''; resetSuccess.style.display = 'none'; }
     }
 
     closeBtn.addEventListener('click', closeAuthModal);
@@ -2344,17 +2351,31 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAuthModal(); });
 
     /* ── 탭 전환 ─────────────────────────────────── */
+    const authTabs = document.querySelector('.auth-tabs');
     function switchTab(tab) {
         if (tab === 'login') {
             tabLogin.classList.add('active');
             tabSignup.classList.remove('active');
             loginForm.style.display = 'flex';
             signupForm.style.display = 'none';
-        } else {
+            if (resetForm) resetForm.style.display = 'none';
+            if (authTabs) authTabs.style.display = '';
+        } else if (tab === 'signup') {
             tabSignup.classList.add('active');
             tabLogin.classList.remove('active');
             signupForm.style.display = 'flex';
             loginForm.style.display = 'none';
+            if (resetForm) resetForm.style.display = 'none';
+            if (authTabs) authTabs.style.display = '';
+        } else if (tab === 'reset') {
+            tabLogin.classList.remove('active');
+            tabSignup.classList.remove('active');
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'none';
+            if (resetForm) resetForm.style.display = 'flex';
+            if (authTabs) authTabs.style.display = 'none';
+            if (resetError) resetError.textContent = '';
+            if (resetSuccess) { resetSuccess.textContent = ''; resetSuccess.style.display = 'none'; }
         }
     }
 
@@ -2362,6 +2383,41 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     tabSignup.addEventListener('click', () => switchTab('signup'));
     document.getElementById('goToSignup').addEventListener('click', () => switchTab('signup'));
     document.getElementById('goToLogin').addEventListener('click', () => switchTab('login'));
+
+    /* ── 비밀번호 찾기 탭 전환 ────────────────────── */
+    const goToResetBtn = document.getElementById('goToReset');
+    const backToLoginBtn = document.getElementById('backToLogin');
+    if (goToResetBtn) goToResetBtn.addEventListener('click', () => switchTab('reset'));
+    if (backToLoginBtn) backToLoginBtn.addEventListener('click', () => switchTab('login'));
+
+    /* ── 비밀번호 재설정 이메일 발송 ──────────────── */
+    if (resetForm) {
+        resetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            resetError.textContent = '';
+            resetSuccess.textContent = '';
+            resetSuccess.style.display = 'none';
+            const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+            const submitBtn = document.getElementById('resetSubmitBtn');
+
+            if (!email) { resetError.textContent = '이메일을 입력해 주세요.'; return; }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '발송 중...';
+
+            try {
+                await PangAuth.resetPasswordForEmail(email);
+                resetSuccess.textContent = '✅ 비밀번호 재설정 링크가 이메일로 발송되었습니다. 메일함을 확인해 주세요.';
+                resetSuccess.style.display = 'block';
+                document.getElementById('resetEmail').value = '';
+            } catch (err) {
+                resetError.textContent = err.message || '이메일 발송에 실패했습니다. 다시 시도해 주세요.';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '재설정 링크 보내기';
+            }
+        });
+    }
 
     /* ── 버튼으로 모달 열기 ──────────────────────── */
     ['navLoginBtn', 'mobileLoginBtn'].forEach(id => {
@@ -2511,6 +2567,36 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                     <li><i class="ri-time-line"></i> ${f.contact.time || '평일 09:00-18:00'}</li>
                 `;
             }
+
+            // 사업자 정보
+            if (f.biz) {
+                const brandEl = document.getElementById('footer-biz-brand');
+                if (brandEl && f.brandName) brandEl.textContent = f.brandName; // 브랜드명은 위에서 설정하지만 일관성을 위해 설정
+
+                const companyEl1 = document.getElementById('footer-biz-company-1');
+                const companyEl2 = document.getElementById('footer-biz-company-2');
+                const ceoEl = document.getElementById('footer-biz-ceo');
+                const numEl = document.getElementById('footer-biz-num');
+                
+                if (companyEl1 && f.biz.companyName) companyEl1.textContent = f.biz.companyName;
+                if (companyEl2 && f.biz.companyName) companyEl2.textContent = f.biz.companyName;
+                if (ceoEl && f.biz.ceo) ceoEl.textContent = f.biz.ceo;
+                if (numEl && f.biz.bizNum) numEl.textContent = f.biz.bizNum;
+            }
+
+            // 모달 내용 업데이트
+            if (f.modals) {
+                const companyIntroBody = document.querySelector('#companyIntroModal .policy-modal__body');
+                const termsBody = document.querySelector('#termsModal .policy-modal__body');
+                const privacyBody = document.querySelector('#privacyModal .policy-modal__body');
+                const noticeBody = document.querySelector('#noticeModal .policy-modal__body');
+
+                if (companyIntroBody && f.modals.companyIntro) companyIntroBody.innerHTML = f.modals.companyIntro;
+                if (termsBody && f.modals.terms) termsBody.innerHTML = f.modals.terms;
+                if (privacyBody && f.modals.privacy) privacyBody.innerHTML = f.modals.privacy;
+                if (noticeBody && f.modals.notice) noticeBody.innerHTML = f.modals.notice;
+            }
+
         } catch (err) {
             console.error('푸터 데이터 렌더링 실패:', err);
         }
@@ -2735,7 +2821,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 return `
                     <div class="pricing-card pricing-card--${style}">
                         <div class="pricing-card__name">${plan.name}</div>
-                        <div class="pricing-card__tier">${plan.tier}</div>
+                        <div class="pricing-card__tier">${plan.tier === 'BRAND SUBSCRIPTION' ? 'HIGH-END' : plan.tier}</div>
                         <div class="pricing-card__price">
                             ${priceHtml}
                         </div>
@@ -2743,7 +2829,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                         <ul class="pricing-card__features">
                             ${Array.isArray(plan.features) ? plan.features.map(f => `<li><i class="ri-check-line"></i> ${f}</li>`).join('') : ''}
                         </ul>
-                        <a href="#order" class="pricing-card__btn ${btnClass}">${btnText}</a>
+                        <a href="javascript:void(0)" onclick="window.openAuthModal('login')" class="pricing-card__btn ${btnClass}">${btnText}</a>
                     </div>
                 `;
             }).join('');

@@ -139,6 +139,15 @@ const PangAuth = {
         return data;
     },
 
+    /** 비밀번호 재설정 이메일 발송 */
+    async resetPasswordForEmail(email) {
+        const { data, error } = await _supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: PANG_CONFIG.SITE_URL + '/#reset-password'
+        });
+        if (error) throw error;
+        return data;
+    },
+
     /** 로그아웃 */
     async signOut() {
         const { error } = await _supabaseClient.auth.signOut();

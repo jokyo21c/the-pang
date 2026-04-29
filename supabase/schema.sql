@@ -106,7 +106,7 @@ INSERT INTO pricing_plans (name, tier, price, period, features, btn_text, order_
 ('PANG-L', 'PREMIUM', '890,000', '1회 기준',
  '["현장 2회 (회당 4시간) 촬영","30초 숏츠 5편 (A/B테스트)","AI 자막 + 색보정 + CG + 썸네일","수정 편당 3회 + 최종확인","납기 3영업일","전플랫폼 + 가로형(16:9)","전담 PD + 마케터 2인","해시태그/캡션 + 성과 리포트"]'::jsonb,
  '프리미엄 시작', 2),
-('PANG-X', 'BRAND SUBSCRIPTION', '1,490,000', '월 정기 구독',
+('PANG-X', 'HIGH-END', '1,490,000', '월 정기 구독',
  '["월 2회 정기 현장촬영","월 8편 숏츠 제작","풀 AI 후보정 + 브랜드 AI모델","수정 무제한","편당 2영업일 납기","PD + 마케터 + 기획자 3인","월간 콘텐츠 전략 리포트","SNS 채널 운영 컨설팅"]'::jsonb,
  '구독 시작하기', 3)
 ON CONFLICT DO NOTHING;
