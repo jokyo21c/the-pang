@@ -2450,6 +2450,13 @@
     padding: 60px 0 32px;
 }
 
+@media (min-width: 769px) {
+    .footer .container {
+        max-width: none;
+        padding: 0 40px;
+    }
+}
+
 .footer__grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
