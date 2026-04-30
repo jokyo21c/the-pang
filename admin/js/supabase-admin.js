@@ -272,7 +272,7 @@ const AdminContent = {
     async getOrders(statusFilter = null) {
         let query = _adminSupabase
             .from('orders')
-            .select('*, members!inner(name, email)')
+            .select('*')
             .order('created_at', { ascending: false });
 
         if (statusFilter && statusFilter !== 'all') {
@@ -280,16 +280,26 @@ const AdminContent = {
         }
 
         const { data, error } = await query;
-        if (error) {
-            // members join 실패 시 fallback (members 테이블에 데이터 없는 경우)
-            const { data: fallback, error: fallbackError } = await _adminSupabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (fallbackError) throw fallbackError;
-            return fallback || [];
+        if (error) throw error;
+
+        // 주문 목록에 고객 이름/이메일 매핑
+        const orders = data || [];
+        if (orders.length > 0) {
+            try {
+                const userIds = [...new Set(orders.map(o => o.user_id))];
+                const { data: members } = await _adminSupabase
+                    .from('members')
+                    .select('user_id, name, email')
+                    .in('user_id', userIds);
+                
+                const memberMap = {};
+                (members || []).forEach(m => { memberMap[m.user_id] = m; });
+                orders.forEach(o => { o._member = memberMap[o.user_id] || null; });
+            } catch (e) {
+                console.warn('회원 매핑 실패 (무시):', e);
+            }
         }
-        return data || [];
+        return orders;
     },
 
     async getOrder(orderId) {

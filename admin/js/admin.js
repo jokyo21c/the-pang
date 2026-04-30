@@ -1093,6 +1093,21 @@ const ORDER_STATUS_MAP = {
     'completed':        { label: '체결 완료', badge: 'complete', icon: '🎉' }
 };
 
+function formatOrderPrice(priceStr) {
+    if (!priceStr) return '-';
+    if (priceStr.includes('|')) {
+        const parts = priceStr.split('|');
+        const base = parts[0] || '';
+        const reason = parts[1] || '';
+        const discounted = parts[2] || '';
+        if (discounted) {
+            return `<span style="text-decoration:line-through; color:#999; font-size:12px;">${base}원</span> ${reason ? `<span style="color:#e53c11; font-size:11px;">${reason}</span>` : ''} <strong>${discounted}원</strong>`;
+        }
+        return `${base}원`;
+    }
+    return `${priceStr}원`;
+}
+
 async function updateOrderStat() {
     try {
         const orders = await AdminContent.getOrders();
@@ -1124,7 +1139,7 @@ async function loadOrders() {
 
         tbody.innerHTML = orders.map((o, i) => {
             const s = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP['quote_pending'];
-            const customerName = o.members?.name || o.user_id?.substring(0, 8) || '-';
+            const customerName = o._member?.name || o.members?.name || o.user_id?.substring(0, 8) || '-';
             const date = new Date(o.created_at).toLocaleDateString('ko-KR');
 
             return `
@@ -1171,7 +1186,7 @@ async function openOrderDetail(orderId) {
                 <div><small style="color:var(--text-secondary);">상태</small><br><strong>${s.icon} ${s.label}</strong></div>
                 <div><small style="color:var(--text-secondary);">플랜</small><br><strong>${order.plan_name}</strong></div>
                 <div><small style="color:var(--text-secondary);">티어</small><br>${order.plan_tier || '-'}</div>
-                <div><small style="color:var(--text-secondary);">기본 가격</small><br>${order.plan_price || '-'}원</div>
+                <div><small style="color:var(--text-secondary);">기본 가격</small><br>${formatOrderPrice(order.plan_price)}</div>
                 ${order.total_amount ? `<div><small style="color:var(--text-secondary);">확정 금액</small><br><strong style="color:#22c55e;">${order.total_amount}원</strong></div>` : ''}
                 <div><small style="color:var(--text-secondary);">신청일</small><br>${new Date(order.created_at).toLocaleString('ko-KR')}</div>
             </div>

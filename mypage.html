@@ -372,6 +372,22 @@
         `;
     }
 
+    /* ── 가격 파싱 헬퍼 (파이프 구분: 원가|할인사유|할인가) ── */
+    function formatPrice(priceStr) {
+        if (!priceStr) return '-';
+        if (priceStr.includes('|')) {
+            const parts = priceStr.split('|');
+            const base = parts[0] || '';
+            const reason = parts[1] || '';
+            const discounted = parts[2] || '';
+            if (discounted) {
+                return `<span style="text-decoration:line-through; color:#666; font-size:12px;">${base}원</span> <span style="color:#ffc107; font-size:11px;">${reason}</span> <strong style="color:#ff6b35;">${discounted}원</strong>`;
+            }
+            return `${base}원`;
+        }
+        return `${priceStr}원`;
+    }
+
     function renderOrderCard(order) {
         const STATUS_MAP = {
             'quote_pending':    { label: '견적 대기', badge: 'pending',   icon: '⏳', step: 1 },
@@ -454,7 +470,7 @@
                     </div>
                     <div class="order-detail">
                         <div class="order-detail__label">기본 가격</div>
-                        <div class="order-detail__value">${order.plan_price || '-'}원</div>
+                        <div class="order-detail__value">${formatPrice(order.plan_price)}</div>
                     </div>
                     ${order.total_amount ? `
                     <div class="order-detail">
