@@ -2921,7 +2921,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                         <ul class="pricing-card__features">
                             ${Array.isArray(plan.features) ? plan.features.map(f => `<li><i class="ri-check-line"></i> ${f}</li>`).join('') : ''}
                         </ul>
-                        <a href="javascript:void(0)" onclick="window.openAuthModal('login')" class="pricing-card__btn ${btnClass}">${btnText}</a>
+                        <a href="javascript:void(0)" onclick="window.handlePricingClick('${plan.id}', '${plan.name}', '${plan.tier}', '${plan.price}')" class="pricing-card__btn ${btnClass}">${btnText}</a>
                     </div>
                 `;
             }).join('');
@@ -2962,3 +2962,219 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
 });
 
 
+/* ══════════════════════════════════════════════════════════
+   QUOTE CART MODULE — 견적담기 모달 로직
+   ══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function initQuoteCart() {
+    // 모달 요소
+    const overlay = document.getElementById('quoteOverlay');
+    const modal = document.getElementById('quoteModal');
+    const closeBtn = document.getElementById('quoteModalClose');
+    const planList = document.getElementById('quotePlanList');
+    const addonList = document.getElementById('quoteAddonList');
+    const memoEl = document.getElementById('quoteMemo');
+    const summaryPlan = document.getElementById('quoteSummaryPlan');
+    const submitBtn = document.getElementById('quoteSubmitBtn');
+
+    if (!modal || !overlay) {
+        console.warn('[QuoteCart] 모달 요소를 찾을 수 없습니다.');
+        return;
+    }
+
+    // 상태
+    let selectedPlan = null;
+    let cachedPlans = [];
+    let cachedAddons = [];
+    let pendingPlanAction = null; // 로그인 후 자동 열기용
+
+
+    /* ── 모달 열기 ── */
+    async function openQuoteModal(preSelectedPlanId) {
+        // 플랜 데이터 로드
+        if (window.PangData) {
+            try {
+                cachedPlans = await PangData.getPricing();
+                const addonsData = await PangData.getSection('addons');
+                cachedAddons = Array.isArray(addonsData) ? addonsData : [];
+            } catch (e) {
+                console.error('Quote modal data load failed:', e);
+            }
+        }
+
+        renderPlans(preSelectedPlanId);
+        renderAddons();
+        if (memoEl) memoEl.value = '';
+
+        overlay.classList.add('open');
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /* ── 모달 닫기 ── */
+    function closeQuoteModal() {
+        overlay.classList.remove('open');
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    closeBtn.addEventListener('click', closeQuoteModal);
+    overlay.addEventListener('click', closeQuoteModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeQuoteModal();
+    });
+
+    /* ── 플랜 카드 렌더링 ── */
+    function renderPlans(preSelectedId) {
+        if (!planList) return;
+        selectedPlan = null;
+
+        planList.innerHTML = cachedPlans.map(plan => {
+            const isSelected = String(plan.id) === String(preSelectedId);
+            if (isSelected) selectedPlan = plan;
+
+            // 가격 표시 처리 (할인 가격이 있을 경우)
+            let displayPrice = plan.price;
+            if (plan.price && plan.price.includes('|')) {
+                const parts = plan.price.split('|');
+                displayPrice = parts[2] || parts[0]; // 할인가 우선
+            }
+
+            return `
+                <div class="quote-plan-card ${isSelected ? 'selected' : ''}" data-plan-id="${plan.id}">
+                    <div class="quote-plan-card__radio">
+                        <span class="quote-radio ${isSelected ? 'checked' : ''}"></span>
+                    </div>
+                    <div class="quote-plan-card__info">
+                        <strong>${plan.name}</strong>
+                        <span class="quote-plan-card__tier">${plan.tier}</span>
+                    </div>
+                    <div class="quote-plan-card__price">${displayPrice}원</div>
+                </div>
+            `;
+        }).join('');
+
+        updateSummary();
+
+        // 플랜 선택 이벤트
+        planList.querySelectorAll('.quote-plan-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const planId = card.dataset.planId;
+                selectedPlan = cachedPlans.find(p => String(p.id) === String(planId)) || null;
+
+                planList.querySelectorAll('.quote-plan-card').forEach(c => {
+                    c.classList.remove('selected');
+                    c.querySelector('.quote-radio').classList.remove('checked');
+                });
+                card.classList.add('selected');
+                card.querySelector('.quote-radio').classList.add('checked');
+
+                updateSummary();
+            });
+        });
+    }
+
+    /* ── 애드온 렌더링 ── */
+    function renderAddons() {
+        if (!addonList) return;
+
+        if (cachedAddons.length === 0) {
+            addonList.innerHTML = '<p style="color:#888; font-size:14px;">추가 옵션이 없습니다.</p>';
+            return;
+        }
+
+        addonList.innerHTML = cachedAddons.map((addon, i) => `
+            <label class="quote-addon-item">
+                <input type="checkbox" class="quote-addon-check" data-index="${i}" value="${addon.name}">
+                <span class="quote-addon-item__name">${(addon.name || '').replace(/\n/g, ' ')}</span>
+                <span class="quote-addon-item__price">${(addon.price || '').replace(/\n/g, ' ')}</span>
+            </label>
+        `).join('');
+    }
+
+    /* ── 요약 업데이트 ── */
+    function updateSummary() {
+        if (summaryPlan) {
+            summaryPlan.textContent = selectedPlan ? selectedPlan.name : '-';
+        }
+        if (submitBtn) {
+            submitBtn.disabled = !selectedPlan;
+        }
+    }
+
+    /* ── 견적 제출 ── */
+    submitBtn.addEventListener('click', async () => {
+        if (!selectedPlan) return;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ri-loader-4-line" style="animation:spin 1s linear infinite"></i> 처리중...';
+
+        try {
+            // 선택된 애드온 수집
+            const checkedAddons = [];
+            addonList.querySelectorAll('.quote-addon-check:checked').forEach(cb => {
+                const idx = parseInt(cb.dataset.index);
+                if (cachedAddons[idx]) {
+                    checkedAddons.push({
+                        name: cachedAddons[idx].name,
+                        price: cachedAddons[idx].price
+                    });
+                }
+            });
+
+            await PangOrders.createOrder({
+                planId: selectedPlan.id,
+                planName: selectedPlan.name,
+                planTier: selectedPlan.tier,
+                planPrice: selectedPlan.price,
+                addons: checkedAddons,
+                memo: memoEl ? memoEl.value.trim() : ''
+            });
+
+            closeQuoteModal();
+            alert('✅ 견적 요청이 완료되었습니다!\n마이페이지에서 진행 상황을 확인하실 수 있습니다.');
+
+            // 마이페이지로 이동 제안
+            if (confirm('마이페이지로 이동하시겠습니까?')) {
+                window.location.href = '/mypage.html';
+            }
+        } catch (err) {
+            console.error('견적 요청 실패:', err);
+            alert('견적 요청에 실패했습니다. 다시 시도해 주세요.\n' + (err.message || ''));
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="ri-send-plane-line"></i> 견적 요청하기';
+        }
+    });
+
+    /* ── 시작하기 버튼 핸들러 (전역) ── */
+    window.handlePricingClick = async function(planId, planName, planTier, planPrice) {
+        try {
+            const user = await PangAuth.getUser();
+            if (user) {
+                // 로그인 상태 → 바로 견적 모달 열기
+                openQuoteModal(planId);
+            } else {
+                // 비로그인 → 로그인 모달 열기 + 로그인 후 액션 저장
+                pendingPlanAction = planId;
+                window.openAuthModal('login');
+            }
+        } catch {
+            pendingPlanAction = planId;
+            window.openAuthModal('login');
+        }
+    };
+
+    /* ── 로그인 성공 후 대기 중인 액션 처리 ── */
+    if (window._supabaseClient) {
+        window._supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session?.user && pendingPlanAction) {
+                const planId = pendingPlanAction;
+                pendingPlanAction = null;
+                // 로그인 모달이 닫힌 후 견적 모달 열기
+                setTimeout(() => openQuoteModal(planId), 500);
+            }
+        });
+    }
+
+    window.openQuoteModal = openQuoteModal;
+});

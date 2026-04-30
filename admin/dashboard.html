@@ -88,6 +88,9 @@
                     관리 <i class="ri-arrow-down-s-line accordion-arrow"></i>
                 </div>
                 <div class="accordion-body" id="accordion-members">
+                    <div class="nav-item" data-panel="orders">
+                        <i class="ri-file-list-3-line"></i> 주문/견적 관리
+                    </div>
                     <div class="nav-item" data-panel="members">
                         <i class="ri-group-line"></i> 회원 목록
                     </div>
@@ -160,6 +163,12 @@
                         <div class="section-card__icon" style="background:rgba(123,47,255,0.12);">🖥️</div>
                         <div class="section-card__title">푸터 관리</div>
                         <div class="section-card__desc">하단 로고, 슬로건, SNS 링크, 회사/문의처 수정</div>
+                    </div>
+                    <div class="section-card" onclick="showPanel('orders')">
+                        <div class="section-card__icon" style="background:rgba(229,60,17,0.12);">📋</div>
+                        <div class="section-card__title">주문/견적 관리</div>
+                        <div class="section-card__desc">고객 견적 요청 확인, 견적서/계약서 발행</div>
+                        <div class="section-card__count" id="stat-orders">0</div>
                     </div>
                     <div class="section-card" onclick="showPanel('members')">
                         <div class="section-card__icon" style="background:rgba(22,163,74,0.12);">👤</div>
@@ -417,6 +426,69 @@
                             <button class="btn-delete-confirm" id="memberDeleteConfirm">삭제</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ─── ORDERS PANEL ─── -->
+            <div class="editor-panel" id="panel-orders">
+                <div class="panel-header">
+                    <div class="panel-header__back" onclick="showPanel('dashboard')"><i class="ri-arrow-left-line"></i></div>
+                    <h2>📋 주문/견적 관리</h2>
+                </div>
+
+                <!-- 상태 필터 -->
+                <div class="members-toolbar">
+                    <div class="members-search" style="flex:1;">
+                        <select id="orderStatusFilter" onchange="loadOrders()" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-primary); font-size:14px;">
+                            <option value="all">전체</option>
+                            <option value="quote_pending">견적 대기</option>
+                            <option value="quote_issued">견적서 발행</option>
+                            <option value="paid">결제 완료</option>
+                            <option value="contract_issued">계약서 발행</option>
+                            <option value="completed">체결 완료</option>
+                        </select>
+                    </div>
+                    <div class="members-stats">
+                        <span>전체 <strong id="orderTotalCount">0</strong>건</span>
+                        <button class="btn-member-refresh" onclick="loadOrders()" title="새로고침">
+                            <i class="ri-refresh-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 주문 테이블 -->
+                <div class="editor-card" style="padding:0;overflow:hidden;">
+                    <div class="members-table-wrap">
+                        <table class="members-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>고객</th>
+                                    <th>플랜</th>
+                                    <th>상태</th>
+                                    <th>신청일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="members-empty" id="ordersEmpty" style="display:none;">
+                        <i class="ri-file-list-3-line"></i>
+                        <p>주문 내역이 없습니다</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주문 상세 모달 -->
+            <div id="orderDetailModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9000; display:none; align-items:center; justify-content:center;">
+                <div style="background:var(--bg-primary); border:1px solid var(--border); border-radius:16px; max-width:600px; width:90%; max-height:85vh; overflow-y:auto; padding:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 id="orderDetailTitle">주문 상세</h3>
+                        <button onclick="closeOrderDetail()" style="background:none; border:none; color:var(--text-primary); font-size:24px; cursor:pointer;"><i class="ri-close-line"></i></button>
+                    </div>
+                    <div id="orderDetailBody"></div>
+                    <div id="orderDetailActions" style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap;"></div>
                 </div>
             </div>
 

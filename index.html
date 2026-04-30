@@ -76,6 +76,7 @@
                 <button class="nav__auth-btn nav__auth-btn--signup" id="navSignupBtn">회원가입</button>
                 <!-- 로그인 후 표시 -->
                 <div class="nav__user" id="navUser" style="display:none;">
+                    <a href="/mypage.html" class="nav__auth-btn nav__auth-btn--mypage" id="navMypageBtn">마이페이지</a>
                     <span class="nav__user-name" id="navUserName"></span>
                     <button class="nav__auth-btn nav__auth-btn--logout" id="navLogoutBtn">로그아웃</button>
                 </div>
@@ -105,6 +106,7 @@
         </div>
         <div class="mobile-menu__user" id="mobileUser" style="display:none;">
             <span id="mobileUserName"></span>
+            <a href="/mypage.html" class="mobile-menu__auth-mypage">마이페이지</a>
             <button class="mobile-menu__auth-logout" id="mobileLogoutBtn">로그아웃</button>
         </div>
     </div>
@@ -1670,6 +1672,56 @@
 
 })();
 </script>
+
+<!-- ════════════════════════════════════════════════════════
+   QUOTE CART MODAL (견적담기)
+   ════════════════════════════════════════════════════════ -->
+<div class="quote-overlay" id="quoteOverlay"></div>
+<div class="quote-modal" id="quoteModal" role="dialog" aria-modal="true">
+    <button class="quote-modal__close" id="quoteModalClose" aria-label="닫기">
+        <i class="ri-close-line"></i>
+    </button>
+    <div class="quote-modal__header">
+        <i class="ri-shopping-cart-2-line"></i>
+        <h2>견적 담기</h2>
+        <p>원하시는 플랜과 추가 옵션을 선택하세요</p>
+    </div>
+
+    <div class="quote-modal__body">
+        <!-- 플랜 선택 -->
+        <div class="quote-section">
+            <h3 class="quote-section__title"><i class="ri-price-tag-3-line"></i> 플랜 선택</h3>
+            <div class="quote-plan-list" id="quotePlanList">
+                <!-- 동적으로 플랜 카드 렌더링 -->
+            </div>
+        </div>
+
+        <!-- 추가 옵션 -->
+        <div class="quote-section">
+            <h3 class="quote-section__title"><i class="ri-add-circle-line"></i> 추가 옵션 (선택)</h3>
+            <div class="quote-addon-list" id="quoteAddonList">
+                <!-- 동적으로 애드온 체크박스 렌더링 -->
+            </div>
+        </div>
+
+        <!-- 요청사항 -->
+        <div class="quote-section">
+            <h3 class="quote-section__title"><i class="ri-chat-1-line"></i> 요청사항 (선택)</h3>
+            <textarea class="quote-memo" id="quoteMemo" rows="3" placeholder="촬영 관련 요청사항이 있으시면 자유롭게 적어주세요"></textarea>
+        </div>
+    </div>
+
+    <div class="quote-modal__footer">
+        <div class="quote-summary">
+            <span>선택한 플랜:</span>
+            <strong id="quoteSummaryPlan">-</strong>
+        </div>
+        <button class="quote-submit-btn" id="quoteSubmitBtn" disabled>
+            <i class="ri-send-plane-line"></i> 견적 요청하기
+        </button>
+        <p class="quote-submit-note">견적 요청 후 관리자가 검토하여 견적서를 발행합니다.</p>
+    </div>
+</div>
 
 <!-- ════════════════════════════════════════════════════════
    AUTH MODAL

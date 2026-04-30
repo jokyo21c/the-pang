@@ -89,6 +89,7 @@ function showPanel(panelId, pushState = true) {
         testimonial: '사장님 후기',
         pricing:     '가격표 관리',
         footer:      '푸터 관리',
+        orders:      '주문/견적 관리',
         members:     '회원 관리',
         settings:    '계정 설정',
     };
@@ -96,7 +97,8 @@ function showPanel(panelId, pushState = true) {
     if (topTitle) topTitle.textContent = titles[panelId] || panelId;
 
     if (panelId === 'members') initMembersPanel();
-    if (panelId === 'dashboard') updateMemberStat();
+    if (panelId === 'orders') loadOrders();
+    if (panelId === 'dashboard') { updateMemberStat(); updateOrderStat(); }
     if (panelId === 'settings') loadAccountSettings();
 
     if (pushState) {
@@ -1077,3 +1079,197 @@ document.getElementById('btn-update-password')?.addEventListener('click', async 
         btn.textContent = '비밀번호 변경';
     }
 });
+
+
+/* ════════════════════════════════════════════════════════
+   주문/견적 관리 — Supabase 연동
+   ════════════════════════════════════════════════════════ */
+
+const ORDER_STATUS_MAP = {
+    'quote_pending':    { label: '견적 대기', badge: 'warning', icon: '⏳' },
+    'quote_issued':     { label: '견적서 발행', badge: 'info', icon: '📋' },
+    'paid':             { label: '결제 완료', badge: 'success', icon: '💰' },
+    'contract_issued':  { label: '계약서 발행', badge: 'primary', icon: '📄' },
+    'completed':        { label: '체결 완료', badge: 'complete', icon: '🎉' }
+};
+
+async function updateOrderStat() {
+    try {
+        const orders = await AdminContent.getOrders();
+        const el = document.getElementById('stat-orders');
+        if (el) el.textContent = orders.length;
+    } catch (e) {
+        console.warn('주문 통계 로드 실패:', e);
+    }
+}
+
+async function loadOrders() {
+    const filter = document.getElementById('orderStatusFilter')?.value || 'all';
+    const tbody = document.getElementById('ordersTableBody');
+    const emptyEl = document.getElementById('ordersEmpty');
+    const totalEl = document.getElementById('orderTotalCount');
+
+    try {
+        const orders = await AdminContent.getOrders(filter === 'all' ? null : filter);
+        if (totalEl) totalEl.textContent = orders.length;
+        const statEl = document.getElementById('stat-orders');
+        if (statEl) statEl.textContent = orders.length;
+
+        if (!orders.length) {
+            tbody.innerHTML = '';
+            emptyEl.style.display = 'flex';
+            return;
+        }
+        emptyEl.style.display = 'none';
+
+        tbody.innerHTML = orders.map((o, i) => {
+            const s = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP['quote_pending'];
+            const customerName = o.members?.name || o.user_id?.substring(0, 8) || '-';
+            const date = new Date(o.created_at).toLocaleDateString('ko-KR');
+
+            return `
+            <tr class="member-row">
+                <td class="member-num">${i + 1}</td>
+                <td>${customerName}</td>
+                <td>${o.plan_name}</td>
+                <td><span class="member-badge member-badge--${s.badge === 'warning' ? 'normal' : 'online'}">${s.icon} ${s.label}</span></td>
+                <td class="member-email">${date}</td>
+                <td>
+                    <button class="btn-member-delete" style="background:rgba(123,47,255,0.1); color:#7b2fff;" onclick="openOrderDetail(${o.id})" title="상세">
+                        <i class="ri-eye-line"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch (e) {
+        console.error('주문 목록 로드 실패:', e);
+        showToast('❌ 주문 목록 로드 실패');
+    }
+}
+
+async function openOrderDetail(orderId) {
+    const modal = document.getElementById('orderDetailModal');
+    const body = document.getElementById('orderDetailBody');
+    const actions = document.getElementById('orderDetailActions');
+
+    try {
+        const order = await AdminContent.getOrder(orderId);
+        const s = ORDER_STATUS_MAP[order.status] || ORDER_STATUS_MAP['quote_pending'];
+
+        let addonsHtml = '';
+        if (order.addons && Array.isArray(order.addons) && order.addons.length > 0) {
+            addonsHtml = `
+                <div style="margin-top:12px;">
+                    <strong>추가 옵션:</strong><br>
+                    ${order.addons.map(a => `<span style="display:inline-block;background:rgba(123,47,255,0.1);color:#a78bfa;padding:3px 8px;border-radius:4px;margin:2px;font-size:13px;">${a.name} ${a.price || ''}</span>`).join('')}
+                </div>
+            `;
+        }
+
+        body.innerHTML = `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+                <div><small style="color:var(--text-secondary);">상태</small><br><strong>${s.icon} ${s.label}</strong></div>
+                <div><small style="color:var(--text-secondary);">플랜</small><br><strong>${order.plan_name}</strong></div>
+                <div><small style="color:var(--text-secondary);">티어</small><br>${order.plan_tier || '-'}</div>
+                <div><small style="color:var(--text-secondary);">기본 가격</small><br>${order.plan_price || '-'}원</div>
+                ${order.total_amount ? `<div><small style="color:var(--text-secondary);">확정 금액</small><br><strong style="color:#22c55e;">${order.total_amount}원</strong></div>` : ''}
+                <div><small style="color:var(--text-secondary);">신청일</small><br>${new Date(order.created_at).toLocaleString('ko-KR')}</div>
+            </div>
+            ${addonsHtml}
+            ${order.memo ? `<div style="margin-top:12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:13px; color:#aaa;">💬 ${order.memo}</div>` : ''}
+        `;
+
+        // 액션 버튼
+        let actionsHtml = '';
+        if (order.status === 'quote_pending') {
+            actionsHtml = `
+                <button onclick="actionIssueQuote(${orderId})" class="btn-save" style="flex:1;">📋 견적서 발행</button>
+                <button onclick="actionDeleteOrder(${orderId})" class="btn-member-delete" style="padding:10px 16px;">삭제</button>
+            `;
+        } else if (order.status === 'quote_issued') {
+            actionsHtml = `<button onclick="actionConfirmPayment(${orderId})" class="btn-save" style="flex:1;">💰 결제 확인</button>`;
+        } else if (order.status === 'paid') {
+            actionsHtml = `<button onclick="actionIssueContract(${orderId})" class="btn-save" style="flex:1;">📄 계약서 발행</button>`;
+        } else if (order.status === 'contract_issued') {
+            actionsHtml = `<button onclick="actionCompleteOrder(${orderId})" class="btn-save" style="flex:1; background:#22c55e;">🎉 체결 완료</button>`;
+        }
+        actions.innerHTML = actionsHtml;
+
+        modal.style.display = 'flex';
+    } catch (e) {
+        console.error('주문 상세 로드 실패:', e);
+        showToast('❌ 주문 상세를 불러올 수 없습니다.');
+    }
+}
+
+function closeOrderDetail() {
+    document.getElementById('orderDetailModal').style.display = 'none';
+}
+
+// 견적서 발행
+async function actionIssueQuote(orderId) {
+    const totalAmount = prompt('확정 금액을 입력하세요 (예: 190,000):');
+    if (totalAmount === null) return;
+
+    try {
+        await AdminContent.issueQuote(orderId, {
+            totalAmount: totalAmount,
+            issuedAt: new Date().toISOString()
+        });
+        showToast('✅ 견적서가 발행되었습니다.');
+        closeOrderDetail();
+        loadOrders();
+    } catch (e) {
+        showToast('❌ 견적서 발행 실패: ' + e.message);
+    }
+}
+
+async function actionConfirmPayment(orderId) {
+    if (!confirm('결제가 확인되었습니까?')) return;
+    try {
+        await AdminContent.confirmPayment(orderId);
+        showToast('✅ 결제가 확인되었습니다.');
+        closeOrderDetail();
+        loadOrders();
+    } catch (e) {
+        showToast('❌ 결제 확인 실패: ' + e.message);
+    }
+}
+
+async function actionIssueContract(orderId) {
+    if (!confirm('계약서를 발행하시겠습니까?')) return;
+    try {
+        await AdminContent.issueContract(orderId, {
+            issuedAt: new Date().toISOString()
+        });
+        showToast('✅ 계약서가 발행되었습니다.');
+        closeOrderDetail();
+        loadOrders();
+    } catch (e) {
+        showToast('❌ 계약서 발행 실패: ' + e.message);
+    }
+}
+
+async function actionCompleteOrder(orderId) {
+    if (!confirm('계약 체결을 완료 처리하시겠습니까?')) return;
+    try {
+        await AdminContent.completeOrder(orderId);
+        showToast('🎉 계약 체결이 완료되었습니다.');
+        closeOrderDetail();
+        loadOrders();
+    } catch (e) {
+        showToast('❌ 완료 처리 실패: ' + e.message);
+    }
+}
+
+async function actionDeleteOrder(orderId) {
+    if (!confirm('이 주문을 삭제하시겠습니까? 되돌릴 수 없습니다.')) return;
+    try {
+        await AdminContent.deleteOrder(orderId);
+        showToast('주문이 삭제되었습니다.');
+        closeOrderDetail();
+        loadOrders();
+    } catch (e) {
+        showToast('❌ 주문 삭제 실패: ' + e.message);
+    }
+}

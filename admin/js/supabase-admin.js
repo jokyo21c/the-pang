@@ -264,6 +264,102 @@ const AdminContent = {
             .delete()
             .eq('id', id);
         if (error) throw error;
+    },
+
+
+    /* ── 주문/견적 관리 ────────────────────────────────────── */
+
+    async getOrders(statusFilter = null) {
+        let query = _adminSupabase
+            .from('orders')
+            .select('*, members!inner(name, email)')
+            .order('created_at', { ascending: false });
+
+        if (statusFilter && statusFilter !== 'all') {
+            query = query.eq('status', statusFilter);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+            // members join 실패 시 fallback (members 테이블에 데이터 없는 경우)
+            const { data: fallback, error: fallbackError } = await _adminSupabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (fallbackError) throw fallbackError;
+            return fallback || [];
+        }
+        return data || [];
+    },
+
+    async getOrder(orderId) {
+        const { data, error } = await _adminSupabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
+    /** 견적서 발행 */
+    async issueQuote(orderId, quoteData) {
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({
+                status: 'quote_issued',
+                quote_data: quoteData,
+                total_amount: quoteData.totalAmount || '',
+                quote_issued_at: new Date().toISOString()
+            })
+            .eq('id', orderId);
+        if (error) throw error;
+    },
+
+    /** 결제 확인 */
+    async confirmPayment(orderId) {
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({
+                status: 'paid',
+                paid_at: new Date().toISOString()
+            })
+            .eq('id', orderId);
+        if (error) throw error;
+    },
+
+    /** 계약서 발행 */
+    async issueContract(orderId, contractData) {
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({
+                status: 'contract_issued',
+                contract_data: contractData,
+                contract_issued_at: new Date().toISOString()
+            })
+            .eq('id', orderId);
+        if (error) throw error;
+    },
+
+    /** 계약 체결 완료 */
+    async completeOrder(orderId) {
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({
+                status: 'completed',
+                completed_at: new Date().toISOString()
+            })
+            .eq('id', orderId);
+        if (error) throw error;
+    },
+
+    /** 주문 삭제 */
+    async deleteOrder(orderId) {
+        const { error } = await _adminSupabase
+            .from('orders')
+            .delete()
+            .eq('id', orderId);
+        if (error) throw error;
     }
 };
 

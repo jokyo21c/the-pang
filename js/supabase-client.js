@@ -160,9 +160,63 @@ const PangAuth = {
     }
 };
 
+/* ── 주문/견적 (고객용) ─────────────────────────────────── */
+const PangOrders = {
+
+    /** 견적 담기 (새 주문 생성) */
+    async createOrder({ planId, planName, planTier, planPrice, addons, memo }) {
+        const user = await PangAuth.getUser();
+        if (!user) throw new Error('로그인이 필요합니다.');
+
+        const { data, error } = await _supabaseClient
+            .from('orders')
+            .insert({
+                user_id: user.id,
+                plan_name: planName,
+                plan_tier: planTier || '',
+                plan_price: planPrice || '',
+                addons: addons || [],
+                memo: memo || '',
+                status: 'quote_pending'
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /** 내 주문 목록 조회 */
+    async getMyOrders() {
+        const { data, error } = await _supabaseClient
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.warn('[PangOrders] getMyOrders() failed:', error.message);
+            return [];
+        }
+        return data || [];
+    },
+
+    /** 단일 주문 조회 */
+    async getOrder(orderId) {
+        const { data, error } = await _supabaseClient
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+};
+
 // Global export
 window.PangData = PangData;
 window.PangAuth = PangAuth;
+window.PangOrders = PangOrders;
 window._supabaseClient = _supabaseClient;
 
 /* ── 조기 PASSWORD_RECOVERY 감지 (DOMContentLoaded 전) ──── */
