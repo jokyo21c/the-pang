@@ -1318,3 +1318,17 @@
         padding: 0 40px;
     }
 }
+
+/* ── QHD (2560px) — FHD 비율 유지 ───────────────────────── */
+@media screen and (min-width: 2560px) {
+    html {
+        zoom: 1.334;  /* 2560 / 1920 ≈ 1.334 */
+    }
+}
+
+/* ── UHD / 4K (3840px) — FHD 비율 유지 ──────────────────── */
+@media screen and (min-width: 3840px) {
+    html {
+        zoom: 2;  /* 3840 / 1920 = 2.0 */
+    }
+}

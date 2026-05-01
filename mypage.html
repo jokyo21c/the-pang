@@ -839,7 +839,7 @@
             ${totalAmount ? `
             <div class="doc-modal__total doc-modal__total--quote">
                 <span class="doc-modal__total-label">확정 금액</span>
-                <span class="doc-modal__total-value doc-modal__total-value--quote">${totalAmount}원</span>
+                <span class="doc-modal__total-value doc-modal__total-value--quote">${totalAmount}원 <span style="font-size:14px; font-weight:400; color:#888;">(VAT 별도)</span></span>
             </div>` : ''}
         `;
 
@@ -898,7 +898,7 @@
             ${totalAmount ? `
             <div class="doc-modal__total doc-modal__total--contract">
                 <span class="doc-modal__total-label">계약 금액</span>
-                <span class="doc-modal__total-value doc-modal__total-value--contract">${totalAmount}원</span>
+                <span class="doc-modal__total-value doc-modal__total-value--contract">${totalAmount}원 <span style="font-size:14px; font-weight:400; color:#888;">(VAT 별도)</span></span>
             </div>` : ''}
             ${isCompleted ? `
             <div class="doc-modal__stamp doc-modal__stamp--completed">

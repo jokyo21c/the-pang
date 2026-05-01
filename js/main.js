@@ -2895,7 +2895,6 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                     discountedPrice = parts[2] || '';
                 }
 
-                let priceHtml = '';
                 if (discountReason || discountedPrice) {
                     priceHtml = `
                         <div class="pricing-card__discount-reason">
@@ -2906,11 +2905,13 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                         </div>
                         <div class="pricing-card__discount-price">
                             ${discountedPrice}<span style="font-size:16px;font-weight:400; color: var(--color-brand-orange);">원</span>
+                            <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
                         </div>
                     `;
                 } else {
                     priceHtml = `
                         ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
+                        <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
                     `;
                 }
 
