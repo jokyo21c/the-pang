@@ -1108,6 +1108,35 @@ function formatOrderPrice(priceStr) {
     return `${priceStr}원`;
 }
 
+// 가격 숫자 추출 (쉼표 제거 후 첫 숫자)
+function extractOrderNumber(str) {
+    if (!str) return 0;
+    const cleaned = str.replace(/,/g, '');
+    const match = cleaned.match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+}
+
+// 기본가 + 추가옵션 합계 계산
+function calcOrderEstimatedTotal(order) {
+    let baseAmount = 0;
+    if (order.plan_price) {
+        if (order.plan_price.includes('|')) {
+            const parts = order.plan_price.split('|');
+            const discounted = parts[2] || '';
+            baseAmount = discounted ? extractOrderNumber(discounted) : extractOrderNumber(parts[0]);
+        } else {
+            baseAmount = extractOrderNumber(order.plan_price);
+        }
+    }
+    let addonsTotal = 0;
+    if (order.addons && Array.isArray(order.addons)) {
+        order.addons.forEach(a => {
+            addonsTotal += extractOrderNumber(a.price || '');
+        });
+    }
+    return baseAmount + addonsTotal;
+}
+
 async function updateOrderStat() {
     try {
         const orders = await AdminContent.getOrders();
@@ -1181,17 +1210,26 @@ async function openOrderDetail(orderId) {
             `;
         }
 
+        // 합계액 계산
+        const estimatedTotal = calcOrderEstimatedTotal(order);
+        const totalHtml = estimatedTotal > 0 ? `
+            <div style="margin-top:14px; padding:12px 16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13px; color:var(--purple-light);">예상 합계 (기본가 + 추가옵션)</span>
+                <strong style="font-size:16px; color:var(--purple);">${estimatedTotal.toLocaleString('ko-KR')}원</strong>
+            </div>` : '';
+
         body.innerHTML = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-                <div><small style="color:var(--text-secondary);">상태</small><br><strong>${s.icon} ${s.label}</strong></div>
-                <div><small style="color:var(--text-secondary);">플랜</small><br><strong>${order.plan_name}</strong></div>
-                <div><small style="color:var(--text-secondary);">티어</small><br>${order.plan_tier || '-'}</div>
-                <div><small style="color:var(--text-secondary);">기본 가격</small><br>${formatOrderPrice(order.plan_price)}</div>
-                ${order.total_amount ? `<div><small style="color:var(--text-secondary);">확정 금액</small><br><strong style="color:#22c55e;">${order.total_amount}원</strong></div>` : ''}
-                <div><small style="color:var(--text-secondary);">신청일</small><br>${new Date(order.created_at).toLocaleString('ko-KR')}</div>
+                <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br><strong style="color:var(--text-primary);">${s.icon} ${s.label}</strong></div>
+                <div><small style="color:var(--text-muted); font-size:11px;">플랜</small><br><strong style="color:var(--text-primary);">${order.plan_name}</strong></div>
+                <div><small style="color:var(--text-muted); font-size:11px;">티어</small><br><span style="color:var(--text-secondary);">${order.plan_tier || '-'}</span></div>
+                <div><small style="color:var(--text-muted); font-size:11px;">기본 가격</small><br><span style="color:var(--text-primary);">${formatOrderPrice(order.plan_price)}</span></div>
+                ${order.total_amount ? `<div><small style="color:var(--text-muted); font-size:11px;">확정 금액</small><br><strong style="color:var(--green);">${order.total_amount}원</strong></div>` : ''}
+                <div><small style="color:var(--text-muted); font-size:11px;">신청일</small><br><span style="color:var(--text-secondary);">${new Date(order.created_at).toLocaleString('ko-KR')}</span></div>
             </div>
             ${addonsHtml}
-            ${order.memo ? `<div style="margin-top:12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:13px; color:#aaa;">💬 ${order.memo}</div>` : ''}
+            ${totalHtml}
+            ${order.memo ? `<div style="margin-top:12px; padding:10px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text-secondary);">💬 ${order.memo}</div>` : ''}
         `;
 
         // 액션 버튼
@@ -1221,10 +1259,40 @@ function closeOrderDetail() {
     document.getElementById('orderDetailModal').style.display = 'none';
 }
 
+// 천 단위 쉼표 포맷 함수
+function formatNumberWithCommas(value) {
+    const num = value.replace(/[^0-9]/g, '');
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 // 견적서 발행
 async function actionIssueQuote(orderId) {
-    const totalAmount = prompt('확정 금액을 입력하세요 (예: 190,000):');
-    if (totalAmount === null) return;
+    const actions = document.getElementById('orderDetailActions');
+    // 이미 입력 UI가 있으면 무시
+    if (document.getElementById('quoteAmountInput')) return;
+
+    actions.innerHTML = `
+        <div style="width:100%;">
+            <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">확정 금액 입력</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="quoteAmountInput" class="form-control" placeholder="예: 190,000" style="flex:1; font-size:16px; font-weight:600;" oninput="this.value = formatNumberWithCommas(this.value)">
+                <span style="color:var(--text-secondary); font-weight:600;">원</span>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <button onclick="confirmIssueQuote(${orderId})" class="btn-save" style="flex:1; height:38px;">✅ 확인</button>
+                <button onclick="openOrderDetail(${orderId})" class="btn-preview" style="height:38px; width:auto; padding:0 16px;">취소</button>
+            </div>
+        </div>
+    `;
+    // 자동 포커스
+    document.getElementById('quoteAmountInput')?.focus();
+}
+
+// 견적 발행 확인
+async function confirmIssueQuote(orderId) {
+    const input = document.getElementById('quoteAmountInput');
+    const totalAmount = input?.value?.trim();
+    if (!totalAmount) { showToast('금액을 입력해주세요.'); return; }
 
     try {
         await AdminContent.issueQuote(orderId, {

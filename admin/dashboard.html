@@ -481,11 +481,11 @@
             </div>
 
             <!-- 주문 상세 모달 -->
-            <div id="orderDetailModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9000; display:none; align-items:center; justify-content:center;">
-                <div style="background:var(--bg-primary); border:1px solid var(--border); border-radius:16px; max-width:600px; width:90%; max-height:85vh; overflow-y:auto; padding:24px;">
+            <div id="orderDetailModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9000; align-items:center; justify-content:center;">
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:16px; max-width:600px; width:90%; max-height:85vh; overflow-y:auto; padding:28px; box-shadow:0 8px 32px rgba(0,0,0,0.15);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3 id="orderDetailTitle">주문 상세</h3>
-                        <button onclick="closeOrderDetail()" style="background:none; border:none; color:var(--text-primary); font-size:24px; cursor:pointer;"><i class="ri-close-line"></i></button>
+                        <h3 id="orderDetailTitle" style="font-size:18px; font-weight:700; color:var(--text-primary);">주문 상세</h3>
+                        <button onclick="closeOrderDetail()" style="background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; color:var(--text-secondary); width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; transition:0.2s;"><i class="ri-close-line"></i></button>
                     </div>
                     <div id="orderDetailBody"></div>
                     <div id="orderDetailActions" style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap;"></div>

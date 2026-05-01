@@ -293,6 +293,183 @@
             .process-bar__label { font-size: 10px; }
             .process-bar__line { flex: 0 0 12px; }
         }
+
+        /* ── Order Action Buttons ── */
+        .order-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .order-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .order-action-btn--quote {
+            background: rgba(123,47,255,0.12);
+            color: #a78bfa;
+            border: 1px solid rgba(123,47,255,0.2);
+        }
+        .order-action-btn--quote:hover {
+            background: rgba(123,47,255,0.25);
+            border-color: rgba(123,47,255,0.4);
+        }
+        .order-action-btn--contract {
+            background: rgba(59,130,246,0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59,130,246,0.2);
+        }
+        .order-action-btn--contract:hover {
+            background: rgba(59,130,246,0.25);
+            border-color: rgba(59,130,246,0.4);
+        }
+
+        /* ── Document Modal ── */
+        .doc-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 9000;
+            align-items: center;
+            justify-content: center;
+        }
+        .doc-modal-overlay.show {
+            display: flex;
+        }
+        .doc-modal {
+            background: #141418;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 560px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+            animation: docModalIn 0.25s ease;
+        }
+        @keyframes docModalIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .doc-modal__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .doc-modal__title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .doc-modal__close {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #888;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .doc-modal__close:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        .doc-modal__row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .doc-modal__label {
+            font-size: 13px;
+            color: #888;
+        }
+        .doc-modal__value {
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+        }
+        .doc-modal__divider {
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            margin: 16px 0;
+        }
+        .doc-modal__total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-top: 12px;
+        }
+        .doc-modal__total--quote {
+            background: rgba(123,47,255,0.1);
+            border: 1px solid rgba(123,47,255,0.2);
+        }
+        .doc-modal__total--contract {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.2);
+        }
+        .doc-modal__total-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ccc;
+        }
+        .doc-modal__total-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .doc-modal__total-value--quote { color: #7b2fff; }
+        .doc-modal__total-value--contract { color: #3b82f6; }
+        .doc-modal__stamp {
+            text-align: center;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .doc-modal__stamp--completed {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.2);
+            color: #22c55e;
+        }
+        .doc-modal__addon-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .doc-modal__addon-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .doc-modal__addon-name { color: #aaa; }
+        .doc-modal__addon-price { color: #ccc; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -320,6 +497,17 @@
     </div>
 </main>
 
+<!-- Document Modal -->
+<div class="doc-modal-overlay" id="docModalOverlay" onclick="if(event.target===this)closeDocModal()">
+    <div class="doc-modal">
+        <div class="doc-modal__header">
+            <h3 class="doc-modal__title" id="docModalTitle"></h3>
+            <button class="doc-modal__close" onclick="closeDocModal()"><i class="ri-close-line"></i></button>
+        </div>
+        <div id="docModalBody"></div>
+    </div>
+</div>
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/config.js"></script>
@@ -329,8 +517,20 @@
     const container = document.getElementById('orderContainer');
     const greeting = document.getElementById('userGreeting');
 
-    // 인증 확인
-    const user = await PangAuth.getUser();
+    // 인증 확인: 세션 먼저 확인 (localStorage 기반), 후 user 조회
+    let user = null;
+    try {
+        const session = await PangAuth.getSession();
+        if (session && session.user) {
+            user = session.user;
+        } else {
+            // 세션 없으면 getUser()로 한번 더 시도 (refresh token 사용)
+            user = await PangAuth.getUser();
+        }
+    } catch(e) {
+        console.warn('[mypage] auth check failed:', e);
+    }
+
     if (!user) {
         window.location.href = '/?login=required';
         return;
@@ -386,6 +586,37 @@
             return `${base}원`;
         }
         return `${priceStr}원`;
+    }
+
+    /* ── 숫자 추출 헬퍼 (쉼표 제거 후 첫 숫자 추출) ── */
+    function extractNumber(str) {
+        if (!str) return 0;
+        const cleaned = str.replace(/,/g, '');
+        const match = cleaned.match(/(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+    }
+
+    /* ── 기본가 + 추가옵션 합계 계산 ── */
+    function calcEstimatedTotal(order) {
+        // 기본 가격: 할인가가 있으면 할인가, 없으면 원가
+        let baseAmount = 0;
+        if (order.plan_price) {
+            if (order.plan_price.includes('|')) {
+                const parts = order.plan_price.split('|');
+                const discounted = parts[2] || '';
+                baseAmount = discounted ? extractNumber(discounted) : extractNumber(parts[0]);
+            } else {
+                baseAmount = extractNumber(order.plan_price);
+            }
+        }
+        // 추가 옵션 합계
+        let addonsTotal = 0;
+        if (order.addons && Array.isArray(order.addons)) {
+            order.addons.forEach(a => {
+                addonsTotal += extractNumber(a.price || '');
+            });
+        }
+        return baseAmount + addonsTotal;
     }
 
     function renderOrderCard(order) {
@@ -481,10 +712,181 @@
                 </div>
 
                 ${addonsHtml}
+
+                ${(() => {
+                    const est = calcEstimatedTotal(order);
+                    return est > 0 ? `
+                    <div style="margin-top:14px; padding:12px 16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:13px; color:#a78bfa;">예상 합계 (기본가 + 추가옵션)</span>
+                        <strong style="font-size:16px; color:#7b2fff;">${est.toLocaleString('ko-KR')}원</strong>
+                    </div>` : '';
+                })()}
+
                 ${memoHtml}
+
+                ${renderOrderActions(order)}
             </div>
         `;
     }
+
+    /* ── 상태별 액션 버튼 렌더링 ── */
+    function renderOrderActions(order) {
+        const s = order.status;
+        let buttons = '';
+
+        // 견적서 발행 이후: 견적서 보기 버튼
+        if (['quote_issued', 'paid', 'contract_issued', 'completed'].includes(s)) {
+            buttons += `<button class="order-action-btn order-action-btn--quote" onclick='showQuoteDoc(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="ri-file-list-3-line"></i> 견적서 보기</button>`;
+        }
+
+        // 계약서 발행 이후: 계약서 보기 버튼
+        if (['contract_issued', 'completed'].includes(s)) {
+            buttons += `<button class="order-action-btn order-action-btn--contract" onclick='showContractDoc(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="ri-file-paper-2-line"></i> 계약서 보기</button>`;
+        }
+
+        if (!buttons) return '';
+        return `<div class="order-actions">${buttons}</div>`;
+    }
+
+    /* ── 견적서 보기 모달 ── */
+    window.showQuoteDoc = function(order) {
+        const modal = document.getElementById('docModalOverlay');
+        const title = document.getElementById('docModalTitle');
+        const body = document.getElementById('docModalBody');
+
+        title.innerHTML = '📋 견적서';
+
+        const basePrice = order.plan_price || '-';
+        let basePriceDisplay = '';
+        let basePriceNum = 0;
+        if (basePrice.includes('|')) {
+            const parts = basePrice.split('|');
+            const discounted = parts[2] || '';
+            basePriceNum = discounted ? extractNumber(discounted) : extractNumber(parts[0]);
+            basePriceDisplay = discounted ? `<span style="text-decoration:line-through; color:#666; font-size:12px;">${parts[0]}원</span> <strong style="color:#ff6b35;">${discounted}원</strong>` : `${parts[0]}원`;
+        } else {
+            basePriceNum = extractNumber(basePrice);
+            basePriceDisplay = `${basePrice}원`;
+        }
+
+        const quoteDate = order.quote_data?.issuedAt ? new Date(order.quote_data.issuedAt).toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }) : '-';
+
+        let addonsSection = '';
+        let addonsTotal = 0;
+        if (order.addons && order.addons.length > 0) {
+            addonsSection = `
+                <div class="doc-modal__row" style="border:none; padding-bottom:4px;">
+                    <span class="doc-modal__label">추가 옵션</span>
+                </div>
+                <div class="doc-modal__addon-list">
+                    ${order.addons.map(a => {
+                        const p = extractNumber(a.price || '');
+                        addonsTotal += p;
+                        return `<div class="doc-modal__addon-item"><span class="doc-modal__addon-name">${a.name}</span><span class="doc-modal__addon-price">${a.price || '-'}</span></div>`;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        const totalAmount = order.total_amount || '';
+        const estimatedTotal = basePriceNum + addonsTotal;
+
+        body.innerHTML = `
+            <div class="doc-modal__row">
+                <span class="doc-modal__label">발행일</span>
+                <span class="doc-modal__value">${quoteDate}</span>
+            </div>
+            <div class="doc-modal__row">
+                <span class="doc-modal__label">플랜</span>
+                <span class="doc-modal__value">${order.plan_name} (${order.plan_tier || ''})</span>
+            </div>
+            <div class="doc-modal__row">
+                <span class="doc-modal__label">기본 가격</span>
+                <span class="doc-modal__value">${basePriceDisplay}</span>
+            </div>
+            ${addonsSection}
+            <div class="doc-modal__divider"></div>
+            <div class="doc-modal__row">
+                <span class="doc-modal__label">예상 합계</span>
+                <span class="doc-modal__value" style="color:#a78bfa;">${estimatedTotal.toLocaleString('ko-KR')}원</span>
+            </div>
+            ${totalAmount ? `
+            <div class="doc-modal__total doc-modal__total--quote">
+                <span class="doc-modal__total-label">확정 금액</span>
+                <span class="doc-modal__total-value doc-modal__total-value--quote">${totalAmount}원</span>
+            </div>` : ''}
+        `;
+
+        modal.classList.add('show');
+    };
+
+    /* ── 계약서 보기 모달 ── */
+    window.showContractDoc = function(order) {
+        const modal = document.getElementById('docModalOverlay');
+        const title = document.getElementById('docModalTitle');
+        const body = document.getElementById('docModalBody');
+
+        title.innerHTML = '📄 계약서';
+
+        const contractDate = order.contract_data?.issuedAt ? new Date(order.contract_data.issuedAt).toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }) : '-';
+
+        const basePrice = order.plan_price || '-';
+        let basePriceDisplay = '';
+        if (basePrice.includes('|')) {
+            const parts = basePrice.split('|');
+            const discounted = parts[2] || '';
+            basePriceDisplay = discounted ? `<strong style="color:#ff6b35;">${discounted}원</strong>` : `${parts[0]}원`;
+        } else {
+            basePriceDisplay = `${basePrice}원`;
+        }
+
+        let addonsSection = '';
+        if (order.addons && order.addons.length > 0) {
+            addonsSection = `
+                <div class="doc-modal__row" style="border:none; padding-bottom:4px;">
+                    <span class="doc-modal__label">포함 옵션</span>
+                </div>
+                <div class="doc-modal__addon-list">
+                    ${order.addons.map(a => `<div class="doc-modal__addon-item"><span class="doc-modal__addon-name">${a.name}</span><span class="doc-modal__addon-price">${a.price || '-'}</span></div>`).join('')}
+                </div>
+            `;
+        }
+
+        const totalAmount = order.total_amount || '';
+        const isCompleted = order.status === 'completed';
+
+        body.innerHTML = `
+            <div class="doc-modal__row">
+                <span class="doc-modal__label">발행일</span>
+                <span class="doc-modal__value">${contractDate}</span>
+            </div>
+            <div class="doc-modal__row">
+                <span class="doc-modal__label">플랜</span>
+                <span class="doc-modal__value">${order.plan_name} (${order.plan_tier || ''})</span>
+            </div>
+            <div class="doc-modal__row">
+                <span class="doc-modal__label">기본 가격</span>
+                <span class="doc-modal__value">${basePriceDisplay}</span>
+            </div>
+            ${addonsSection}
+            ${totalAmount ? `
+            <div class="doc-modal__total doc-modal__total--contract">
+                <span class="doc-modal__total-label">계약 금액</span>
+                <span class="doc-modal__total-value doc-modal__total-value--contract">${totalAmount}원</span>
+            </div>` : ''}
+            ${isCompleted ? `
+            <div class="doc-modal__stamp doc-modal__stamp--completed">
+                🎉 계약 체결 완료
+            </div>` : ''}
+        `;
+
+        modal.classList.add('show');
+    };
+
+    /* ── 모달 닫기 ── */
+    window.closeDocModal = function() {
+        document.getElementById('docModalOverlay').classList.remove('show');
+    };
 })();
 </script>
 </body>

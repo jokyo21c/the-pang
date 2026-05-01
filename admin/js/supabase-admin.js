@@ -319,8 +319,7 @@ const AdminContent = {
             .update({
                 status: 'quote_issued',
                 quote_data: quoteData,
-                total_amount: quoteData.totalAmount || '',
-                quote_issued_at: new Date().toISOString()
+                total_amount: quoteData.totalAmount || ''
             })
             .eq('id', orderId);
         if (error) throw error;
@@ -328,18 +327,36 @@ const AdminContent = {
 
     /** 결제 확인 */
     async confirmPayment(orderId) {
+        // 기존 quote_data 보존
+        const { data: current } = await _adminSupabase
+            .from('orders').select('quote_data').eq('id', orderId).single();
+        const mergedQuote = { ...(current?.quote_data || {}), paid_at: new Date().toISOString() };
+
+        // 먼저 paid_at 컬럼 포함하여 시도
         const { error } = await _adminSupabase
             .from('orders')
             .update({
                 status: 'paid',
+                quote_data: mergedQuote,
                 paid_at: new Date().toISOString()
             })
             .eq('id', orderId);
-        if (error) throw error;
+
+        if (error && error.message && error.message.includes('paid_at')) {
+            // paid_at 컬럼이 없으면 컬럼 없이 재시도
+            const { error: err2 } = await _adminSupabase
+                .from('orders')
+                .update({ status: 'paid', quote_data: mergedQuote })
+                .eq('id', orderId);
+            if (err2) throw err2;
+        } else if (error) {
+            throw error;
+        }
     },
 
     /** 계약서 발행 */
     async issueContract(orderId, contractData) {
+        // contract_issued_at 포함 시도
         const { error } = await _adminSupabase
             .from('orders')
             .update({
@@ -348,19 +365,44 @@ const AdminContent = {
                 contract_issued_at: new Date().toISOString()
             })
             .eq('id', orderId);
-        if (error) throw error;
+
+        if (error && error.message && error.message.includes('contract_issued_at')) {
+            const { error: err2 } = await _adminSupabase
+                .from('orders')
+                .update({ status: 'contract_issued', contract_data: contractData })
+                .eq('id', orderId);
+            if (err2) throw err2;
+        } else if (error) {
+            throw error;
+        }
     },
 
     /** 계약 체결 완료 */
     async completeOrder(orderId) {
+        // 기존 contract_data 보존
+        const { data: current } = await _adminSupabase
+            .from('orders').select('contract_data').eq('id', orderId).single();
+        const mergedContract = { ...(current?.contract_data || {}), completed_at: new Date().toISOString() };
+
+        // completed_at 컬럼 포함 시도
         const { error } = await _adminSupabase
             .from('orders')
             .update({
                 status: 'completed',
+                contract_data: mergedContract,
                 completed_at: new Date().toISOString()
             })
             .eq('id', orderId);
-        if (error) throw error;
+
+        if (error && error.message && error.message.includes('completed_at')) {
+            const { error: err2 } = await _adminSupabase
+                .from('orders')
+                .update({ status: 'completed', contract_data: mergedContract })
+                .eq('id', orderId);
+            if (err2) throw err2;
+        } else if (error) {
+            throw error;
+        }
     },
 
     /** 주문 삭제 */

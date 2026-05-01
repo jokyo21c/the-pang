@@ -2341,7 +2341,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         modal.classList.remove('open');
         document.body.style.overflow = '';
         if (loginError) loginError.textContent = '';
-        if (signupError) signupError.textContent = '';
+        if (signupError) { signupError.textContent = ''; signupError.style.color = ''; }
         if (resetError) resetError.textContent = '';
         if (resetSuccess) { resetSuccess.textContent = ''; resetSuccess.style.display = 'none'; }
     }
@@ -2475,11 +2475,18 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
 
         try {
             const data = await PangAuth.signUp(email, pw, name);
-            if (data.user) {
+
+            if (data.user && data.session) {
+                // 이메일 확인 불필요 설정: 즉시 로그인 상태
                 applyLoggedInUI(data.user);
                 closeAuthModal();
+            } else if (data.user && !data.session) {
+                // 이메일 확인 필요: 확인 안내 메시지 표시
+                signupError.style.color = '#22c55e';
+                signupError.textContent = '✅ 회원가입 완료! 이메일로 전송된 확인 링크를 클릭한 후 로그인해 주세요.';
             }
         } catch (err) {
+            signupError.style.color = '';
             signupError.textContent = translateAuthError(err.message);
         }
     });

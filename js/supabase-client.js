@@ -115,17 +115,38 @@ const PangAuth = {
 
         if (error) throw error;
 
-        // members 테이블에도 삽입 (실패해도 회원가입 자체는 성공 처리)
-        if (data.user) {
+        // ── 중복 이메일 감지 ──────────────────────────────────
+        // Supabase는 이미 가입된 이메일로 signUp 시 에러 대신
+        // identities 배열이 비어있는 user를 반환합니다.
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+            throw new Error('User already registered');
+        }
+
+        // ── members 테이블 삽입 ───────────────────────────────
+        // 이메일 확인이 필요한 경우: session이 null이어서 RLS(auth.uid())가 통과 안 됨.
+        // 따라서 세션이 있을 때만 insert 시도하고, 없으면 onAuthStateChange에서 처리.
+        if (data.user && data.session) {
+            // 이메일 확인 불필요 설정 or 즉시 세션 발급된 경우
             const { error: insertErr } = await _supabaseClient.from('members').insert({
                 user_id: data.user.id,
                 name: name,
                 email: email
             });
-            if (insertErr) {
-                console.warn('[PangAuth] members 테이블 삽입 실패 (auth는 성공):', insertErr.message);
+            if (insertErr && !insertErr.message.includes('duplicate')) {
+                console.warn('[PangAuth] members 테이블 삽입 실패:', insertErr.message);
             }
+        } else if (data.user && !data.session) {
+            // 이메일 확인 대기 중 → pending 정보를 localStorage에 저장
+            // SIGNED_IN 이벤트 시 insert 처리
+            try {
+                localStorage.setItem('_pangPendingMember', JSON.stringify({
+                    user_id: data.user.id,
+                    name: name,
+                    email: email
+                }));
+            } catch(e) {}
         }
+
         return data;
     },
 
@@ -221,8 +242,33 @@ window._supabaseClient = _supabaseClient;
 
 /* ── 조기 PASSWORD_RECOVERY 감지 (DOMContentLoaded 전) ──── */
 window._pangRecoveryDetected = false;
-_supabaseClient.auth.onAuthStateChange((event) => {
+_supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
         window._pangRecoveryDetected = true;
+    }
+
+    // ── 이메일 확인 후 첫 로그인 시 members 테이블 삽입 ────────
+    if (event === 'SIGNED_IN' && session?.user) {
+        try {
+            const pending = localStorage.getItem('_pangPendingMember');
+            if (pending) {
+                const m = JSON.parse(pending);
+                // user_id가 일치하는지 확인
+                if (m.user_id === session.user.id) {
+                    const { error: insertErr } = await _supabaseClient.from('members').insert({
+                        user_id: m.user_id,
+                        name: m.name,
+                        email: m.email
+                    });
+                    if (!insertErr || insertErr.message.includes('duplicate')) {
+                        localStorage.removeItem('_pangPendingMember');
+                    } else {
+                        console.warn('[PangAuth] pending member insert 실패:', insertErr.message);
+                    }
+                }
+            }
+        } catch(e) {
+            console.warn('[PangAuth] pending member 처리 실패:', e);
+        }
     }
 });
