@@ -231,6 +231,17 @@ const PangOrders = {
 
         if (error) throw error;
         return data;
+    },
+
+    /** 견적 요청 취소 (quote_pending 상태만 삭제 가능) */
+    async cancelOrder(orderId) {
+        const { error } = await _supabaseClient
+            .from('orders')
+            .delete()
+            .eq('id', orderId)
+            .eq('status', 'quote_pending');
+
+        if (error) throw error;
     }
 };
 

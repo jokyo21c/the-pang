@@ -1206,9 +1206,11 @@ async function openOrderDetail(orderId) {
         let addonsHtml = '';
         if (order.addons && Array.isArray(order.addons) && order.addons.length > 0) {
             addonsHtml = `
-                <div style="margin-top:12px;">
-                    <strong>추가 옵션:</strong><br>
-                    ${order.addons.map(a => `<span style="display:inline-block;background:rgba(123,47,255,0.1);color:#a78bfa;padding:3px 8px;border-radius:4px;margin:2px;font-size:13px;">${a.name} ${a.price || ''}</span>`).join('')}
+                <div style="margin-top:16px;">
+                    <strong style="font-size:13px; color:var(--text-secondary);">추가 옵션</strong>
+                    <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                        ${order.addons.map(a => `<div style="background:rgba(123,47,255,0.05); border:1px solid rgba(123,47,255,0.15); color:var(--text-primary); padding:8px 12px; border-radius:6px; font-size:13px; display:flex; justify-content:space-between; align-items:center;"><span>${a.name}</span><span style="color:var(--purple-light); font-weight:600;">${a.price || ''}</span></div>`).join('')}
+                    </div>
                 </div>
             `;
         }
@@ -1216,9 +1218,16 @@ async function openOrderDetail(orderId) {
         // 합계액 계산
         const estimatedTotal = calcOrderEstimatedTotal(order);
         const totalHtml = estimatedTotal > 0 ? `
-            <div style="margin-top:14px; padding:12px 16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="margin-top:16px; padding:12px 16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:13px; color:var(--purple-light);">예상 합계 (기본가 + 추가옵션)</span>
                 <strong style="font-size:16px; color:var(--purple);">${estimatedTotal.toLocaleString('ko-KR')}원</strong>
+            </div>` : '';
+
+        // 확정 금액 (예상 합계 아래에 크게 표시)
+        const confirmedTotalHtml = order.total_amount ? `
+            <div style="margin-top:12px; padding:16px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:14px; font-weight:600; color:var(--text-primary);">확정 금액</span>
+                <strong style="font-size:22px; color:var(--green);">${order.total_amount}원</strong>
             </div>` : '';
 
         body.innerHTML = `
@@ -1227,12 +1236,12 @@ async function openOrderDetail(orderId) {
                 <div><small style="color:var(--text-muted); font-size:11px;">플랜</small><br><strong style="color:var(--text-primary);">${order.plan_name}</strong></div>
                 <div><small style="color:var(--text-muted); font-size:11px;">티어</small><br><span style="color:var(--text-secondary);">${order.plan_tier || '-'}</span></div>
                 <div><small style="color:var(--text-muted); font-size:11px;">기본 가격</small><br><span style="color:var(--text-primary);">${formatOrderPrice(order.plan_price)}</span></div>
-                ${order.total_amount ? `<div><small style="color:var(--text-muted); font-size:11px;">확정 금액</small><br><strong style="color:var(--green);">${order.total_amount}원</strong></div>` : ''}
                 <div><small style="color:var(--text-muted); font-size:11px;">신청일</small><br><span style="color:var(--text-secondary);">${new Date(order.created_at).toLocaleString('ko-KR')}</span></div>
             </div>
             ${addonsHtml}
             ${totalHtml}
-            ${order.memo ? `<div style="margin-top:12px; padding:10px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text-secondary);">💬 ${order.memo}</div>` : ''}
+            ${confirmedTotalHtml}
+            ${order.memo ? `<div style="margin-top:16px; padding:12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text-secondary); line-height:1.5;">💬 ${order.memo}</div>` : ''}
         `;
 
         // 액션 버튼

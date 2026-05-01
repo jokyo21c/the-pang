@@ -331,6 +331,15 @@
             background: rgba(59,130,246,0.25);
             border-color: rgba(59,130,246,0.4);
         }
+        .order-action-btn--cancel {
+            background: rgba(239,68,68,0.12);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+        .order-action-btn--cancel:hover {
+            background: rgba(239,68,68,0.25);
+            border-color: rgba(239,68,68,0.4);
+        }
 
         /* ── Document Modal ── */
         .doc-modal-overlay {
@@ -734,6 +743,11 @@
         const s = order.status;
         let buttons = '';
 
+        // 견적 대기 상태: 취소 버튼
+        if (s === 'quote_pending') {
+            buttons += `<button class="order-action-btn order-action-btn--cancel" onclick="cancelMyOrder(${order.id})"><i class="ri-close-circle-line"></i> 견적 요청 취소</button>`;
+        }
+
         // 견적서 발행 이후: 견적서 보기 버튼
         if (['quote_issued', 'paid', 'contract_issued', 'completed'].includes(s)) {
             buttons += `<button class="order-action-btn order-action-btn--quote" onclick='showQuoteDoc(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="ri-file-list-3-line"></i> 견적서 보기</button>`;
@@ -747,6 +761,18 @@
         if (!buttons) return '';
         return `<div class="order-actions">${buttons}</div>`;
     }
+
+    /* ── 견적 요청 취소 ── */
+    window.cancelMyOrder = async function(orderId) {
+        if (!confirm('견적 요청을 취소하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+        try {
+            await PangOrders.cancelOrder(orderId);
+            alert('견적 요청이 취소되었습니다.');
+            window.location.reload();
+        } catch (e) {
+            alert('취소 실패: ' + (e.message || ''));
+        }
+    };
 
     /* ── 견적서 보기 모달 ── */
     window.showQuoteDoc = function(order) {
