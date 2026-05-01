@@ -209,9 +209,13 @@ const PangOrders = {
 
     /** 내 주문 목록 조회 */
     async getMyOrders() {
+        const user = await PangAuth.getUser();
+        if (!user) return [];
+
         const { data, error } = await _supabaseClient
             .from('orders')
             .select('*')
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false });
 
         if (error) {
