@@ -103,7 +103,7 @@
 .nav__hamburger {
     display: none;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px; /* 2줄 사이의 간격 */
     width: 28px;
     cursor: pointer;
     z-index: 1200; /* nav(1100)보다 높게 설정 */
@@ -123,19 +123,21 @@
     height: 2px;
     background: var(--color-text-primary);
     border-radius: 2px;
-    transition: var(--transition);
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
+/* 2줄 햄버거 모양을 위해 가운데 줄 숨김 */
+.nav__hamburger span:nth-child(2) {
+    display: none;
+}
+
+/* X 모양 애니메이션 (translateY로 중앙 정렬 후 회전) */
 .nav__hamburger.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 6px);
-}
-
-.nav__hamburger.active span:nth-child(2) {
-    opacity: 0;
+    transform: translateY(5px) rotate(45deg);
 }
 
 .nav__hamburger.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -6px);
+    transform: translateY(-5px) rotate(-45deg);
 }
 
 /* Mobile Menu */
@@ -2839,8 +2841,8 @@
 
 .mobile-menu__auth-login {
     background: transparent;
-    color: var(--color-text-primary);
-    border: 1.5px solid rgba(255,255,255,0.3);
+    color: #ffffff;
+    border: 1.5px solid #ffffff;
 }
 
 .mobile-menu__auth-signup {
@@ -2855,7 +2857,7 @@
     gap: 8px;
     padding: 0 24px 0 0;
     margin-top: 8px;
-    color: var(--color-brand-purple);
+    color: #ffffff;
     font-size: 13px;
     font-weight: var(--fw-semibold);
     width: 100%;
@@ -2863,8 +2865,8 @@
 
 .mobile-menu__auth-logout {
     background: transparent;
-    color: rgba(255,255,255,0.5);
-    border: 1.5px solid rgba(255,255,255,0.15);
+    color: #ffffff;
+    border: 1.5px solid #ffffff;
     font-size: 12px;
 }
 

@@ -212,6 +212,12 @@
         padding: 4px 10px; /* Reduced padding */
     }
 
+    /* 모바일 환경에서 헤더의 로그아웃 버튼 숨김 */
+    .nav__auth-btn--logout,
+    #logoutBtn.mypage-header__link {
+        display: none !important;
+    }
+
     .mobile-break {
         display: block;
     }

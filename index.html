@@ -98,7 +98,7 @@
         <a href="#pricing" class="mobile-menu__link">요금 안내</a>
         <a href="#news" class="mobile-menu__link">팡 뉴스</a>
         <a href="#order" class="mobile-menu__link">문의하기</a>
-        <a href="#order" class="mobile-menu__cta">견적 받기</a>
+        <a href="javascript:void(0)" class="mobile-menu__cta" onclick="if(window.handlePricingClick){document.getElementById('mobileMenu').classList.remove('open');document.getElementById('hamburger').classList.remove('active');handlePricingClick(null);}">견적 받기</a>
         <!-- Mobile Auth -->
         <div class="mobile-menu__auth" id="mobileAuth">
             <button class="mobile-menu__auth-login" id="mobileLoginBtn">로그인</button>
