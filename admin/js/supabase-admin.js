@@ -312,13 +312,29 @@ const AdminContent = {
         return data;
     },
 
+    /** 관리자 답변 저장 (quote_data에 병합) */
+    async saveAdminReply(orderId, replyText) {
+        const { data: current } = await _adminSupabase
+            .from('orders').select('quote_data').eq('id', orderId).single();
+        const merged = { ...(current?.quote_data || {}), admin_reply: replyText };
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({ quote_data: merged })
+            .eq('id', orderId);
+        if (error) throw error;
+    },
+
     /** 견적서 발행 */
     async issueQuote(orderId, quoteData) {
+        // 기존 quote_data (admin_reply 등) 보존
+        const { data: current } = await _adminSupabase
+            .from('orders').select('quote_data').eq('id', orderId).single();
+        const merged = { ...(current?.quote_data || {}), ...quoteData };
         const { error } = await _adminSupabase
             .from('orders')
             .update({
                 status: 'quote_issued',
-                quote_data: quoteData,
+                quote_data: merged,
                 total_amount: quoteData.totalAmount || ''
             })
             .eq('id', orderId);

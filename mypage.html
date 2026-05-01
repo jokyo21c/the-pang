@@ -519,6 +519,8 @@
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="/js/config.js"></script>
 <script src="/js/supabase-client.js"></script>
 <script>
@@ -677,10 +679,14 @@
             `;
         }
 
-        // 메모
+        // 메모 + 관리자 답변
         let memoHtml = '';
         if (order.memo) {
-            memoHtml = `<div class="order-memo">💬 ${order.memo}</div>`;
+            memoHtml = `<div class="order-memo">💬 요청사항: ${order.memo}</div>`;
+        }
+        const adminReply = order.quote_data?.admin_reply || '';
+        if (adminReply) {
+            memoHtml += `<div class="order-memo" style="background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); margin-top:8px;">📝 답변: ${adminReply}</div>`;
         }
 
         const createdDate = new Date(order.created_at).toLocaleDateString('ko-KR', {
@@ -742,23 +748,26 @@
     function renderOrderActions(order) {
         const s = order.status;
         let buttons = '';
+        const oj = JSON.stringify(order).replace(/'/g, "&#39;");
 
         // 견적 대기 상태: 취소 버튼
         if (s === 'quote_pending') {
             buttons += `<button class="order-action-btn order-action-btn--cancel" onclick="cancelMyOrder(${order.id})"><i class="ri-close-circle-line"></i> 견적 요청 취소</button>`;
         }
 
-        // 견적서 발행 이후: 견적서 보기 버튼
-        if (['quote_issued', 'paid', 'contract_issued', 'completed'].includes(s)) {
-            buttons += `<button class="order-action-btn order-action-btn--quote" onclick='showQuoteDoc(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="ri-file-list-3-line"></i> 견적서 보기</button>`;
-        }
+        // 견적서 보기 → 견적서 PDF → 계약서 보기 → 계약서 PDF 순서
+        const quoteReady = ['quote_issued', 'paid', 'contract_issued', 'completed'].includes(s);
+        const contractReady = ['contract_issued', 'completed'].includes(s);
 
-        // 계약서 발행 이후: 계약서 보기 버튼
-        if (['contract_issued', 'completed'].includes(s)) {
-            buttons += `<button class="order-action-btn order-action-btn--contract" onclick='showContractDoc(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="ri-file-paper-2-line"></i> 계약서 보기</button>`;
-        }
+        // 견적서 보기
+        buttons += `<button class="order-action-btn order-action-btn--quote" onclick='showQuoteDoc(${oj})' ${quoteReady ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"'}><i class="ri-file-list-3-line"></i> 견적서 보기</button>`;
+        // 견적서 PDF
+        buttons += `<button class="order-action-btn order-action-btn--quote" onclick='downloadQuotePDF(${oj})' ${quoteReady ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"'}><i class="ri-download-2-line"></i> 견적서 PDF</button>`;
+        // 계약서 보기
+        buttons += `<button class="order-action-btn order-action-btn--contract" onclick='showContractDoc(${oj})' ${contractReady ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"'}><i class="ri-file-paper-2-line"></i> 계약서 보기</button>`;
+        // 계약서 PDF
+        buttons += `<button class="order-action-btn order-action-btn--contract" onclick='downloadContractPDF(${oj})' ${contractReady ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"'}><i class="ri-download-2-line"></i> 계약서 PDF</button>`;
 
-        if (!buttons) return '';
         return `<div class="order-actions">${buttons}</div>`;
     }
 
@@ -789,7 +798,7 @@
             const parts = basePrice.split('|');
             const discounted = parts[2] || '';
             basePriceNum = discounted ? extractNumber(discounted) : extractNumber(parts[0]);
-            basePriceDisplay = discounted ? `<span style="text-decoration:line-through; color:#666; font-size:12px;">${parts[0]}원</span> <strong style="color:#ff6b35;">${discounted}원</strong>` : `${parts[0]}원`;
+            basePriceDisplay = discounted ? `<span style="text-decoration:line-through; color:#666; font-size:12px;">${parts[0]}원</span> <strong style="color:#e53c11;">${discounted}원</strong>` : `${parts[0]}원`;
         } else {
             basePriceNum = extractNumber(basePrice);
             basePriceDisplay = `${basePrice}원`;
@@ -797,49 +806,82 @@
 
         const quoteDate = order.quote_data?.issuedAt ? new Date(order.quote_data.issuedAt).toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }) : '-';
 
-        let addonsSection = '';
+        let addonsRows = '';
         let addonsTotal = 0;
         if (order.addons && order.addons.length > 0) {
-            addonsSection = `
-                <div class="doc-modal__row" style="border:none; padding-bottom:4px;">
-                    <span class="doc-modal__label">추가 옵션</span>
-                </div>
-                <div class="doc-modal__addon-list">
-                    ${order.addons.map(a => {
-                        const p = extractNumber(a.price || '');
-                        addonsTotal += p;
-                        return `<div class="doc-modal__addon-item"><span class="doc-modal__addon-name">${a.name}</span><span class="doc-modal__addon-price">${a.price || '-'}</span></div>`;
-                    }).join('')}
-                </div>
-            `;
+            addonsRows = order.addons.map(a => {
+                const p = extractNumber(a.price || '');
+                addonsTotal += p;
+                return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span style="color:#ccc;">${a.name}</span><span style="color:#a78bfa; font-weight:600;">${a.price || '-'}</span></div>`;
+            }).join('');
         }
 
         const totalAmount = order.total_amount || '';
         const estimatedTotal = basePriceNum + addonsTotal;
+        const adminReply = order.quote_data?.admin_reply || '';
 
         body.innerHTML = `
-            <div class="doc-modal__row">
-                <span class="doc-modal__label">발행일</span>
-                <span class="doc-modal__value">${quoteDate}</span>
+            <!-- 회사 정보 헤더 -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(123,47,255,0.2);">
+                <div>
+                    <div style="font-size:18px; font-weight:700; color:#fff; letter-spacing:1px;">THE PANG</div>
+                    <div style="font-size:11px; color:#888; margin-top:4px;">넥스온 | 사업자번호: 686-46-01233</div>
+                    <div style="font-size:11px; color:#888;">충남 아산시 탕정면 탕정면로109번길 46-1</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px; color:#a78bfa; font-weight:600;">발행일</div>
+                    <div style="font-size:14px; color:#fff; font-weight:600;">${quoteDate}</div>
+                </div>
             </div>
-            <div class="doc-modal__row">
-                <span class="doc-modal__label">플랜</span>
-                <span class="doc-modal__value">${order.plan_name} (${order.plan_tier || ''})</span>
+
+            <!-- 플랜 정보 -->
+            <div style="background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:10px; padding:16px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:11px; color:#a78bfa; font-weight:600; margin-bottom:4px;">플랜</div>
+                        <div style="font-size:16px; font-weight:700; color:#fff;">${order.plan_name} <span style="font-size:12px; color:#888; font-weight:400;">${order.plan_tier || ''}</span></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:11px; color:#a78bfa; font-weight:600; margin-bottom:4px;">기본 가격</div>
+                        <div style="font-size:15px; font-weight:600; color:#fff;">${basePriceDisplay}</div>
+                    </div>
+                </div>
             </div>
-            <div class="doc-modal__row">
-                <span class="doc-modal__label">기본 가격</span>
-                <span class="doc-modal__value">${basePriceDisplay}</span>
+
+            <!-- 추가 옵션 -->
+            ${addonsRows ? `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:600; color:#a78bfa; margin-bottom:8px;">추가 옵션</div>
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 14px;">
+                    ${addonsRows}
+                </div>
+            </div>` : ''}
+
+            <!-- 예상 합계 -->
+            <div style="display:flex; justify-content:space-between; padding:12px 16px; background:rgba(123,47,255,0.08); border:1px solid rgba(123,47,255,0.15); border-radius:8px; margin-bottom:8px;">
+                <span style="font-size:13px; color:#a78bfa;">예상 합계 (기본가 + 추가옵션)</span>
+                <strong style="font-size:15px; color:#a78bfa;">${estimatedTotal.toLocaleString('ko-KR')}원</strong>
             </div>
-            ${addonsSection}
-            <div class="doc-modal__divider"></div>
-            <div class="doc-modal__row">
-                <span class="doc-modal__label">예상 합계</span>
-                <span class="doc-modal__value" style="color:#a78bfa;">${estimatedTotal.toLocaleString('ko-KR')}원</span>
-            </div>
+
+            <!-- 확정 금액 -->
             ${totalAmount ? `
-            <div class="doc-modal__total doc-modal__total--quote">
-                <span class="doc-modal__total-label">확정 금액</span>
-                <span class="doc-modal__total-value doc-modal__total-value--quote">${totalAmount}원 <span style="font-size:14px; font-weight:400; color:#888;">(VAT 별도)</span></span>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:10px; margin-bottom:16px;">
+                <span style="font-size:14px; font-weight:700; color:#fff;">확정 금액</span>
+                <strong style="font-size:20px; color:#e53c11;">${totalAmount}원 <span style="font-size:12px; font-weight:400; color:#888;">(VAT 별도)</span></strong>
+            </div>` : ''}
+
+            <!-- 고객 요청사항 -->
+            ${order.memo ? `
+            <div style="margin-bottom:12px; padding:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px;">
+                <div style="font-size:11px; font-weight:600; color:#a78bfa; margin-bottom:8px;">💬 고객 요청사항</div>
+                <div style="font-size:13px; color:#ccc; line-height:1.6; white-space:pre-wrap;">${order.memo}</div>
+            </div>` : ''}
+
+            <!-- 관리자 답변 -->
+            ${adminReply ? `
+            <div style="padding:14px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px;">
+                <div style="font-size:11px; font-weight:600; color:#e53c11; margin-bottom:8px;">📝 답변</div>
+                <div style="font-size:13px; color:#fff; line-height:1.6; white-space:pre-wrap;">${adminReply}</div>
             </div>` : ''}
         `;
 
@@ -912,6 +954,143 @@
     /* ── 모달 닫기 ── */
     window.closeDocModal = function() {
         document.getElementById('docModalOverlay').classList.remove('show');
+    };
+
+    /* ── 견적서 PDF 다운로드 ── */
+    window.downloadQuotePDF = async function(order) {
+        const quoteDate = order.quote_data?.issuedAt ? new Date(order.quote_data.issuedAt).toLocaleDateString('ko-KR') : '-';
+        const totalAmount = order.total_amount || '-';
+        const basePrice = order.plan_price || '-';
+        let basePriceClean = basePrice;
+        if (basePrice.includes('|')) {
+            const p = basePrice.split('|');
+            basePriceClean = (p[2] || p[0]) + '원';
+        } else { basePriceClean = basePrice + '원'; }
+
+        let addonsRows = '';
+        if (order.addons && order.addons.length > 0) {
+            addonsRows = order.addons.map(a => `<tr><td style="padding:6px 10px; border:1px solid #ddd;">${a.name}</td><td style="padding:6px 10px; border:1px solid #ddd; text-align:right;">${a.price || '-'}</td></tr>`).join('');
+        }
+        const adminReply = order.quote_data?.admin_reply || '';
+
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:fixed; left:-9999px; top:0; z-index:99999; background:#fff;';
+        wrapper.innerHTML = `
+<div id="quotePdfContent" style="width:794px; padding:60px 70px; font-family:'Pretendard Variable','Malgun Gothic',sans-serif; color:#111; font-size:13px; line-height:1.8; background:#fff;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #7b2fff;">
+        <div>
+            <div style="font-size:24px; font-weight:700; letter-spacing:2px;">THE PANG</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;">넥스온 | 사업자번호: 686-46-01233</div>
+            <div style="font-size:11px; color:#888;">충남 아산시 탕정면 탕정면로109번길 46-1 | 대표: 조교선</div>
+        </div>
+        <div style="text-align:right;">
+            <div style="font-size:22px; font-weight:700; color:#7b2fff; letter-spacing:3px;">견 적 서</div>
+            <div style="font-size:12px; color:#888; margin-top:4px;">발행일: ${quoteDate}</div>
+        </div>
+    </div>
+    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+        <tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; width:120px; font-weight:600;">플랜</td><td style="padding:8px 12px; border:1px solid #ddd;">${order.plan_name} (${order.plan_tier || ''})</td></tr>
+        <tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; font-weight:600;">기본 가격</td><td style="padding:8px 12px; border:1px solid #ddd;">${basePriceClean}</td></tr>
+    </table>
+    ${addonsRows ? `<h3 style="font-size:14px; margin-bottom:8px; color:#7b2fff;">추가 옵션</h3><table style="width:100%; border-collapse:collapse; margin-bottom:20px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">옵션명</th><th style="padding:6px 10px; border:1px solid #ddd; text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
+    <div style="text-align:right; font-size:18px; font-weight:700; margin-top:20px; padding:16px; background:#f0f0ff; border-radius:8px;">
+        확정 금액: ${totalAmount}원 <span style="font-size:12px; color:#888;">(VAT 별도)</span>
+    </div>
+    ${order.memo ? `<div style="margin-top:24px; padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">💬 고객 요청사항</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
+    ${adminReply ? `<div style="margin-top:12px; padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">📝 답변</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
+</div>`;
+        document.body.appendChild(wrapper);
+        try {
+            const el = document.getElementById('quotePdfContent');
+            const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pW = pdf.internal.pageSize.getWidth() - 20;
+            const pH = (canvas.height * pW) / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, pW, pH);
+            pdf.save('견적서_' + order.plan_name + '.pdf');
+        } catch (e) { alert('PDF 생성 실패: ' + e.message); }
+        finally { document.body.removeChild(wrapper); }
+    };
+
+    /* ── 계약서 PDF 다운로드 (2페이지: 본문 + 별지) ── */
+    window.downloadContractPDF = async function(order) {
+        const contractDate = order.contract_data?.issuedAt ? new Date(order.contract_data.issuedAt) : new Date();
+        const year = contractDate.getFullYear();
+        const month = contractDate.getMonth() + 1;
+        const day = contractDate.getDate();
+        const totalAmount = order.total_amount || '0';
+        const customerName = order.user_name || order.plan_name || '고객';
+        const adminReply = order.quote_data?.admin_reply || '';
+        const basePrice = order.plan_price || '-';
+        let basePriceClean = basePrice;
+        if (basePrice.includes('|')) { const p = basePrice.split('|'); basePriceClean = (p[2] || p[0]) + '원'; }
+        else { basePriceClean = basePrice + '원'; }
+        let addonsRows = '';
+        if (order.addons && order.addons.length > 0) {
+            addonsRows = order.addons.map(a => `<tr><td style="padding:6px 10px; border:1px solid #ddd;">${a.name}</td><td style="padding:6px 10px; border:1px solid #ddd; text-align:right;">${a.price || '-'}</td></tr>`).join('');
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:fixed; left:-9999px; top:0; z-index:99999; background:#fff;';
+        wrapper.innerHTML = `
+<div id="contractPage1" style="width:794px; height:1123px; padding:50px 65px; font-family:'Pretendard Variable','Malgun Gothic',sans-serif; color:#111; font-size:12px; line-height:1.7; background:#fff; box-sizing:border-box; overflow:hidden;">
+    <h1 style="text-align:center; font-size:20px; font-weight:700; margin-bottom:4px; letter-spacing:2px;">광고 마케팅 업무 표준 계약서</h1>
+    <div style="text-align:center; font-size:10px; color:#888; margin-bottom:20px;">THE PANG by NEXON</div>
+    <p style="margin-bottom:14px;">${customerName}(이하 "행"이라 한다)과 넥스온(이하 "동"이라 한다)은 "행"의 상품 및 브랜드 홍보를 위한 광고 마케팅 업무를 수행함에 있어 상호 신뢰를 바탕으로 다음과 같이 계약을 체결한다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제1조 (목적)</h3><p>본 계약은 "행"이 의뢰한 광고 마케팅 업무를 "동"이 수행함에 있어 필요한 제반 사항과 양 당사자의 권리 및 의무를 규정함을 목적으로 한다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제2조 (업무의 범위 및 내용)</h3><p>① "동"이 수행할 구체적인 업무 범위와 실행 내용은 양 당사자가 사전에 합의한 [별첨: 견적서]를 원칙으로 한다.<br>② 추가 업무 발생 시 양 당사자는 서면(전자문서 포함) 합의를 통해 업무 범위와 비용을 조정한다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제3조 (계약 기간)</h3><p>본 계약 기간은 계약 체결일로부터 프로젝트 완료일까지로 하며, 연장 필요시 종료 전 상호 협의하여 결정한다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제4조 (계약 금액 및 결제 방식)</h3><p>① 본 업무의 총 계약 금액은 금 <strong>${totalAmount}원 (VAT 별도)</strong>으로 한다.<br>② "행"은 "동"이 제공하는 온라인 결제 시스템을 통하여 결제하며, 지출 증빙은 결제 수단에 따라 발행된다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제5조 (계약의 성립)</h3><p>본 계약은 "행"이 결제를 완료하고, "동"이 본 계약서를 전자적 방식으로 발송한 시점부터 효력이 발생하며, 결제 행위는 본 계약 내용에 동의한 것으로 간주한다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제6조 (업무의 수행 및 협조)</h3><p>"동"은 신의성실의 원칙에 따라 업무를 수행하며, "행"의 자료 제공 지연으로 인한 일정 차질은 "동"의 책임으로 보지 않는다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제7조 (권리의 귀속 및 성과물 활용)</h3><p>① 최종 성과물의 사용권 및 지식재산권은 "행"에게 귀속된다.<br>② "행"은 "동"이 해당 성과물을 "동"의 포트폴리오 및 자체 광고·마케팅 목적으로 활용하는 것에 동의한다.<br>③ "동"의 성과물 활용은 "행"의 브랜드 및 상품에 대한 2차 광고 효과를 창출할 수 있으므로, 양 당사자는 이를 상호 이익이 되는 방향으로 적극 활용함에 동의한다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제8조 (비밀유지)</h3><p>양 당사자는 본 계약과 관련하여 취득한 영업비밀 및 개인정보를 제3자에게 누설하거나 목적 외로 사용해서는 안 된다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제9조 (계약 해지 및 환불)</h3><p>의무 위반 시 7일 이내 시정되지 않으면 계약을 해지할 수 있으며, 환불 시 기진행된 업무 비율 및 투입 리소스 비용을 공제하고 환불한다.</p>
+    <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제10조 (손해배상 및 관할 법원)</h3><p>본 계약 위반으로 발생한 손해는 위반 당사자가 배상하며, 분쟁 발생 시 "동"의 본점 소재지 관할 법원을 제1심 합의 관할 법원으로 한다.</p>
+    <div style="margin-top:28px; text-align:center; font-size:13px; font-weight:600;">계약일자: ${year}년 ${month}월 ${day}일</div>
+    <div style="display:flex; justify-content:space-between; margin-top:24px; gap:30px;">
+        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
+            <div style="font-size:11px; font-weight:700; color:#7b2fff; margin-bottom:8px;">[동] 공급자</div>
+            <table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">넥스온</td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;">조교선 (서명)</td></tr></table>
+        </div>
+        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
+            <div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div>
+            <table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">${customerName}</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0;">(온라인 결제 동의로 갈음)</td></tr></table>
+        </div>
+    </div>
+</div>
+<div id="contractPage2" style="width:794px; padding:50px 65px; font-family:'Pretendard Variable','Malgun Gothic',sans-serif; color:#111; font-size:12px; line-height:1.7; background:#fff; box-sizing:border-box;">
+    <h2 style="text-align:center; font-size:18px; font-weight:700; margin-bottom:4px; letter-spacing:1px;">[별 첨] 계약 상세 내역</h2>
+    <div style="text-align:center; font-size:10px; color:#888; margin-bottom:24px;">본 문서는 광고 마케팅 업무 표준 계약서의 별첨 자료입니다.</div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom:14px; border-bottom:2px solid #7b2fff;">
+        <div><div style="font-size:18px; font-weight:700;">THE PANG</div><div style="font-size:10px; color:#888; margin-top:2px;">넥스온 | 686-46-01233 | 충남 아산시 탕정면 탕정면로109번길 46-1</div></div>
+        <div style="text-align:right; font-size:11px; color:#888;">계약일: ${year}년 ${month}월 ${day}일</div>
+    </div>
+    <table style="width:100%; border-collapse:collapse; margin-bottom:16px;"><tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; width:110px; font-weight:600;">고객명</td><td style="padding:8px 12px; border:1px solid #ddd;">${customerName}</td></tr><tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; font-weight:600;">플랜</td><td style="padding:8px 12px; border:1px solid #ddd;">${order.plan_name} (${order.plan_tier || ''})</td></tr><tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; font-weight:600;">기본 가격</td><td style="padding:8px 12px; border:1px solid #ddd;">${basePriceClean}</td></tr></table>
+    ${addonsRows ? `<h3 style="font-size:13px; margin-bottom:6px; color:#7b2fff;">추가 옵션</h3><table style="width:100%; border-collapse:collapse; margin-bottom:16px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">옵션명</th><th style="padding:6px 10px; border:1px solid #ddd; text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
+    <div style="text-align:right; font-size:16px; font-weight:700; padding:14px; background:#f0f0ff; border-radius:8px; margin-bottom:20px;">확정 금액: ${totalAmount}원 <span style="font-size:11px; color:#888;">(VAT 별도)</span></div>
+    ${order.memo ? `<div style="padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px; margin-bottom:12px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">💬 고객 요청사항</div><div style="font-size:12px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
+    ${adminReply ? `<div style="padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px; margin-bottom:12px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">📝 답변</div><div style="font-size:12px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
+    <div style="margin-top:30px; text-align:center; font-size:10px; color:#aaa;">본 별첨은 계약서와 동일한 효력을 가집니다.</div>
+</div>`;
+        document.body.appendChild(wrapper);
+        try {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfW = pdf.internal.pageSize.getWidth();
+            const pdfH = pdf.internal.pageSize.getHeight();
+            const imgW = pdfW - 20;
+            // 페이지 1
+            const c1 = await html2canvas(document.getElementById('contractPage1'), { scale: 2, useCORS: true, backgroundColor: '#fff' });
+            pdf.addImage(c1.toDataURL('image/png'), 'PNG', 10, 10, imgW, Math.min((c1.height * imgW) / c1.width, pdfH - 20));
+            // 페이지 2: 별지
+            pdf.addPage();
+            const c2 = await html2canvas(document.getElementById('contractPage2'), { scale: 2, useCORS: true, backgroundColor: '#fff' });
+            pdf.addImage(c2.toDataURL('image/png'), 'PNG', 10, 10, imgW, Math.min((c2.height * imgW) / c2.width, pdfH - 20));
+            pdf.save('계약서_' + order.plan_name + '_' + year + month + day + '.pdf');
+        } catch (e) { alert('PDF 생성 실패: ' + e.message); }
+        finally { document.body.removeChild(wrapper); }
     };
 })();
 </script>
