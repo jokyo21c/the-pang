@@ -946,14 +946,98 @@
             <div class="doc-modal__stamp doc-modal__stamp--completed">
                 🎉 계약 체결 완료
             </div>` : ''}
+
+            <!-- 전자서명 영역 -->
+            <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
+                <div style="font-size:12px; font-weight:600; color:#a78bfa; margin-bottom:10px;">✍️ 고객 전자서명</div>
+                ${order.contract_data?.customer_signature ? `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:11px; color:#888; margin-bottom:6px;">저장된 서명:</div>
+                    <div style="background:#fff; border-radius:8px; padding:8px; display:inline-block;">
+                        <img src="${order.contract_data.customer_signature}" style="max-width:100%; height:60px;" alt="전자서명">
+                    </div>
+                </div>
+                ` : ''}
+                <div style="background:#fff; border-radius:8px; padding:4px; margin-bottom:8px;">
+                    <canvas id="signatureCanvas" width="460" height="120" style="width:100%; height:120px; cursor:crosshair; display:block; border-radius:6px;"></canvas>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="clearSignature()" style="flex:1; height:36px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#ccc; border-radius:8px; font-size:12px; cursor:pointer;">🔄 다시 서명</button>
+                    <button onclick="saveSignature(${order.id})" style="flex:1; height:36px; border:none; background:#7b2fff; color:#fff; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 서명 저장</button>
+                </div>
+            </div>
         `;
 
         modal.classList.add('show');
+
+        // 서명 캔버스 초기화
+        setTimeout(() => {
+            const canvas = document.getElementById('signatureCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth * 2;
+            canvas.height = 240;
+            ctx.scale(2, 2);
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            let drawing = false;
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                return { x, y };
+            };
+
+            canvas.onmousedown = canvas.ontouchstart = (e) => {
+                e.preventDefault(); drawing = true;
+                const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+            };
+            canvas.onmousemove = canvas.ontouchmove = (e) => {
+                if (!drawing) return; e.preventDefault();
+                const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke();
+            };
+            canvas.onmouseup = canvas.onmouseleave = canvas.ontouchend = () => { drawing = false; };
+        }, 100);
     };
 
     /* ── 모달 닫기 ── */
     window.closeDocModal = function() {
         document.getElementById('docModalOverlay').classList.remove('show');
+    };
+
+    /* ── 전자서명: 캔버스 초기화 ── */
+    window.clearSignature = function() {
+        const canvas = document.getElementById('signatureCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+
+    /* ── 전자서명: 저장 ── */
+    window.saveSignature = async function(orderId) {
+        const canvas = document.getElementById('signatureCanvas');
+        if (!canvas) return;
+        // 빈 캔버스 체크
+        const ctx = canvas.getContext('2d');
+        const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let blank = true;
+        for (let i = 3; i < pixels.length; i += 4) {
+            if (pixels[i] !== 0) { blank = false; break; }
+        }
+        if (blank) { alert('서명을 입력해주세요.'); return; }
+
+        try {
+            const dataUrl = canvas.toDataURL('image/png');
+            await PangOrders.saveSignature(orderId, dataUrl);
+            alert('✅ 전자서명이 저장되었습니다.');
+            // 주문 목록 새로고침
+            location.reload();
+        } catch (e) {
+            alert('❌ 서명 저장 실패: ' + e.message);
+        }
     };
 
     /* ── 견적서 PDF 다운로드 ── */
@@ -1022,6 +1106,7 @@
         const totalAmount = order.total_amount || '0';
         const customerName = order.user_name || order.plan_name || '고객';
         const adminReply = order.quote_data?.admin_reply || '';
+        const customerSignature = order.contract_data?.customer_signature || '';
         const basePrice = order.plan_price || '-';
         let basePriceClean = basePrice;
         if (basePrice.includes('|')) { const p = basePrice.split('|'); basePriceClean = (p[2] || p[0]) + '원'; }
@@ -1056,7 +1141,8 @@
         </div>
         <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
             <div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div>
-            <table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">${customerName}</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0;">(온라인 결제 동의로 갈음)</td></tr></table>
+            <table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">${customerName}</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0;">${customerSignature ? '(전자서명)' : '(온라인 결제 동의로 갈음)'}</td></tr></table>
+            ${customerSignature ? `<div style="margin-top:6px; text-align:right;"><img src="${customerSignature}" style="height:40px;" alt="전자서명"></div>` : ''}
         </div>
     </div>
 </div>

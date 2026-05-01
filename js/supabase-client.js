@@ -246,6 +246,18 @@ const PangOrders = {
             .eq('status', 'quote_pending');
 
         if (error) throw error;
+    },
+
+    /** 전자서명 저장 (contract_data에 병합) */
+    async saveSignature(orderId, signatureDataUrl) {
+        const { data: current } = await _supabaseClient
+            .from('orders').select('contract_data').eq('id', orderId).single();
+        const merged = { ...(current?.contract_data || {}), customer_signature: signatureDataUrl };
+        const { error } = await _supabaseClient
+            .from('orders')
+            .update({ contract_data: merged })
+            .eq('id', orderId);
+        if (error) throw error;
     }
 };
 
