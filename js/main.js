@@ -3155,6 +3155,7 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
 
     /* ── 시작하기 버튼 핸들러 (전역) ── */
     window.handlePricingClick = async function(planId, planName, planTier, planPrice) {
+        const actionKey = planId || '__open_quote__';
         try {
             const user = await PangAuth.getUser();
             if (user) {
@@ -3162,11 +3163,11 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
                 openQuoteModal(planId);
             } else {
                 // 비로그인 → 로그인 모달 열기 + 로그인 후 액션 저장
-                pendingPlanAction = planId;
+                pendingPlanAction = actionKey;
                 window.openAuthModal('login');
             }
         } catch {
-            pendingPlanAction = planId;
+            pendingPlanAction = actionKey;
             window.openAuthModal('login');
         }
     };
@@ -3175,7 +3176,7 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
     if (window._supabaseClient) {
         window._supabaseClient.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session?.user && pendingPlanAction) {
-                const planId = pendingPlanAction;
+                const planId = pendingPlanAction === '__open_quote__' ? null : pendingPlanAction;
                 pendingPlanAction = null;
                 // 로그인 모달이 닫힌 후 견적 모달 열기
                 setTimeout(() => openQuoteModal(planId), 500);

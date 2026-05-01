@@ -1182,6 +1182,9 @@ async function loadOrders() {
                     <button class="btn-member-delete" style="background:rgba(123,47,255,0.1); color:#7b2fff;" onclick="openOrderDetail(${o.id})" title="상세">
                         <i class="ri-eye-line"></i>
                     </button>
+                    <button class="btn-member-delete" onclick="actionDeleteOrder(${o.id})" title="삭제" style="margin-left:4px;">
+                        <i class="ri-delete-bin-6-line"></i>
+                    </button>
                 </td>
             </tr>`;
         }).join('');
