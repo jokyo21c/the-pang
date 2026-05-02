@@ -1846,7 +1846,7 @@
     <form class="auth-form" id="loginForm">
         <div class="auth-form__group">
             <label for="loginEmail">이메일</label>
-            <input type="email" id="loginEmail" placeholder="이메일을 입력하세요" autocomplete="email" required>
+            <input type="email" id="loginEmail" placeholder="example@email.com" autocomplete="email" required>
         </div>
         <div class="auth-form__group">
             <label for="loginPassword">비밀번호</label>
@@ -1861,22 +1861,79 @@
 
     <!-- 회원가입 폼 -->
     <form class="auth-form" id="signupForm" style="display:none;">
+        <!-- 이름 -->
         <div class="auth-form__group">
-            <label for="signupName">이름</label>
-            <input type="text" id="signupName" placeholder="이름을 입력하세요" required>
+            <label for="signupName">이름 <span class="auth-required">*</span></label>
+            <input type="text" id="signupName" placeholder="홍길동" required>
+        </div>
+        <!-- 이메일 -->
+        <div class="auth-form__group">
+            <label for="signupEmail">이메일 <span class="auth-required">*</span></label>
+            <input type="email" id="signupEmail" placeholder="example@email.com" autocomplete="email" required>
+        </div>
+        <!-- 비밀번호 -->
+        <div class="auth-form__group">
+            <label for="signupPassword">비밀번호 <span class="auth-required">*</span></label>
+            <input type="password" id="signupPassword" placeholder="6자 이상 입력" required>
+        </div>
+        <!-- 비밀번호 확인 -->
+        <div class="auth-form__group">
+            <label for="signupPasswordConfirm">비밀번호 확인 <span class="auth-required">*</span></label>
+            <input type="password" id="signupPasswordConfirm" placeholder="비밀번호 재입력" required>
+        </div>
+        <!-- 생년월일 + 성별 (한 줄) -->
+        <div class="auth-form__row">
+            <div class="auth-form__group">
+                <label for="signupBirthday">생년월일 <span class="auth-required">*</span></label>
+                <input type="date" id="signupBirthday" required>
+            </div>
+            <div class="auth-form__group">
+                <label>성별 <span class="auth-required">*</span></label>
+                <div class="auth-gender-group">
+                    <button type="button" class="auth-gender-btn active" data-gender="male">남성</button>
+                    <button type="button" class="auth-gender-btn" data-gender="female">여성</button>
+                </div>
+                <input type="hidden" id="signupGender" value="male">
+            </div>
+        </div>
+
+        <!-- 추가 정보 (선택) -->
+        <div class="auth-form__optional-label">추가 정보 (선택)</div>
+        <div class="auth-form__group">
+            <label for="signupPhone">연락처</label>
+            <input type="tel" id="signupPhone" placeholder="010-1234-5678">
         </div>
         <div class="auth-form__group">
-            <label for="signupEmail">이메일</label>
-            <input type="email" id="signupEmail" placeholder="이메일을 입력하세요" autocomplete="email" required>
+            <label for="signupAddress">주소</label>
+            <input type="text" id="signupAddress" placeholder="기본 주소">
         </div>
         <div class="auth-form__group">
-            <label for="signupPassword">비밀번호</label>
-            <input type="password" id="signupPassword" placeholder="6자 이상 입력하세요" required>
+            <label for="signupAddressDetail">상세 주소</label>
+            <input type="text" id="signupAddressDetail" placeholder="동/호수 등 상세 주소">
         </div>
-        <div class="auth-form__group">
-            <label for="signupPasswordConfirm">비밀번호 확인</label>
-            <input type="password" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+
+        <!-- 약관 동의 -->
+        <div class="auth-terms">
+            <div class="auth-terms__all">
+                <input type="checkbox" id="termsAll">
+                <label for="termsAll">전체 동의</label>
+            </div>
+            <div class="auth-terms__item">
+                <input type="checkbox" id="termsService" required>
+                <label for="termsService">이용약관 동의 <span class="auth-required">(필수)</span></label>
+                <button type="button" class="auth-terms__view" onclick="document.getElementById('authOverlay').click(); setTimeout(()=>document.getElementById('termsModal').style.display='flex', 300);">보기</button>
+            </div>
+            <div class="auth-terms__item">
+                <input type="checkbox" id="termsPrivacy" required>
+                <label for="termsPrivacy">개인정보처리방침 동의 <span class="auth-required">(필수)</span></label>
+                <button type="button" class="auth-terms__view" onclick="document.getElementById('authOverlay').click(); setTimeout(()=>document.getElementById('privacyModal').style.display='flex', 300);">보기</button>
+            </div>
+            <div class="auth-terms__item">
+                <input type="checkbox" id="termsMarketing">
+                <label for="termsMarketing">마케팅 정보 수신 동의 (선택)</label>
+            </div>
         </div>
+
         <p class="auth-form__error" id="signupError"></p>
         <button type="submit" class="auth-form__submit">회원가입</button>
 
@@ -1887,7 +1944,7 @@
     <form class="auth-form" id="resetForm" style="display:none;">
         <div style="text-align:center; margin-bottom:20px;">
             <i class="ri-lock-unlock-line" style="font-size:40px; color:#7b2fff;"></i>
-            <h3 style="margin-top:12px; font-size:18px; font-weight:700; color:#fff;">비밀번호 재설정</h3>
+            <h3 style="margin-top:12px; font-size:18px; font-weight:700; color:#222;">비밀번호 재설정</h3>
             <p style="margin-top:8px; font-size:14px; color:#888; line-height:1.5;">가입한 이메일을 입력하시면<br>비밀번호 재설정 링크를 보내드립니다.</p>
         </div>
         <div class="auth-form__group">
@@ -1904,7 +1961,7 @@
     <form class="auth-form" id="newPasswordForm" style="display:none;">
         <div style="text-align:center; margin-bottom:20px;">
             <i class="ri-key-2-line" style="font-size:40px; color:#34d399;"></i>
-            <h3 style="margin-top:12px; font-size:18px; font-weight:700; color:#fff;">새 비밀번호 설정</h3>
+            <h3 style="margin-top:12px; font-size:18px; font-weight:700; color:#222;">새 비밀번호 설정</h3>
             <p style="margin-top:8px; font-size:14px; color:#888; line-height:1.5;">새로운 비밀번호를 입력해 주세요.</p>
         </div>
         <div class="auth-form__group">
@@ -1920,6 +1977,45 @@
         <button type="submit" class="auth-form__submit" id="newPasswordSubmitBtn">비밀번호 변경하기</button>
     </form>
 </div>
+
+<script>
+/* ── Auth Modal: Gender Toggle & Terms All Checkbox ── */
+(function() {
+    // Gender toggle
+    document.querySelectorAll('.auth-gender-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.auth-gender-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const genderInput = document.getElementById('signupGender');
+            if (genderInput) genderInput.value = btn.dataset.gender;
+        });
+    });
+
+    // Terms: "전체 동의" toggle
+    const termsAll = document.getElementById('termsAll');
+    const termsSubs = ['termsService', 'termsPrivacy', 'termsMarketing'];
+    if (termsAll) {
+        termsAll.addEventListener('change', () => {
+            termsSubs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = termsAll.checked;
+            });
+        });
+        // Reverse sync: if all sub-items checked, check "all"
+        termsSubs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', () => {
+                    termsAll.checked = termsSubs.every(sid => {
+                        const s = document.getElementById(sid);
+                        return s && s.checked;
+                    });
+                });
+            }
+        });
+    }
+})();
+</script>
 
 </body>
 </html>

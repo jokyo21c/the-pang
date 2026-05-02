@@ -133,25 +133,25 @@
             font-weight: 600;
         }
         .status-badge--pending {
-            background: rgba(255,193,7,0.12);
-            color: #ffc107;
+            background: rgba(255,255,255,0.12);
+            color: #ccc;
         }
         .status-badge--quote {
             background: rgba(123,47,255,0.12);
             color: #7b2fff;
         }
         .status-badge--paid {
-            background: rgba(34,197,94,0.12);
-            color: #22c55e;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
         }
         .status-badge--contract {
-            background: rgba(59,130,246,0.12);
-            color: #3b82f6;
+            background: rgba(229,60,17,0.12);
+            color: #e53c11;
         }
         .status-badge--completed {
-            background: rgba(34,197,94,0.15);
-            color: #22c55e;
-            box-shadow: 0 0 12px rgba(34,197,94,0.2);
+            background: #e53c11;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(229,60,17,0.4);
         }
 
         /* ── Process Bar ── */
@@ -184,14 +184,14 @@
             transition: all 0.3s;
         }
         .process-bar__dot--active {
-            background: #7b2fff;
-            border-color: #7b2fff;
+            background: #e53c11;
+            border-color: #e53c11;
             color: #fff;
-            box-shadow: 0 0 12px rgba(123,47,255,0.4);
+            box-shadow: 0 0 12px rgba(229,60,17,0.4);
         }
         .process-bar__dot--done {
-            background: #22c55e;
-            border-color: #22c55e;
+            background: #7b2fff;
+            border-color: #7b2fff;
             color: #fff;
         }
         .process-bar__label {
@@ -200,11 +200,11 @@
             white-space: nowrap;
         }
         .process-bar__label--active {
-            color: #7b2fff;
+            color: #e53c11;
             font-weight: 600;
         }
         .process-bar__label--done {
-            color: #22c55e;
+            color: #7b2fff;
         }
         .process-bar__line {
             flex: 0 0 20px;
@@ -213,7 +213,7 @@
             margin-top: -16px;
         }
         .process-bar__line--done {
-            background: #22c55e;
+            background: #7b2fff;
         }
 
         /* ── Order Details ── */
@@ -323,22 +323,23 @@
             border-color: rgba(123,47,255,0.4);
         }
         .order-action-btn--contract {
-            background: rgba(59,130,246,0.12);
-            color: #60a5fa;
-            border: 1px solid rgba(59,130,246,0.2);
+            background: rgba(229,60,17,0.12);
+            color: #e53c11;
+            border: 1px solid rgba(229,60,17,0.2);
         }
         .order-action-btn--contract:hover {
-            background: rgba(59,130,246,0.25);
-            border-color: rgba(59,130,246,0.4);
+            background: rgba(229,60,17,0.25);
+            border-color: rgba(229,60,17,0.4);
         }
         .order-action-btn--cancel {
-            background: rgba(239,68,68,0.12);
-            color: #f87171;
-            border: 1px solid rgba(239,68,68,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #888;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .order-action-btn--cancel:hover {
-            background: rgba(239,68,68,0.25);
-            border-color: rgba(239,68,68,0.4);
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            color: #fff;
         }
 
         /* ── Document Modal ── */
@@ -435,8 +436,8 @@
             border: 1px solid rgba(123,47,255,0.2);
         }
         .doc-modal__total--contract {
-            background: rgba(59,130,246,0.1);
-            border: 1px solid rgba(59,130,246,0.2);
+            background: rgba(229,60,17,0.1);
+            border: 1px solid rgba(229,60,17,0.2);
         }
         .doc-modal__total-label {
             font-size: 14px;
@@ -448,7 +449,7 @@
             font-weight: 700;
         }
         .doc-modal__total-value--quote { color: #7b2fff; }
-        .doc-modal__total-value--contract { color: #3b82f6; }
+        .doc-modal__total-value--contract { color: #e53c11; }
         .doc-modal__stamp {
             text-align: center;
             margin-top: 20px;
@@ -458,9 +459,9 @@
             font-weight: 600;
         }
         .doc-modal__stamp--completed {
-            background: rgba(34,197,94,0.1);
-            border: 1px solid rgba(34,197,94,0.2);
-            color: #22c55e;
+            background: rgba(229,60,17,0.1);
+            border: 1px solid rgba(229,60,17,0.2);
+            color: #e53c11;
         }
         .doc-modal__addon-list {
             display: flex;
@@ -592,7 +593,7 @@
             const reason = parts[1] || '';
             const discounted = parts[2] || '';
             if (discounted) {
-                return `<span style="text-decoration:line-through; color:#666; font-size:12px;">${base}원</span> <span style="color:#ffc107; font-size:11px;">${reason}</span> <strong style="color:#ff6b35;">${discounted}원</strong>`;
+                return `<span style="text-decoration:line-through; color:#666; font-size:12px;">${base}원</span> <span style="color:#7b2fff; font-size:11px;">${reason}</span> <strong style="color:#e53c11;">${discounted}원</strong>`;
             }
             return `${base}원`;
         }
@@ -721,7 +722,7 @@
                     ${order.total_amount ? `
                     <div class="order-detail">
                         <div class="order-detail__label">확정 금액</div>
-                        <div class="order-detail__value" style="color:#22c55e">${order.total_amount}원</div>
+                        <div class="order-detail__value" style="color:#e53c11">${order.total_amount}원</div>
                     </div>
                     ` : ''}
                 </div>

@@ -1225,14 +1225,14 @@ async function openOrderDetail(orderId) {
 
         // 확정 금액 (예상 합계 아래에 크게 표시)
         const confirmedTotalHtml = order.total_amount ? `
-            <div style="margin-top:12px; padding:16px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="margin-top:12px; padding:16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:14px; font-weight:600; color:var(--text-primary);">확정 금액</span>
-                <strong style="font-size:22px; color:var(--green);">${order.total_amount}원</strong>
+                <strong style="font-size:22px; color:#e53c11;">${order.total_amount}원</strong>
             </div>` : '';
 
         body.innerHTML = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-                <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br><strong style="color:var(--text-primary);">${s.icon} ${s.label}</strong></div>
+                <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br><strong style="color:var(--text-primary);">${s.label}</strong></div>
                 <div><small style="color:var(--text-muted); font-size:11px;">플랜</small><br><strong style="color:var(--text-primary);">${order.plan_name}</strong></div>
                 <div><small style="color:var(--text-muted); font-size:11px;">티어</small><br><span style="color:var(--text-secondary);">${order.plan_tier || '-'}</span></div>
                 <div><small style="color:var(--text-muted); font-size:11px;">기본 가격</small><br><span style="color:var(--text-primary);">${formatOrderPrice(order.plan_price)}</span></div>
@@ -1241,38 +1241,37 @@ async function openOrderDetail(orderId) {
             ${addonsHtml}
             ${totalHtml}
             ${confirmedTotalHtml}
-            ${order.memo ? `<div style="margin-top:16px; padding:12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">💬 고객 요청사항</strong><br>${order.memo}</div>` : ''}
+            ${order.memo ? `<div style="margin-top:16px; padding:12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text-secondary); line-height:1.5;"><strong style="color:var(--text-primary);">고객 요청사항</strong><br>${order.memo}</div>` : ''}
             <div style="margin-top:12px;">
-                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">📝 관리자 답변</label>
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">관리자 답변</label>
                 <textarea id="adminReplyInput" class="form-control" rows="3" placeholder="고객 요청사항에 대한 답변을 입력하세요..." style="width:100%; font-size:13px; resize:vertical;">${order.quote_data?.admin_reply || ''}</textarea>
-                <button onclick="saveAdminReply(${orderId})" class="btn-preview" style="margin-top:8px; height:40px; padding:0 16px; font-size:13px; border-radius:8px; font-weight:600;">💾 답변 저장</button>
+                <button onclick="saveAdminReply(${orderId})" class="btn-preview" style="margin-top:8px; height:40px; padding:0 16px; font-size:13px; border-radius:8px; font-weight:600;">답변 저장</button>
             </div>
         `;
 
-        const btnStyle = 'height:40px; padding:0 16px; font-size:13px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0;';
+        const btnStyle = 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0; white-space:nowrap;';
 
         // PDF 다운로드 버튼 (상태에 따라)
         let pdfBtns = '';
         if (['quote_issued','paid','contract_issued','completed'].includes(order.status)) {
-            pdfBtns += `<button onclick="adminDownloadQuotePDF(${orderId})" class="btn-preview" style="${btnStyle}">📋 견적서 PDF</button>`;
+            pdfBtns += `<button onclick="adminDownloadQuotePDF(${orderId})" class="btn-preview" style="${btnStyle}">견적서 PDF</button>`;
         }
         if (['contract_issued','completed'].includes(order.status)) {
-            pdfBtns += `<button onclick="adminDownloadContractPDF(${orderId})" class="btn-preview" style="${btnStyle}">📄 계약서 PDF</button>`;
+            pdfBtns += `<button onclick="adminDownloadContractPDF(${orderId})" class="btn-preview" style="${btnStyle}">계약서 PDF</button>`;
         }
 
         // 액션 버튼
         let actionsHtml = '';
         if (order.status === 'quote_pending') {
             actionsHtml = `
-                <button onclick="actionIssueQuote(${orderId})" class="btn-save" style="${btnStyle}">📋 견적서 발행</button>
-                <button onclick="actionDeleteOrder(${orderId})" class="btn-member-delete" style="${btnStyle}">삭제</button>
+                <button onclick="actionIssueQuote(${orderId})" class="btn-save" style="${btnStyle}">견적서 발행</button>
             `;
         } else if (order.status === 'quote_issued') {
-            actionsHtml = `<button onclick="actionConfirmPayment(${orderId})" class="btn-save" style="${btnStyle}">💰 결제 확인</button>`;
+            actionsHtml = `<button onclick="actionConfirmPayment(${orderId})" class="btn-save" style="${btnStyle}">결제 확인</button>`;
         } else if (order.status === 'paid') {
-            actionsHtml = `<button onclick="actionIssueContract(${orderId})" class="btn-save" style="${btnStyle}">📄 계약서 발행</button>`;
+            actionsHtml = `<button onclick="actionIssueContract(${orderId})" class="btn-save" style="${btnStyle}">계약서 발행</button>`;
         } else if (order.status === 'contract_issued') {
-            actionsHtml = `<button onclick="actionCompleteOrder(${orderId})" class="btn-save" style="${btnStyle} background:#22c55e;">🎉 체결 완료</button>`;
+            actionsHtml = `<button onclick="actionCompleteOrder(${orderId})" class="btn-save" style="${btnStyle} background:#e53c11; color:#fff; border-color:#e53c11;">체결 완료</button>`;
         }
         actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}${actionsHtml}</div>`;
 
@@ -1307,7 +1306,7 @@ async function actionIssueQuote(orderId) {
                 <span style="color:var(--text-secondary); font-weight:600;">원</span>
             </div>
             <div style="display:flex; gap:8px; margin-top:10px;">
-                <button onclick="confirmIssueQuote(${orderId})" class="btn-save" style="flex:1; height:38px;">✅ 확인</button>
+                <button onclick="confirmIssueQuote(${orderId})" class="btn-save" style="flex:1; height:38px;">확인</button>
                 <button onclick="openOrderDetail(${orderId})" class="btn-preview" style="height:38px; width:auto; padding:0 16px;">취소</button>
             </div>
         </div>

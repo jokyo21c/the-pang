@@ -2945,12 +2945,15 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 if (addons && Array.isArray(addons)) {
                     const addonTable = document.querySelector('.addon-table');
                     if (addonTable) {
-                        addonTable.innerHTML = addons.map(addon => `
+                        addonTable.innerHTML = addons.map(addon => {
+                            if (!addon.name || addon.name.trim() === '') return '';
+                            return `
                             <div class="addon-table__row">
                                 <span class="addon-table__name">${(addon.name || '').replace(/\n/g, '<br>')}</span>
                                 <span class="addon-table__price">${(addon.price || '').replace(/\n/g, '<br>')}</span>
                             </div>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
                 }
             } catch (err) {
@@ -3090,13 +3093,16 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
             return;
         }
 
-        addonList.innerHTML = cachedAddons.map((addon, i) => `
+        addonList.innerHTML = cachedAddons.map((addon, i) => {
+            if (!addon.name || addon.name.trim() === '') return '';
+            return `
             <label class="quote-addon-item">
                 <input type="checkbox" class="quote-addon-check" data-index="${i}" value="${addon.name}">
                 <span class="quote-addon-item__name">${(addon.name || '').replace(/\n/g, ' ')}</span>
                 <span class="quote-addon-item__price">${(addon.price || '').replace(/\n/g, ' ')}</span>
             </label>
-        `).join('');
+            `;
+        }).join('');
     }
 
     /* ── 요약 업데이트 ── */
