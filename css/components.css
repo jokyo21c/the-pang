@@ -1297,7 +1297,7 @@
 
     /* 사장님들의 실제 후기 섹션 제목 → 후기 박스 사이 간격: 60px에서 100px로 확대 */
     #testimonials .section-header {
-        margin-bottom: 100px !important;
+        margin-bottom: 60px !important;
     }
 
     /* 사장님들의 실제 후기 섹션 상/하단 여백: 100px에서 170px로 확대 */
@@ -2160,71 +2160,78 @@
 .testimonial-slider {
     position: relative;
     overflow: hidden;
-    padding: 0 40px;
+    padding: 0;
 }
 
 .testimonial-track {
     display: flex;
-    transition: transform 0.5s ease;
+    transition: none;
 }
 
 .testimonial-card {
-    min-width: 100%;
-    padding: 0 12px;
+    flex: 0 0 280px;
+    width: 280px;
+    padding: 0 10px;
 }
 
 .testimonial-card__inner {
     background: var(--color-bg-card);
     border-radius: var(--radius-card);
-    padding: 40px 48px;
-    text-align: left;
+    padding: 0;
+    text-align: center;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    gap: 48px;
+    gap: 0;
     height: 100%;
+    overflow: hidden;
 }
 
 .testimonial-card__content {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     flex-grow: 1;
-    justify-content: center;
+    justify-content: flex-start;
+    padding: 20px 20px 24px;
 }
 
 .testimonial-card__stars {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     color: var(--color-brand-orange);
-    font-size: 20px;
+    font-size: 16px;
     letter-spacing: 4px;
 }
 
 .testimonial-card__text {
-    font-size: 18px;
+    font-size: 13px;
     color: var(--color-text-secondary);
     font-style: italic;
-    line-height: 1.7;
-    margin-bottom: 32px;
+    line-height: 1.6;
+    margin-bottom: 16px;
     flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .testimonial-card__footer {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: center;
+    gap: 8px;
 }
 
 .testimonial-card__photo {
-    width: 256px;
-    height: 256px;
+    width: 100%;
+    height: 220px;
     margin: 0;
-    aspect-ratio: 1 / 1;
-    border-radius: 24px;
+    aspect-ratio: unset;
+    border-radius: 0;
     overflow: hidden;
     flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: none;
 }
 
 .testimonial-card__photo img {
@@ -2237,12 +2244,12 @@
 .testimonial-card__info {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 6px;
 }
 
 .testimonial-card__author {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: var(--fw-semibold);
     color: var(--color-text-primary);
 }
@@ -2257,8 +2264,9 @@
     font-weight: var(--fw-semibold);
 }
 
+/* PC: hide slider controls (arrows + dots) */
 .slider-controls {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 16px;
@@ -2305,6 +2313,12 @@
     background: var(--color-brand-purple);
     width: 28px;
     border-radius: 5px;
+}
+
+/* PC Infinite Marquee Animation */
+@keyframes testimonialMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }
 
 

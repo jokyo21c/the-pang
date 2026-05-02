@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalSlides = 0;
     let autoSlideInterval;
     let isTestimonialTransitioning = false;
+    let testimonialMode = 'mobile'; // 'pc' or 'mobile'
 
     // [FIX] dots는 항상 최신 DOM에서 재조회 (stale closure 방지)
     const getDots = () => document.querySelectorAll('.slider-dot');
@@ -72,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const goToSlide = (index) => {
-        const dots = getDots();
+        if (testimonialMode === 'pc') return;
         if (totalSlides === 0 || isTestimonialTransitioning) return;
         
         isTestimonialTransitioning = true;
@@ -87,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (testimonialTrack) {
         testimonialTrack.addEventListener('transitionend', () => {
+            if (testimonialMode === 'pc') return;
             isTestimonialTransitioning = false;
             if (currentSlide >= totalSlides + 1) {
                 testimonialTrack.style.transition = 'none';
@@ -103,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const startAutoSlide = () => {
+        if (testimonialMode === 'pc') return;
         autoSlideInterval = setInterval(() => goToSlide(currentSlide + 1), 3000);
     };
 
@@ -112,18 +115,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const dots = getDots();
         dots.forEach(dot => {
             dot.addEventListener('click', () => {
+                if (testimonialMode === 'pc') return;
                 stopAutoSlide();
-                // dot.dataset.index는 0부터 시작하므로 +1
                 goToSlide(parseInt(dot.dataset.index) + 1);
                 startAutoSlide();
             });
         });
     };
 
-    if (prevBtn) prevBtn.addEventListener('click', () => { stopAutoSlide(); goToSlide(currentSlide - 1); startAutoSlide(); });
-    if (nextBtn) nextBtn.addEventListener('click', () => { stopAutoSlide(); goToSlide(currentSlide + 1); startAutoSlide(); });
+    if (prevBtn) prevBtn.addEventListener('click', () => { if (testimonialMode === 'pc') return; stopAutoSlide(); goToSlide(currentSlide - 1); startAutoSlide(); });
+    if (nextBtn) nextBtn.addEventListener('click', () => { if (testimonialMode === 'pc') return; stopAutoSlide(); goToSlide(currentSlide + 1); startAutoSlide(); });
 
-    // Touch swipe logic for testimonials
+    // Touch swipe logic for testimonials (mobile only)
     if (testimonialTrack) {
         let startX = 0;
         let startY = 0;
@@ -132,30 +135,26 @@ document.addEventListener('DOMContentLoaded', () => {
         let prevTranslate = 0;
 
         testimonialTrack.addEventListener('touchstart', (e) => {
+            if (testimonialMode === 'pc') return;
             stopAutoSlide();
             isTestimonialTransitioning = false;
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             isDragging = true;
-            
             prevTranslate = -(currentSlide * 100);
             testimonialTrack.style.transition = 'none';
         }, { passive: true });
 
         testimonialTrack.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
+            if (testimonialMode === 'pc' || !isDragging) return;
             const currentX = e.touches[0].clientX;
             const currentY = e.touches[0].clientY;
-            
             const diffX = currentX - startX;
             const diffY = currentY - startY;
-            
             if (Math.abs(diffX) > Math.abs(diffY)) {
                 if (e.cancelable) e.preventDefault();
-                
                 const trackWidth = testimonialTrack.clientWidth || 1;
                 const percentageMoved = (diffX / trackWidth) * 100;
-                
                 currentTranslate = prevTranslate + percentageMoved;
                 testimonialTrack.style.transform = `translateX(${currentTranslate}%)`;
             } else {
@@ -164,52 +163,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: false });
 
         testimonialTrack.addEventListener('touchend', (e) => {
-            if (!isDragging) {
-                startAutoSlide();
-                return;
-            }
+            if (testimonialMode === 'pc') return;
+            if (!isDragging) { startAutoSlide(); return; }
             isDragging = false;
-            
             const endX = e.changedTouches[0].clientX;
             const diffX = endX - startX;
-            
-            if (diffX > 50) {
-                goToSlide(currentSlide - 1);
-            } else if (diffX < -50) {
-                goToSlide(currentSlide + 1);
-            } else {
-                goToSlide(currentSlide);
-            }
-            
+            if (diffX > 50) { goToSlide(currentSlide - 1); }
+            else if (diffX < -50) { goToSlide(currentSlide + 1); }
+            else { goToSlide(currentSlide); }
             startAutoSlide();
         });
     }
 
-    const setupInfiniteTestimonial = () => {
+    /* ── PC Marquee: duplicate cards for seamless infinite scroll ── */
+    function setupPCMarquee() {
         if (!testimonialTrack) return;
+        testimonialMode = 'pc';
+        stopAutoSlide();
+        testimonialTrack.querySelectorAll('.clone').forEach(el => el.remove());
+        testimonialTrack.style.transition = 'none';
+        testimonialTrack.style.transform = '';
+        const cards = Array.from(testimonialTrack.querySelectorAll('.testimonial-card'));
+        if (cards.length === 0) return;
+        cards.forEach(card => {
+            const clone = card.cloneNode(true);
+            clone.classList.add('clone');
+            clone.setAttribute('aria-hidden', 'true');
+            testimonialTrack.appendChild(clone);
+        });
+        const cardWidth = 300;
+        const totalWidth = cards.length * cardWidth;
+        const speed = 40;
+        const duration = totalWidth / speed;
+        testimonialTrack.style.animation = `testimonialMarquee ${duration}s linear infinite`;
+        testimonialTrack.addEventListener('mouseenter', () => { testimonialTrack.style.animationPlayState = 'paused'; });
+        testimonialTrack.addEventListener('mouseleave', () => { testimonialTrack.style.animationPlayState = 'running'; });
+    }
+
+    /* ── Mobile: standard single-card infinite slider ── */
+    function setupMobileSlider() {
+        if (!testimonialTrack) return;
+        testimonialMode = 'mobile';
+        testimonialTrack.querySelectorAll('.clone').forEach(el => el.remove());
+        testimonialTrack.style.animation = 'none';
         const cards = Array.from(testimonialTrack.querySelectorAll('.testimonial-card:not(.clone)'));
         totalSlides = cards.length;
         if (totalSlides === 0) return;
-
-        testimonialTrack.querySelectorAll('.clone').forEach(el => el.remove());
-
         const firstClone = cards[0].cloneNode(true);
         firstClone.classList.add('clone');
         firstClone.setAttribute('aria-hidden', 'true');
-        
         const lastClone = cards[cards.length - 1].cloneNode(true);
         lastClone.classList.add('clone');
         lastClone.setAttribute('aria-hidden', 'true');
-
         testimonialTrack.insertBefore(lastClone, cards[0]);
         testimonialTrack.appendChild(firstClone);
-
         testimonialTrack.style.transition = 'none';
         currentSlide = 1;
         testimonialTrack.style.transform = `translateX(-100%)`;
         void testimonialTrack.offsetHeight;
         updateTestimonialDots(currentSlide);
-    };
+        stopAutoSlide();
+        startAutoSlide();
+    }
+
+    /* ── Decide which mode to use ── */
+    function initTestimonialMode() {
+        if (window.innerWidth > 768) { setupPCMarquee(); }
+        else { setupMobileSlider(); }
+    }
+
+    let testimonialResizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(testimonialResizeTimer);
+        testimonialResizeTimer = setTimeout(() => {
+            const newMode = window.innerWidth > 768 ? 'pc' : 'mobile';
+            if (newMode !== testimonialMode) { initTestimonialMode(); }
+        }, 200);
+    });
 
     // [FIX] localStorage 대신 Supabase PangData.getTestimonials() 사용
     async function loadTestimonials() {
@@ -224,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <img src="${t.photo_url || t.photo || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop'}" alt="${t.author || ''}">
                                 </div>
                                 <div class="testimonial-card__content">
-                                    <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:20px;">${'★'.repeat(t.stars || 5)}</div>
+                                    <div class="testimonial-card__stars" style="letter-spacing:4px;color:var(--color-brand-orange);margin-bottom:12px;">${'★'.repeat(t.stars || 5)}</div>
                                     <p class="testimonial-card__text">"${t.text || ''}"</p>
                                     <div class="testimonial-card__footer">
                                         <div class="testimonial-card__info">
@@ -242,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`
                         ).join('');
                     }
-                    setupInfiniteTestimonial();
+                    initTestimonialMode();
                     bindSliderControls();
                 }
             }
@@ -252,10 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 초기 HTML 데이터로 먼저 setup, 이후 Supabase로 교체
-    setupInfiniteTestimonial();
+    initTestimonialMode();
     bindSliderControls();
     loadTestimonials();
-    startAutoSlide();
 
 
     // ── Pricing Toggle ──────────────────────────────────────

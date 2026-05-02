@@ -1028,9 +1028,21 @@
         grid-column: 1 / -1;
     }
 
-    /* Slider */
+    /* Slider — Mobile: restore single-card swipe slider */
     .testimonial-slider {
         padding: 0 16px;
+    }
+
+    .testimonial-track {
+        animation: none !important;
+        transition: transform 0.5s ease;
+    }
+
+    .testimonial-card {
+        min-width: 100%;
+        flex: 0 0 100%;
+        width: 100%;
+        padding: 0 12px;
     }
 
     .testimonial-card__inner {
@@ -1047,6 +1059,7 @@
     .testimonial-card__photo {
         width: 160px;
         height: 160px;
+        border-radius: 24px;
     }
 
     .testimonial-card__footer {
@@ -1059,6 +1072,14 @@
 
     .testimonial-card__text {
         font-size: 16px;
+        display: block;
+        -webkit-line-clamp: unset;
+        overflow: visible;
+    }
+
+    /* Mobile: show slider controls */
+    .slider-controls {
+        display: flex;
     }
 
     /* Floating Sidebar - Left Vertical (Mobile) */
