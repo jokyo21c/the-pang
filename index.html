@@ -1427,18 +1427,27 @@
 
     <!-- ── Policy Modals ── -->
     <style>
-        .policy-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
-        .policy-modal__content { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 40px; position: relative; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
-        .policy-modal__close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 28px; color: var(--color-text-secondary); cursor: pointer; transition: color 0.2s; }
-        .policy-modal__close:hover { color: var(--color-text-primary); }
-        .policy-modal__header { border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 30px; }
-        .policy-modal__title { font-size: 24px; font-weight: 700; color: var(--color-brand-purple); margin-bottom: 5px; }
-        .policy-modal__date { font-size: 13px; color: var(--color-text-muted); }
-        .policy-modal__body h4 { font-size: 16px; color: var(--color-text-primary); margin-top: 15px; margin-bottom: 8px; }
-        .policy-modal__body p { font-size: 14px; margin-bottom: 15px; }
-        .policy-modal__body ul { margin-bottom: 15px; padding-left: 20px; }
-        .policy-modal__body li { font-size: 14px; margin-bottom: 8px; list-style: disc; }
-        @media (max-width: 768px) { .policy-modal__content { padding: 30px 20px; } }
+        .policy-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
+        .policy-modal__content { background: #121212; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; width: 100%; max-width: 700px; max-height: 85vh; overflow-y: auto; padding: 48px; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8); scrollbar-width: thin; scrollbar-color: var(--color-brand-purple) transparent; }
+        .policy-modal__content::-webkit-scrollbar { width: 6px; }
+        .policy-modal__content::-webkit-scrollbar-thumb { background: var(--color-brand-purple); border-radius: 10px; }
+        .policy-modal__close { position: absolute; top: 24px; right: 24px; background: rgba(255,255,255,0.05); border: none; font-size: 24px; color: #fff; cursor: pointer; transition: all 0.2s; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .policy-modal__close:hover { background: rgba(255,255,255,0.15); transform: rotate(90deg); }
+        .policy-modal__header { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 24px; margin-bottom: 32px; }
+        .policy-modal__title { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .policy-modal__date { font-size: 14px; color: var(--color-text-muted); opacity: 0.8; }
+        .policy-modal__body { color: #ccc; line-height: 1.8; font-size: 15px; }
+        .policy-modal__body h4 { font-size: 18px; color: #fff; margin-top: 40px; margin-bottom: 16px; font-weight: 700; border-left: 4px solid var(--color-brand-purple); padding-left: 12px; }
+        .policy-modal__body h4:first-child { margin-top: 0; }
+        .policy-modal__body p { margin-bottom: 20px; }
+        .policy-modal__body ul { margin-bottom: 20px; padding-left: 20px; }
+        .policy-modal__body li { margin-bottom: 10px; list-style: none; position: relative; }
+        .policy-modal__body li::before { content: "•"; color: var(--color-brand-purple); font-weight: bold; position: absolute; left: -16px; }
+        .policy-modal__table { width: 100%; border-collapse: collapse; margin: 24px 0; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; }
+        .policy-modal__table th, .policy-modal__table td { padding: 14px; border: 1px solid rgba(255,255,255,0.1); text-align: left; font-size: 14px; }
+        .policy-modal__table th { background: rgba(255,255,255,0.05); color: #fff; font-weight: 600; }
+        .policy-modal__body strong { color: #fff; font-weight: 600; }
+        @media (max-width: 768px) { .policy-modal__content { padding: 40px 24px; } .policy-modal__title { font-size: 24px; } }
     </style>
 
     <div class="policy-modal" id="companyIntroModal">
@@ -1471,22 +1480,62 @@
             </button>
             <div class="policy-modal__header">
                 <h2 class="policy-modal__title">이용약관</h2>
-                <p class="policy-modal__date">시행일자: 2026.04.20</p>
+                <p class="policy-modal__date">시행일자: 2026.05.02 (개정)</p>
             </div>
-            <div class="policy-modal__body" style="color: var(--color-text-secondary); line-height: 1.6;">
+            <div class="policy-modal__body">
                 <h4>제 1 조 (목적)</h4>
-                <p>본 약관은 넥스온(이하 "회사")이 운영하는 숏폼 광고 대행 플랫폼 '더팡(THE PANG)'(이하 "서비스")의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항 등을 규정함을 목적으로 합니다.</p>
+                <p>본 약관은 <strong>넥스온(NexON)</strong>(이하 "회사")이 운영하는 숏폼 광고 제작 대행 플랫폼 '더팡(THE PANG)'(이하 "서비스")에서 제공하는 제반 서비스의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.</p>
+
                 <h4>제 2 조 (용어의 정의)</h4>
-                <p>1. "서비스"란 더팡(THE PANG) 플랫폼을 통해 회사가 고객에게 제공하는 숏폼 광고 제작, 기획, 편집, AI 후보정 및 관련 제반 서비스를 의미합니다.<br>
-                2. "회원"이란 본 약관에 동의하고 서비스를 제공받는 고객을 의미합니다.</p>
-                <h4>제 3 조 (서비스의 제공 등)</h4>
-                <p>1. 회사는 회원에게 성공적인 바이럴 마케팅을 위해 최고의 영상 콘텐츠 풀 패키지를 제공합니다.<br>
-                2. 서비스의 세부 내용 및 요금은 더팡 웹사이트 또는 전담 PD와의 협의를 통해 결정됩니다.</p>
-                <h4>제 4 조 (회원의 의무)</h4>
-                <p>회원은 서비스 이용 과정에서 폭언, 무리한 수정 요구 등 회사의 업무를 방해하는 행위를 하여서는 안 되며, 서비스 결과물을 저작권법 등 관련 법령에 위반하여 임의로 수정·결합하거나 상업적 용도로 불법 배포할 수 없습니다.</p>
-                <h4>제 5 조 (면책사항)</h4>
-                <p>1. 회사는 천재지변, 전쟁 등 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는 서비스 제공에 관한 책임이 면제됩니다.<br>
-                2. 회사는 플랫폼(틱톡, 유튜브, 인스타그램 등)의 정책 변경 등 외부 요인에 의해 발생하는 결과에 대해 책임을 지지 않습니다.</p>
+                <ul>
+                    <li>1. "서비스"라 함은 회사가 웹사이트를 통해 회원에게 제공하는 영상 콘텐츠 기획, 촬영, 편집, AI 후보정 등 영상 제작 대행 업무 일체를 의미합니다.</li>
+                    <li>2. "회원"이라 함은 회사의 서비스에 접속하여 본 약관에 동의하고 회사와 이용계약을 체결하여 서비스를 이용하는 고객을 의미합니다.</li>
+                    <li>3. "콘텐츠(결과물)"라 함은 회사의 의뢰에 따라 제작하여 최종 납품한 영상 파일 및 관련 결과물을 의미합니다.</li>
+                </ul>
+
+                <h4>제 3 조 (이용계약의 성립)</h4>
+                <p>이용계약은 회원이 본 약관에 동의하고, 서비스 신청(견적 요청 및 결제)을 완료함으로써 성립합니다. 단, 제작의 난이도나 일정에 따라 회사가 승낙을 거절하거나 유보할 수 있습니다.</p>
+
+                <h4>제 4 조 (대금 지급 방식)</h4>
+                <p>1. 서비스 이용료는 회사가 제시한 정찰제 가격 또는 별도 협의된 견적 금액에 따릅니다.<br>
+                2. 결제는 회사가 지정한 방식(신용카드, 계좌이체 등)으로 진행하며, 원칙적으로 <strong>선결제 완료 후 작업에 착수</strong>합니다.</p>
+
+                <h4>제 5 조 (제작 공정 및 기간)</h4>
+                <p>1. 회사는 계약된 일정 내에 기획, 촬영, 편집 등의 공정을 거쳐 결과물을 인도합니다.<br>
+                2. 회원의 자료 제출 지연, 검수 지연 등으로 발생한 제작 지연에 대해서는 회사가 책임을 지지 않습니다.</p>
+
+                <h4>제 6 조 (수정 및 보완)</h4>
+                <p>1. <strong>무상 수정은 최종 결과물 인도 후 2회</strong>로 제한하며, 수정 범위는 오타 수정, 컷 편집 변경 등 경미한 사항에 한합니다.<br>
+                2. 기획 자체를 변경하거나 전체 촬영을 다시 해야 하는 등 제작 공정의 50% 이상을 수정해야 하는 경우 추가 비용이 발생할 수 있습니다.</p>
+
+                <h4>제 7 조 (저작권의 귀속)</h4>
+                <p>1. 회원이 의뢰하여 제작된 최종 결과물의 저작재산권은 <strong>회원이 대금을 완납한 시점에 회원에게 귀속</strong>됩니다.<br>
+                2. 단, 회사는 제작된 결과물을 회사의 <strong>포트폴리오, SNS 홍보, 마케팅 자료</strong> 등으로 사용할 수 있는 권리를 가집니다. 만약 노출을 원치 않을 경우 사전에 회사에 서면으로 요청해야 합니다.</p>
+
+                <h4>제 8 조 (폰트 및 음원 라이선스)</h4>
+                <p>1. 회사는 제작 과정에서 상업적 이용이 가능한 라이선스가 확보된 폰트, 음원, 소스만을 사용합니다.<br>
+                2. 납품된 결과물 이외에 작업 과정에서 생성된 원본 파일(Project File)은 제공하지 않는 것을 원칙으로 하며, 제공 시 별도의 비용을 청구할 수 있습니다.</p>
+
+                <h4>제 9 조 (청약철회 및 환불 기준)</h4>
+                <p>본 서비스는 고객의 개별 요청에 따라 제작되는 <strong>주문제작 서비스</strong>이므로, 제작이 시작된 이후에는 단순 변심에 의한 환불이 제한됩니다. (전자상거래법 제17조 제2항 제6호 준용)</p>
+                <ul>
+                    <li>1. 작업 착수 전: <strong>전액 환불</strong></li>
+                    <li>2. 기획 및 촬영 준비 단계: <strong>대금의 70% 환불</strong></li>
+                    <li>3. 촬영 완료 및 편집 단계: <strong>대금의 30% 환불</strong></li>
+                    <li>4. 최종 결과물 납품 완료 후: <strong>환불 불가</strong></li>
+                </ul>
+
+                <h4>제 10 조 (회사의 의무)</h4>
+                <p>회사는 관련 법령과 본 약관이 금지하거나 미풍양속에 반하는 행위를 하지 않으며, 계속적이고 안정적으로 서비스를 제공하기 위하여 최선을 다하여 노력합니다.</p>
+
+                <h4>제 11 조 (면책사항)</h4>
+                <p>1. 회사는 천재지변 또는 이에 준하는 불가항력으로 인하여 서비스를 제공할 수 없는 경우 책임이 면제됩니다.<br>
+                2. 회사는 <strong>유튜브, 틱톡, 인스타그램 등 외부 플랫폼의 정책 변경</strong>으로 인해 발생하는 노출 제한, 계정 불이익 등에 대해서는 책임을 지지 않습니다.</p>
+
+                <h4>제 12 조 (분쟁 해결)</h4>
+                <p>본 약관과 관련하여 발생한 분쟁은 회사와 회원이 상호 합의하여 해결하되, 합의가 이루어지지 않을 경우 회사의 본점 소재지 관할 법원을 합의 관할 법원으로 합니다.</p>
+                
+                <p style="margin-top: 40px; font-size: 13px; color: var(--color-text-muted);"><strong>부칙</strong><br>본 약관은 2026년 5월 2일부터 시행됩니다.</p>
             </div>
         </div>
     </div>
@@ -1498,20 +1547,75 @@
             </button>
             <div class="policy-modal__header">
                 <h2 class="policy-modal__title">개인정보처리방침</h2>
-                <p class="policy-modal__date">시행일자: 2026.04.20</p>
+                <p class="policy-modal__date">시행일자: 2026.05.02 (개정)</p>
             </div>
-            <div class="policy-modal__body" style="color: var(--color-text-secondary); line-height: 1.6;">
-                <p>넥스온(이하 "회사")이 운영하는 더팡(THE PANG)은 정보주체의 개인정보를 가장 중요하게 생각하며, 「개인정보 보호법」 등 관련 법령을 준수하고 있습니다.</p>
-                <h4>1. 개인정보의 수집 및 이용 목적</h4>
-                <p>회사는 숏폼 콘텐츠 제작 문의 확인, 상담, 견적 제공, 서비스 제공 및 계약 이행, 서비스 개선을 위해 최소한의 개인정보를 수집합니다.</p>
-                <h4>2. 수집하는 개인정보의 항목</h4>
-                <p>필수항목: 상호명, 담당자 이름, 연락처(전화번호, 이메일), 서비스 요청 사항, 결제 정보 등</p>
+            <div class="policy-modal__body">
+                <p><strong>넥스온(NexON)</strong>(이하 "회사")이 운영하는 <strong>더팡(THE PANG)</strong>은 정보주체의 개인정보를 가장 중요하게 생각하며, 「개인정보 보호법」 등 관련 법령을 준수하고 있습니다. 회사는 본 방침을 통해 제공하시는 개인정보의 이용 목적과 방식, 보호 조치에 대해 안내드립니다.</p>
+
+                <h4>1. 수집하는 개인정보의 항목 및 수집방법</h4>
+                <p>회사는 회원가입, 상담, 숏폼 영상 제작 서비스 신청 등을 위해 아래와 같은 개인정보를 수집하고 있습니다.</p>
+                <ul>
+                    <li><strong>회원가입 시 (필수)</strong>: 이름, 이메일, 비밀번호, 생년월일, 성별</li>
+                    <li><strong>회원가입 시 (선택)</strong>: 연락처, 주소(기본 주소, 상세 주소)</li>
+                    <li><strong>서비스 신청 시</strong>: 상호명, 담당자명, 연락처, 이메일, 결제 정보 등</li>
+                    <li><strong>기타</strong>: 서비스 이용기록, 접속로그, 쿠키, 접속 IP 등</li>
+                </ul>
+                <p>수집방법: 홈페이지(회원가입, 견적문의), 이메일, 전화, 상담 채널 등을 통한 수집</p>
+
+                <h4>2. 개인정보의 수집 및 이용 목적</h4>
+                <ul>
+                    <li><strong>계약 이행 및 서비스 제공</strong>: 숏폼 콘텐츠 제작 문의 상담, 맞춤형 견적 제공, 영상 콘텐츠 기획/제작 및 납품, 대금 결제</li>
+                    <li><strong>회원 관리</strong>: 회원제 서비스 이용에 따른 본인확인, 부정 이용 방지, 가입 의사 확인, 불만 처리 및 고지사항 전달</li>
+                    <li><strong>마케팅 및 광고 활용</strong>: 신규 서비스 안내, 이벤트 등 광고성 정보 전달 (선택 동의 시)</li>
+                </ul>
+
                 <h4>3. 개인정보의 보유 및 이용기간</h4>
-                <p>원칙적으로 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 관계 법령의 규정에 의하여 보존할 필요가 있는 경우 적법한 기간 동안 보관합니다.</p>
-                <h4>4. 개인정보의 제3자 제공</h4>
-                <p>회사는 원칙적으로 정보주체의 개인정보를 제3자에게 제공하지 않습니다. 단, 협력업체를 통한 필수 서비스 제공이나 법령에 따른 요구가 있는 경우는 예외로 합니다.</p>
+                <p>원칙적으로 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 관계 법령에 따라 보존할 필요가 있는 경우 아래와 같이 보관합니다.</p>
+                <ul>
+                    <li>계약 또는 청약철회 등에 관한 기록: <strong>5년</strong></li>
+                    <li>대금결제 및 재화 등의 공급에 관한 기록: <strong>5년</strong></li>
+                    <li>소비자의 불만 또는 분쟁처리에 관한 기록: <strong>3년</strong></li>
+                    <li>웹사이트 방문기록: <strong>3개월</strong></li>
+                </ul>
+
+                <h4>4. 수집한 개인정보의 처리 위탁</h4>
+                <p>회사는 원활한 서비스 이행을 위해 아래와 같이 외부 전문업체에 업무를 위탁하고 있습니다.</p>
+                <table class="policy-modal__table">
+                    <thead>
+                        <tr>
+                            <th>수탁업체</th>
+                            <th>위탁업무 내용</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>토스페이먼츠</strong></td>
+                            <td>서비스 이용에 따른 결제 대행 및 에스크로</td>
+                        </tr>
+                        <tr>
+                            <td>(클라우드/호스팅사)</td>
+                            <td>서버 호스팅 및 데이터 보관</td>
+                        </tr>
+                        <tr>
+                            <td>외부 파트너사</td>
+                            <td>영상 촬영, 편집 보조, 자막 제작 등 제작 보조 업무</td>
+                        </tr>
+                    </tbody>
+                </table>
+
                 <h4>5. 정보주체의 권리와 그 행사방법</h4>
-                <p>정보주체는 언제든지 자신의 개인정보에 대한 열람, 정정, 삭제, 처리정지 등을 요구할 수 있습니다. 자세한 문의나 권리 행사는 이메일(thepang2026@gmail.com)로 연락 부탁드립니다.</p>
+                <p>이용자는 언제든지 자신의 개인정보를 조회, 수정하거나 가입 해지를 요청할 수 있습니다. 마이페이지를 통하거나 개인정보보호책임자에게 연락하시면 지체 없이 조치하겠습니다.</p>
+
+                <h4>6. 개인정보 자동수집 장치의 운영</h4>
+                <p>회사는 이용자의 정보를 저장하고 찾아내는 '쿠키(cookie)' 등을 운용합니다. 이용자는 웹 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으나, 이 경우 일부 서비스 이용에 어려움이 있을 수 있습니다.</p>
+
+                <h4>7. 개인정보보호책임자 및 상담 안내</h4>
+                <p>회사는 고객의 개인정보를 보호하고 관련 불만을 처리하기 위하여 아래와 같이 책임자를 지정하고 있습니다.</p>
+                <ul>
+                    <li><strong>개인정보보호책임자</strong>: 조교선</li>
+                    <li><strong>문의처</strong>: <a href="https://pf.kakao.com/_CCxcCX" target="_blank" style="color:var(--color-brand-purple); text-decoration:underline;">더팡 카카오톡 공식 채널</a></li>
+                    <li><strong>이메일</strong>: thepang2026@gmail.com</li>
+                </ul>
             </div>
         </div>
     </div>
