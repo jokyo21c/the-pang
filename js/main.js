@@ -193,11 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const cardWidth = 300;
         const totalWidth = cards.length * cardWidth;
-        const speed = 40;
+        const speed = 180;
         const duration = totalWidth / speed;
         testimonialTrack.style.animation = `testimonialMarquee ${duration}s linear infinite`;
-        testimonialTrack.addEventListener('mouseenter', () => { testimonialTrack.style.animationPlayState = 'paused'; });
-        testimonialTrack.addEventListener('mouseleave', () => { testimonialTrack.style.animationPlayState = 'running'; });
     }
 
     /* ── Mobile: standard single-card infinite slider ── */
@@ -986,13 +984,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Platform Banner Infinite Loop ────────────────────────
     const platformTrack = document.getElementById('platformTrack');
     if (platformTrack) {
-        // Clone the content for seamless infinite scroll
+        // Clone the content for seamless infinite scroll on wide screens
         const clone = platformTrack.innerHTML;
-        platformTrack.innerHTML += clone;
+        platformTrack.innerHTML += clone + clone + clone; // 총 4세트 생성
 
-        // [FIX] 복제 후 children.length는 원본의 2배 → 2로 나눠서 올바른 속도 계산
-        const originalCount = platformTrack.children.length / 2;
-        const baseDuration = originalCount * 2; // 아이템 1개당 2초
+        // 애니메이션이 -50% (절반) 이동하므로, 절반에 해당하는 아이템 수로 속도 계산
+        const itemsInHalf = platformTrack.children.length / 2;
+        const baseDuration = itemsInHalf * 2; // 아이템 1개당 2초
         platformTrack.style.setProperty('animation-duration', `${baseDuration}s`);
     }
 

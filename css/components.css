@@ -609,14 +609,14 @@
 }
 
 .platform-banner__viewport {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 10px 0;
     overflow: hidden;
     position: relative;
-    /* edge fade masks — applied only within 1200px */
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    /* edge fade masks */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
 }
 
 .platform-banner__track {
@@ -2161,6 +2161,13 @@
     position: relative;
     overflow: hidden;
     padding: 0;
+}
+
+@media (min-width: 769px) {
+    .testimonial-slider {
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
+    }
 }
 
 .testimonial-track {
