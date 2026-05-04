@@ -2361,6 +2361,12 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
 
     /* ── 모달 열기/닫기 ─────────────────────────── */
     function openAuthModal(tab) {
+        // 폼 입력값 초기화 (관리자 자격증명 자동완성 방지)
+        ['loginEmail', 'loginPassword', 'signupName', 'signupEmail',
+         'signupPassword', 'signupPasswordConfirm'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
         overlay.classList.add('open');
         modal.classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -2551,9 +2557,9 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     ['navLogoutBtn', 'mobileLogoutBtn'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.addEventListener('click', () => {
-            // 1. 먼저 모든 세션 관련 키를 즉시 삭제
+            // 1. 고객용 세션 키만 삭제 (관리자 토큰은 보존)
             Object.keys(localStorage).forEach(key => {
-                if (key.includes('auth-token') || key.startsWith('sb-')) {
+                if (key === 'pang-user-auth-token' || key.startsWith('sb-')) {
                     localStorage.removeItem(key);
                 }
             });

@@ -1310,9 +1310,9 @@
     // ── 로그아웃: try 바깥에서 항상 등록 (네트워크 장애/SDK 행 시에도 작동 보장) ──
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault();
-        // 1. 먼저 모든 세션 관련 키를 즉시 삭제
+        // 1. 고객용 세션 키만 삭제 (관리자 토큰은 보존)
         Object.keys(localStorage).forEach(key => {
-            if (key.includes('auth-token') || key.startsWith('sb-')) {
+            if (key === 'pang-user-auth-token' || key.startsWith('sb-')) {
                 localStorage.removeItem(key);
             }
         });
@@ -1327,7 +1327,7 @@
     const _supabaseHealthTimer = setTimeout(() => {
         console.warn('[mypage] Supabase 클라이언트 응답 없음 — 토큰 초기화 후 리로드');
         Object.keys(localStorage).forEach(key => {
-            if (key.includes('auth-token') || key.startsWith('sb-')) {
+            if (key === 'pang-user-auth-token' || key.startsWith('sb-')) {
                 localStorage.removeItem(key);
             }
         });
