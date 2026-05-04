@@ -253,9 +253,34 @@ const AdminContent = {
         const { data, error } = await _adminSupabase
             .from('members')
             .select('*')
+            .neq('status', 'withdrawn')
             .order('created_at', { ascending: false });
         if (error) throw error;
         return data || [];
+    },
+
+    /** 탈퇴 회원 조회 */
+    async getWithdrawnMembers() {
+        // withdrawn_at 컬럼이 없을 수 있으므로 created_at으로 정렬 시도
+        let query = _adminSupabase
+            .from('members')
+            .select('*')
+            .eq('status', 'withdrawn');
+
+        try {
+            const { data, error } = await query.order('withdrawn_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch(e) {
+            // withdrawn_at 컬럼이 없으면 created_at으로 대체
+            const { data, error } = await _adminSupabase
+                .from('members')
+                .select('*')
+                .eq('status', 'withdrawn')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        }
     },
 
     async deleteMember(id) {
@@ -428,6 +453,29 @@ const AdminContent = {
             .delete()
             .eq('id', orderId);
         if (error) throw error;
+    },
+
+    /** 특정 회원의 주문 목록 조회 (user_id 기반) */
+    async getOrdersByUser(userId) {
+        const { data, error } = await _adminSupabase
+            .from('orders')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
+    },
+
+    /** 관리자 대리 입력: 계약 사업자 정보 업데이트 (contract_data에 직접 병합) */
+    async updateContractBizInfo(orderId, bizData) {
+        const { data: current } = await _adminSupabase
+            .from('orders').select('contract_data').eq('id', orderId).single();
+        const merged = { ...(current?.contract_data || {}), ...bizData };
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({ contract_data: merged })
+            .eq('id', orderId);
+        if (error) throw error;
     }
 };
 
@@ -442,9 +490,16 @@ const AdminContent = {
 const AdminStorage = {
 
     /**
-     * 파일 업로드 → Supabase Storage 저장 → Bunny CDN URL 반환
-     * 저장: Supabase Storage (원본 보관)
-     * URL: Bunny CDN (트래픽 전달용)
+     * Supabase Storage 퍼블릭 URL 생성
+     * Bunny CDN 비활성화 시 Supabase 직접 URL 사용
+     */
+    _getPublicUrl(filePath) {
+        // Supabase Storage 퍼블릭 URL (CDN 비활성화 시 직접 사용)
+        return `${PANG_CONFIG.SUPABASE_URL}/storage/v1/object/public/${PANG_CONFIG.STORAGE_BUCKET}/${filePath}`;
+    },
+
+    /**
+     * 파일 업로드 → Supabase Storage 저장 → 퍼블릭 URL 반환
      * @param {File} file - 업로드할 파일 객체
      * @param {string} folder - 저장 폴더 (예: 'portfolio/meokpang', 'hero', 'testimonials')
      * @returns {{ path: string, url: string, type: 'image'|'video' }}
@@ -465,12 +520,12 @@ const AdminStorage = {
 
         if (error) throw error;
 
-        // 2. DB에는 Bunny CDN URL 저장 (트래픽은 Bunny가 처리)
-        const cdnUrl = `${PANG_CONFIG.BUNNY_PULL_ZONE_URL}/${data.path}`;
+        // 2. Supabase Storage 퍼블릭 URL 생성
+        const publicUrl = this._getPublicUrl(filePath);
 
         return {
             path: data.path,
-            url: cdnUrl,
+            url: publicUrl,
             type: file.type.startsWith('video/') ? 'video' : 'image'
         };
     },
@@ -530,12 +585,12 @@ const AdminStorage = {
 
             xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    // DB에는 Bunny CDN URL 저장 (트래픽은 Bunny가 처리)
-                    const cdnUrl = `${PANG_CONFIG.BUNNY_PULL_ZONE_URL}/${filePath}`;
+                    // Supabase Storage 퍼블릭 URL 생성
+                    const publicUrl = AdminStorage._getPublicUrl(filePath);
 
                     resolve({
                         path: filePath,
-                        url: cdnUrl,
+                        url: publicUrl,
                         type: file.type.startsWith('video/') ? 'video' : 'image'
                     });
                 } else {

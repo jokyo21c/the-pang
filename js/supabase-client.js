@@ -104,12 +104,12 @@ const PangAuth = {
     },
 
     /** 이메일/비밀번호 회원가입 */
-    async signUp(email, password, name) {
+    async signUp(email, password, name, phone) {
         const { data, error } = await _supabaseClient.auth.signUp({
             email,
             password,
             options: {
-                data: { name }
+                data: { name, phone }
             }
         });
 
@@ -130,7 +130,8 @@ const PangAuth = {
             const { error: insertErr } = await _supabaseClient.from('members').insert({
                 user_id: data.user.id,
                 name: name,
-                email: email
+                email: email,
+                phone: phone
             });
             if (insertErr && !insertErr.message.includes('duplicate')) {
                 console.warn('[PangAuth] members 테이블 삽입 실패:', insertErr.message);
@@ -142,7 +143,8 @@ const PangAuth = {
                 localStorage.setItem('_pangPendingMember', JSON.stringify({
                     user_id: data.user.id,
                     name: name,
-                    email: email
+                    email: email,
+                    phone: phone
                 }));
             } catch(e) {}
         }
@@ -157,6 +159,22 @@ const PangAuth = {
             password
         });
         if (error) throw error;
+        
+        // 로그인 성공 후, members 테이블에서 탈퇴 여부 확인
+        if (data && data.user) {
+            const { data: memberData } = await _supabaseClient
+                .from('members')
+                .select('status')
+                .eq('user_id', data.user.id)
+                .single();
+            
+            if (memberData && memberData.status === 'withdrawn') {
+                // 탈퇴한 회원이면 로그아웃 시키고 에러 반환
+                await this.signOut();
+                throw new Error('탈퇴한 계정입니다.');
+            }
+        }
+        
         return data;
     },
 
@@ -258,6 +276,44 @@ const PangOrders = {
             .update({ contract_data: merged })
             .eq('id', orderId);
         if (error) throw error;
+    },
+
+    /** 사업자등록증 파일 → data URL 반환 (Storage 미사용, 직접 DB 저장) */
+    async uploadBusinessLicense(file) {
+        const user = await PangAuth.getUser();
+        if (!user) throw new Error('로그인이 필요합니다.');
+
+        if (file.size > 5 * 1024 * 1024) {
+            throw new Error('파일 크기는 5MB 이하여야 합니다.');
+        }
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                let dataUrl = reader.result;
+                // 파일 확장자가 이미지(.png/.jpg)여도 실제 내용이 PDF인 경우 MIME 타입 교정
+                const base64Part = dataUrl.split(';base64,')[1] || '';
+                if (base64Part.startsWith('JVBER')) {
+                    // %PDF 시그니처 감지 → application/pdf로 교정
+                    dataUrl = 'data:application/pdf;base64,' + base64Part;
+                }
+                resolve(dataUrl);
+            };
+            reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
+            reader.readAsDataURL(file);
+        });
+    },
+
+    /** 계약 사업자 정보 제출 (contract_data에 병합) */
+    async submitContractInfo(orderId, infoData) {
+        const { data: current } = await _supabaseClient
+            .from('orders').select('contract_data').eq('id', orderId).single();
+        const merged = { ...(current?.contract_data || {}), ...infoData };
+        const { error } = await _supabaseClient
+            .from('orders')
+            .update({ contract_data: merged })
+            .eq('id', orderId);
+        if (error) throw error;
     }
 };
 
@@ -285,7 +341,8 @@ _supabaseClient.auth.onAuthStateChange(async (event, session) => {
                     const { error: insertErr } = await _supabaseClient.from('members').insert({
                         user_id: m.user_id,
                         name: m.name,
-                        email: m.email
+                        email: m.email,
+                        phone: m.phone || ''
                     });
                     if (!insertErr || insertErr.message.includes('duplicate')) {
                         localStorage.removeItem('_pangPendingMember');

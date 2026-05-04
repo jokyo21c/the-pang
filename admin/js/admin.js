@@ -91,6 +91,7 @@ function showPanel(panelId, pushState = true) {
         footer:      '푸터 관리',
         orders:      '주문/견적 관리',
         members:     '회원 관리',
+        withdrawn:   '탈퇴회원 관리',
         settings:    '계정 설정',
     };
     const topTitle = document.getElementById('topbarTitle');
@@ -98,7 +99,8 @@ function showPanel(panelId, pushState = true) {
 
     if (panelId === 'members') initMembersPanel();
     if (panelId === 'orders') loadOrders();
-    if (panelId === 'dashboard') { updateMemberStat(); updateOrderStat(); }
+    if (panelId === 'withdrawn') initWithdrawnPanel();
+    if (panelId === 'dashboard') { updateMemberStat(); updateOrderStat(); updateWithdrawnStat(); }
     if (panelId === 'settings') loadAccountSettings();
 
     if (pushState) {
@@ -954,7 +956,10 @@ function renderMembers(members) {
             <td class="member-email">${m.email}</td>
             <td>${statusBadge}</td>
             <td>
-                <button class="btn-member-delete" onclick="openMemberDeleteModal(${m.id}, '${m.name}', '${m.email}')" title="삭제">
+                <button class="btn-member-delete" style="background:rgba(123,47,255,0.1); color:#7b2fff;" onclick="openMemberDetail('${m.user_id}', '${m.name}', '${m.email}', '${m.status}', '${m.created_at}')" title="상세">
+                    <i class="ri-eye-line"></i>
+                </button>
+                <button class="btn-member-delete" onclick="openMemberDeleteModal(${m.id}, '${m.name}', '${m.email}')" title="삭제" style="margin-left:4px;">
                     <i class="ri-delete-bin-6-line"></i>
                 </button>
             </td>
@@ -1004,6 +1009,82 @@ async function confirmDeleteMember() {
     } catch (e) {
         console.error('회원 삭제 실패:', e);
         showToast('❌ 회원 삭제 실패: ' + e.message);
+    }
+}
+
+/* ── 회원 상세 보기 ── */
+async function openMemberDetail(userId, name, email, status, createdAt) {
+    const modal = document.getElementById('memberDetailModal');
+    const body = document.getElementById('memberDetailBody');
+
+    const statusLabel = status === 'active' ? '<span style="color:#22c55e;">활성</span>' : '<span style="color:#888;">비활성</span>';
+    const joinDate = createdAt ? new Date(createdAt).toLocaleString('ko-KR') : '-';
+
+    let ordersHtml = '<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">주문 이력을 불러오는 중...</div>';
+
+    body.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <div><small style="color:var(--text-muted); font-size:11px;">이름</small><br><strong style="color:var(--text-primary); font-size:15px;">${name}</strong></div>
+            <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br>${statusLabel}</div>
+            <div><small style="color:var(--text-muted); font-size:11px;">이메일</small><br><span style="color:var(--text-secondary); font-size:13px;">${email}</span></div>
+            <div><small style="color:var(--text-muted); font-size:11px;">가입일</small><br><span style="color:var(--text-secondary); font-size:13px;">${joinDate}</span></div>
+        </div>
+        <div style="border-top:1px solid var(--border); padding-top:16px;">
+            <h4 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">📋 주문/견적 이력</h4>
+            <div id="memberOrdersList">${ordersHtml}</div>
+        </div>
+    `;
+    modal.style.display = 'flex';
+
+    // 주문 이력 비동기 로드
+    try {
+        const orders = await AdminContent.getOrdersByUser(userId);
+        const listEl = document.getElementById('memberOrdersList');
+        if (!orders.length) {
+            listEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">주문 내역이 없습니다.</div>';
+        } else {
+            listEl.innerHTML = orders.map(o => {
+                const s = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP['quote_pending'];
+                const date = new Date(o.created_at).toLocaleDateString('ko-KR');
+                return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer;" onclick="closeMemberDetail(); openOrderDetail(${o.id})">
+                    <div><strong style="font-size:13px; color:var(--text-primary);">${o.plan_name}</strong> <span style="font-size:11px; color:var(--text-muted);">${date}</span></div>
+                    <span style="font-size:12px; font-weight:600; color:var(--purple-light);">${s.icon} ${s.label}</span>
+                </div>`;
+            }).join('');
+        }
+    } catch (e) {
+        document.getElementById('memberOrdersList').innerHTML = '<div style="color:#e53c11; font-size:12px;">주문 이력 로드 실패</div>';
+    }
+}
+
+function closeMemberDetail() {
+    document.getElementById('memberDetailModal').style.display = 'none';
+}
+
+/* ── 주문 상세에서 사업자 정보 관리자 대리 입력 저장 ── */
+async function saveAdminBizInfo(orderId) {
+    const company = document.getElementById('adminBizCompany')?.value?.trim() || '';
+    const ceo = document.getElementById('adminBizCeo')?.value?.trim() || '';
+    const bizNum = document.getElementById('adminBizNum')?.value?.trim() || '';
+    const address = document.getElementById('adminBizAddr')?.value?.trim() || '';
+    const phone = document.getElementById('adminBizPhone')?.value?.trim() || '';
+    const email = document.getElementById('adminBizEmail')?.value?.trim() || '';
+
+    if (!company) { showToast('업체명을 입력해주세요.'); return; }
+
+    try {
+        await AdminContent.updateContractBizInfo(orderId, {
+            company_name: company,
+            ceo_name: ceo,
+            biz_number: bizNum,
+            address: address,
+            contact_phone: phone,
+            contact_email: email
+        });
+        showToast('✅ 사업자 정보가 저장되었습니다.');
+        openOrderDetail(orderId); // 새로고침
+    } catch (e) {
+        showToast('❌ 저장 실패: ' + e.message);
     }
 }
 
@@ -1247,6 +1328,58 @@ async function openOrderDetail(orderId) {
                 <textarea id="adminReplyInput" class="form-control" rows="3" placeholder="고객 요청사항에 대한 답변을 입력하세요..." style="width:100%; font-size:13px; resize:vertical;">${order.quote_data?.admin_reply || ''}</textarea>
                 <button onclick="saveAdminReply(${orderId})" class="btn-preview" style="margin-top:8px; height:40px; padding:0 16px; font-size:13px; border-radius:8px; font-weight:600;">답변 저장</button>
             </div>
+            ${(() => {
+                // 사업자 정보 섹션
+                const bizUrl = order.contract_data?.biz_license_url || '';
+                const custBiz = order.contract_data?.customer_business || {};
+                const cd = order.contract_data || {};
+                // customer_business 내부 값을 우선 사용하되, 없으면 contract_data 루트(간편 첨부 시 저장 위치)에서 폴백
+                const bizInfo = {
+                    company_name: custBiz.company_name || cd.company_name || '',
+                    ceo_name: custBiz.ceo_name || cd.ceo_name || '',
+                    biz_number: custBiz.biz_number || cd.biz_number || '',
+                    address: custBiz.address || cd.address || '',
+                    contact_phone: custBiz.contact_phone || cd.contact_phone || '',
+                    contact_email: custBiz.contact_email || cd.contact_email || '',
+                    biz_type: custBiz.biz_type || cd.biz_type || '',
+                    contact_name: custBiz.contact_name || cd.contact_name || ''
+                };
+                const hasBizInfo = bizInfo.company_name || bizInfo.contact_phone || bizInfo.contact_email;
+                let bizHtml = '<div style="margin-top:16px; border-top:1px solid var(--border); padding-top:16px;"><div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">📋 고객 사업자 정보</div>';
+
+                if (bizUrl) {
+                    bizHtml += `<div style="margin-bottom:12px;"><div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">첨부된 사업자등록증</div><div id="bizLicensePreview" style="display:inline-block; max-width:100%;"><span style="color:#888; font-size:12px;">이미지 로딩 중...</span></div></div>`;
+                }
+
+                if (hasBizInfo) {
+                    bizHtml += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px;">
+                        <div><span style="color:var(--text-muted);">업체명</span><br><strong style="color:var(--text-primary);">${bizInfo.company_name || '-'}</strong></div>
+                        <div><span style="color:var(--text-muted);">대표자</span><br><strong style="color:var(--text-primary);">${bizInfo.ceo_name || '-'}</strong></div>
+                        <div><span style="color:var(--text-muted);">사업자번호</span><br><span style="color:var(--text-secondary);">${bizInfo.biz_number || '-'}</span></div>
+                        <div><span style="color:var(--text-muted);">주소</span><br><span style="color:var(--text-secondary);">${bizInfo.address || '-'}</span></div>
+                        <div><span style="color:var(--text-muted);">연락처</span><br><span style="color:var(--text-secondary);">${bizInfo.contact_phone || '-'}</span></div>
+                        <div><span style="color:var(--text-muted);">이메일</span><br><span style="color:var(--text-secondary);">${bizInfo.contact_email || '-'}</span></div>
+                    </div>`;
+                }
+
+                // 관리자 대리 입력 폼 (항상 표시 - 기존 정보 수정 가능)
+                const inputStyle = 'width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-primary); font-size:12px;';
+                bizHtml += `<div style="margin-top:12px; padding:12px; background:rgba(123,47,255,0.04); border:1px solid rgba(123,47,255,0.12); border-radius:8px;">
+                    <div style="font-size:11px; font-weight:600; color:var(--purple-light); margin-bottom:10px;">${hasBizInfo ? '✏️ 사업자 정보 수정' : '✏️ 사업자 정보 대리 입력'}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div><label style="font-size:10px; color:var(--text-muted);">업체명 *</label><input id="adminBizCompany" style="${inputStyle}" value="${bizInfo.company_name || ''}" placeholder="업체명"></div>
+                        <div><label style="font-size:10px; color:var(--text-muted);">대표자</label><input id="adminBizCeo" style="${inputStyle}" value="${bizInfo.ceo_name || ''}" placeholder="대표자"></div>
+                        <div><label style="font-size:10px; color:var(--text-muted);">사업자번호</label><input id="adminBizNum" style="${inputStyle}" value="${bizInfo.biz_number || ''}" placeholder="000-00-00000"></div>
+                        <div><label style="font-size:10px; color:var(--text-muted);">주소</label><input id="adminBizAddr" style="${inputStyle}" value="${bizInfo.address || ''}" placeholder="주소"></div>
+                        <div><label style="font-size:10px; color:var(--text-muted);">연락처</label><input id="adminBizPhone" style="${inputStyle}" value="${bizInfo.contact_phone || ''}" placeholder="010-0000-0000"></div>
+                        <div><label style="font-size:10px; color:var(--text-muted);">이메일</label><input id="adminBizEmail" style="${inputStyle}" value="${bizInfo.contact_email || ''}" placeholder="email@example.com"></div>
+                    </div>
+                    <button onclick="saveAdminBizInfo(${orderId})" class="btn-save" style="margin-top:10px; height:34px; font-size:12px; width:100%;">사업자 정보 저장</button>
+                </div>`;
+
+                bizHtml += '</div>';
+                return (bizUrl || hasBizInfo || ['contract_issued','completed'].includes(order.status)) ? bizHtml : '';
+            })()}
         `;
 
         const btnStyle = 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0; white-space:nowrap;';
@@ -1267,7 +1400,13 @@ async function openOrderDetail(orderId) {
                 <button onclick="actionIssueQuote(${orderId})" class="btn-save" style="${btnStyle}">견적서 발행</button>
             `;
         } else if (order.status === 'quote_issued') {
-            actionsHtml = `<button onclick="actionConfirmPayment(${orderId})" class="btn-save" style="${btnStyle}">결제 확인</button>`;
+            // 고객이 계약정보를 등록했는지 확인
+            const hasBizInfo = order.contract_data?.customer_business || order.contract_data?.biz_license_url;
+            if (hasBizInfo) {
+                actionsHtml = `<button onclick="actionConfirmPayment(${orderId})" class="btn-save" style="${btnStyle}">결제 확인</button>`;
+            } else {
+                actionsHtml = `<button disabled class="btn-save" style="${btnStyle} opacity:0.4; cursor:not-allowed;" title="고객이 계약 정보를 등록한 후 활성화됩니다">결제 확인 (대기 중)</button>`;
+            }
         } else if (order.status === 'paid') {
             actionsHtml = `<button onclick="actionIssueContract(${orderId})" class="btn-save" style="${btnStyle}">계약서 발행</button>`;
         } else if (order.status === 'contract_issued') {
@@ -1276,6 +1415,72 @@ async function openOrderDetail(orderId) {
         actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}${actionsHtml}</div>`;
 
         modal.style.display = 'flex';
+
+        // 사업자등록증 표시 (PDF/이미지 자동 감지)
+        const bizLicenseUrl = order.contract_data?.biz_license_url || '';
+        const previewContainer = document.getElementById('bizLicensePreview');
+        if (previewContainer && bizLicenseUrl) {
+            previewContainer.innerHTML = '';
+
+            // PDF 감지: MIME 타입 또는 base64 내용으로 판단
+            const isPdf = bizLicenseUrl.includes('application/pdf') ||
+                          bizLicenseUrl.includes(';base64,JVBER');
+
+            // 기존 데이터 중 image/jpeg로 잘못 저장된 PDF도 교정
+            let displayUrl = bizLicenseUrl;
+            if (isPdf && !bizLicenseUrl.includes('application/pdf')) {
+                const base64 = bizLicenseUrl.split(';base64,')[1] || '';
+                displayUrl = 'data:application/pdf;base64,' + base64;
+            }
+
+            if (isPdf) {
+                // PDF → iframe으로 표시
+                const iframe = document.createElement('iframe');
+                iframe.src = displayUrl;
+                iframe.style.cssText = 'width:100%; height:350px; border-radius:8px; border:1px solid var(--border);';
+                previewContainer.appendChild(iframe);
+
+                // PDF 새 창에서 보기 버튼
+                const btn = document.createElement('button');
+                btn.textContent = '📄 PDF 새 창에서 보기';
+                btn.className = 'btn-preview';
+                btn.style.cssText = 'margin-top:8px; font-size:11px; padding:4px 12px; cursor:pointer;';
+                btn.onclick = () => {
+                    const w = window.open('', '_blank');
+                    if (!w) { alert('팝업이 차단되었습니다.'); return; }
+                    const pdfIframe = w.document.createElement('iframe');
+                    pdfIframe.src = displayUrl;
+                    pdfIframe.style.cssText = 'width:100%; height:100%; border:none;';
+                    w.document.body.style.cssText = 'margin:0; overflow:hidden;';
+                    w.document.body.appendChild(pdfIframe);
+                    w.document.title = '사업자등록증';
+                };
+                previewContainer.appendChild(btn);
+            } else {
+                // 이미지 → img 엘리먼트
+                const img = document.createElement('img');
+                img.alt = '사업자등록증';
+                img.style.cssText = 'max-width:100%; max-height:250px; border-radius:8px; border:1px solid var(--border); cursor:pointer;';
+                img.title = '클릭하면 새 창에서 볼 수 있습니다';
+                img.onload = () => {
+                    img.onclick = () => {
+                        const w = window.open('', '_blank');
+                        if (!w) { alert('팝업이 차단되었습니다.'); return; }
+                        w.document.title = '사업자등록증';
+                        w.document.body.style.cssText = 'margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; background:#111;';
+                        const popupImg = w.document.createElement('img');
+                        popupImg.style.cssText = 'max-width:100%; max-height:100vh;';
+                        popupImg.src = displayUrl;
+                        w.document.body.appendChild(popupImg);
+                    };
+                };
+                img.onerror = () => {
+                    previewContainer.innerHTML = '<span style="color:#888; font-size:12px;">📎 파일을 표시할 수 없습니다</span>';
+                };
+                previewContainer.appendChild(img);
+                img.src = displayUrl;
+            }
+        }
     } catch (e) {
         console.error('주문 상세 로드 실패:', e);
         showToast('❌ 주문 상세를 불러올 수 없습니다.');
@@ -1339,8 +1544,12 @@ async function actionConfirmPayment(orderId) {
     try {
         await AdminContent.confirmPayment(orderId);
         showToast('✅ 결제가 확인되었습니다.');
-        closeOrderDetail();
         loadOrders();
+        // 모달 닫지 않고 바로 계약서 발행 버튼 표시
+        const actions = document.getElementById('orderDetailActions');
+        const btnStyle = 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0; white-space:nowrap;';
+        let pdfBtns = `<button onclick="adminDownloadQuotePDF(${orderId})" class="btn-preview" style="${btnStyle}">견적서 PDF</button>`;
+        actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}<button onclick="actionIssueContract(${orderId})" class="btn-save" style="${btnStyle}">계약서 발행</button></div>`;
     } catch (e) {
         showToast('❌ 결제 확인 실패: ' + e.message);
     }
@@ -1353,8 +1562,13 @@ async function actionIssueContract(orderId) {
             issuedAt: new Date().toISOString()
         });
         showToast('✅ 계약서가 발행되었습니다.');
-        closeOrderDetail();
         loadOrders();
+        // 모달 닫지 않고 바로 체결 완료 버튼 표시
+        const actions = document.getElementById('orderDetailActions');
+        const btnStyle = 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0; white-space:nowrap;';
+        let pdfBtns = `<button onclick="adminDownloadQuotePDF(${orderId})" class="btn-preview" style="${btnStyle}">견적서 PDF</button>`;
+        pdfBtns += `<button onclick="adminDownloadContractPDF(${orderId})" class="btn-preview" style="${btnStyle}">계약서 PDF</button>`;
+        actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}<button onclick="actionCompleteOrder(${orderId})" class="btn-save" style="${btnStyle} background:#e53c11; color:#fff; border-color:#e53c11;">체결 완료</button></div>`;
     } catch (e) {
         showToast('❌ 계약서 발행 실패: ' + e.message);
     }
@@ -1510,4 +1724,136 @@ async function adminDownloadContractPDF(orderId) {
 }
 
 
+/* ════════════════════════════════════════════════════════
+   탈퇴회원 관리 패널 (열람 전용)
+   ════════════════════════════════════════════════════════ */
+
+let _withdrawnMembers = [];
+
+async function updateWithdrawnStat() {
+    try {
+        const withdrawn = await AdminContent.getWithdrawnMembers();
+        const el = document.getElementById('stat-withdrawn');
+        if (el) el.textContent = withdrawn.length;
+    } catch(e) { console.warn('withdrawn stat fail:', e); }
+}
+
+async function initWithdrawnPanel() {
+    try {
+        _withdrawnMembers = await AdminContent.getWithdrawnMembers();
+        document.getElementById('withdrawnTotalCount').textContent = _withdrawnMembers.length;
+        const statEl = document.getElementById('stat-withdrawn');
+        if (statEl) statEl.textContent = _withdrawnMembers.length;
+
+        // 각 회원별 주문 건수 조회
+        for (const m of _withdrawnMembers) {
+            try {
+                const orders = await AdminContent.getOrdersByUser(m.user_id);
+                m._orderCount = orders.length;
+            } catch(e) { m._orderCount = 0; }
+        }
+
+        renderWithdrawnMembers(_withdrawnMembers);
+    } catch (e) {
+        console.error('탈퇴회원 로드 실패:', e);
+        showToast('❌ 탈퇴회원 로드 실패');
+    }
+}
+
+function renderWithdrawnMembers(members) {
+    const tbody = document.getElementById('withdrawnTableBody');
+    const empty = document.getElementById('withdrawnEmpty');
+
+    if (!members.length) {
+        tbody.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = members.map((m, i) => {
+        const wDate = m.withdrawn_at ? new Date(m.withdrawn_at).toLocaleDateString('ko-KR') : '-';
+        const orderCount = m._orderCount || 0;
+        const countBadge = orderCount > 0
+            ? `<span style="background:rgba(229,60,17,0.12); color:#e53c11; padding:2px 8px; border-radius:10px; font-size:12px; font-weight:600;">${orderCount}건</span>`
+            : `<span style="color:var(--text-muted); font-size:12px;">없음</span>`;
+
+        const safeName = (m.name || '').replace(/'/g, "\\'");
+        const safeEmail = (m.email || '').replace(/'/g, "\\'");
+
+        return `
+        <tr class="member-row">
+            <td class="member-num">${i + 1}</td>
+            <td>
+                <div class="member-name-cell">
+                    <div class="member-avatar" style="background:rgba(229,60,17,0.15); color:#e53c11;">${(m.name || '?').charAt(0)}</div>
+                    <span>${m.name || '-'}</span>
+                </div>
+            </td>
+            <td class="member-email">${m.email || '-'}</td>
+            <td style="font-size:12px; color:var(--text-secondary);">${wDate}</td>
+            <td>${countBadge}</td>
+            <td>
+                <button class="btn-member-delete" style="background:rgba(123,47,255,0.1); color:#7b2fff;" onclick="openWithdrawnDetail('${m.user_id}', '${safeName}', '${safeEmail}', '${m.created_at||''}', '${m.withdrawn_at||''}')" title="상세 보기">
+                    <i class="ri-eye-line"></i>
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function filterWithdrawnMembers() {
+    const q = document.getElementById('withdrawnSearchInput').value.trim().toLowerCase();
+    const filtered = q
+        ? _withdrawnMembers.filter(m => (m.name||'').toLowerCase().includes(q) || (m.email||'').toLowerCase().includes(q))
+        : _withdrawnMembers;
+    renderWithdrawnMembers(filtered);
+}
+
+async function openWithdrawnDetail(userId, name, email, createdAt, withdrawnAt) {
+    const modal = document.getElementById('withdrawnDetailModal');
+    const body = document.getElementById('withdrawnDetailBody');
+
+    const joinDate = createdAt ? new Date(createdAt).toLocaleString('ko-KR') : '-';
+    const wDate = withdrawnAt ? new Date(withdrawnAt).toLocaleString('ko-KR') : '-';
+
+    body.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <div><small style="color:var(--text-muted); font-size:11px;">이름</small><br><strong style="color:var(--text-primary); font-size:15px;">${name}</strong></div>
+            <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br><span style="color:#e53c11; font-weight:600;">탈퇴</span></div>
+            <div><small style="color:var(--text-muted); font-size:11px;">이메일</small><br><span style="color:var(--text-secondary); font-size:13px;">${email}</span></div>
+            <div><small style="color:var(--text-muted); font-size:11px;">가입일</small><br><span style="color:var(--text-secondary); font-size:13px;">${joinDate}</span></div>
+            <div style="grid-column:1/-1;"><small style="color:var(--text-muted); font-size:11px;">탈퇴일</small><br><span style="color:#e53c11; font-size:13px; font-weight:600;">${wDate}</span></div>
+        </div>
+        <div style="border-top:1px solid var(--border); padding-top:16px;">
+            <h4 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">📋 계약/견적 이력 (증빙 보관용)</h4>
+            <div id="withdrawnOrdersList" style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">이력을 불러오는 중...</div>
+        </div>
+    `;
+    modal.style.display = 'flex';
+
+    // 주문 이력 로드
+    try {
+        const orders = await AdminContent.getOrdersByUser(userId);
+        const listEl = document.getElementById('withdrawnOrdersList');
+        if (!orders.length) {
+            listEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">계약/견적 이력이 없습니다.</div>';
+        } else {
+            listEl.innerHTML = orders.map(o => {
+                const s = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP['quote_pending'];
+                const date = new Date(o.created_at).toLocaleDateString('ko-KR');
+                return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer;" onclick="closeWithdrawnDetail(); openOrderDetail(${o.id})">
+                    <div><strong style="font-size:13px; color:var(--text-primary);">${o.plan_name}</strong> <span style="font-size:11px; color:var(--text-muted);">${date}</span></div>
+                    <span style="font-size:12px; font-weight:600; color:var(--purple-light);">${s.icon} ${s.label}</span>
+                </div>`;
+            }).join('');
+        }
+    } catch (e) {
+        document.getElementById('withdrawnOrdersList').innerHTML = '<div style="color:#e53c11; font-size:12px;">이력 로드 실패</div>';
+    }
+}
+
+function closeWithdrawnDetail() {
+    document.getElementById('withdrawnDetailModal').style.display = 'none';
+}
 
