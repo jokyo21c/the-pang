@@ -11,7 +11,12 @@ const { createClient } = supabase;
 
 const _supabaseClient = createClient(
     PANG_CONFIG.SUPABASE_URL,
-    PANG_CONFIG.SUPABASE_ANON_KEY
+    PANG_CONFIG.SUPABASE_ANON_KEY,
+    {
+        auth: {
+            storageKey: 'pang-user-auth-token'
+        }
+    }
 );
 
 /* ── 콘텐츠 읽기 (메인사이트 공용) ────────────────────── */
@@ -104,12 +109,12 @@ const PangAuth = {
     },
 
     /** 이메일/비밀번호 회원가입 */
-    async signUp(email, password, name, phone) {
+    async signUp(email, password, name, phone, birthday, gender, address, addressDetail) {
         const { data, error } = await _supabaseClient.auth.signUp({
             email,
             password,
             options: {
-                data: { name, phone }
+                data: { name, phone, birthday, gender, address, addressDetail }
             }
         });
 
@@ -131,22 +136,13 @@ const PangAuth = {
                 user_id: data.user.id,
                 name: name,
                 email: email,
-                phone: phone
+                phone: phone || ''
             });
             if (insertErr && !insertErr.message.includes('duplicate')) {
                 console.warn('[PangAuth] members 테이블 삽입 실패:', insertErr.message);
             }
         } else if (data.user && !data.session) {
-            // 이메일 확인 대기 중 → pending 정보를 localStorage에 저장
-            // SIGNED_IN 이벤트 시 insert 처리
-            try {
-                localStorage.setItem('_pangPendingMember', JSON.stringify({
-                    user_id: data.user.id,
-                    name: name,
-                    email: email,
-                    phone: phone
-                }));
-            } catch(e) {}
+            // 이메일 확인 대기 중: SIGNED_IN 이벤트 시 user_metadata를 이용해 자동 삽입됩니다.
         }
 
         return data;
@@ -325,34 +321,39 @@ window._supabaseClient = _supabaseClient;
 
 /* ── 조기 PASSWORD_RECOVERY 감지 (DOMContentLoaded 전) ──── */
 window._pangRecoveryDetected = false;
-_supabaseClient.auth.onAuthStateChange(async (event, session) => {
+_supabaseClient.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
         window._pangRecoveryDetected = true;
     }
 
-    // ── 이메일 확인 후 첫 로그인 시 members 테이블 삽입 ────────
+    // ── 로그인 성공 시 members 테이블 삽입 보장 ────────
+    // 주의: 이 콜백 안에서 await를 사용하면 SDK 내부 잠금과 데드락이
+    // 발생할 수 있으므로, 비동기 작업은 별도 함수로 분리하여 fire-and-forget
     if (event === 'SIGNED_IN' && session?.user) {
-        try {
-            const pending = localStorage.getItem('_pangPendingMember');
-            if (pending) {
-                const m = JSON.parse(pending);
-                // user_id가 일치하는지 확인
-                if (m.user_id === session.user.id) {
-                    const { error: insertErr } = await _supabaseClient.from('members').insert({
-                        user_id: m.user_id,
-                        name: m.name,
-                        email: m.email,
-                        phone: m.phone || ''
-                    });
-                    if (!insertErr || insertErr.message.includes('duplicate')) {
-                        localStorage.removeItem('_pangPendingMember');
-                    } else {
-                        console.warn('[PangAuth] pending member insert 실패:', insertErr.message);
-                    }
-                }
+        setTimeout(() => {
+            const meta = session.user.user_metadata || {};
+            const memberObj = {
+                user_id: session.user.id,
+                name: meta.name || '알 수 없음',
+                email: session.user.email
+            };
+            
+            // phone 컬럼이 존재할 경우에만 포함하도록 처리 (스키마 오류 방지)
+            if (meta.phone) {
+                memberObj.phone = meta.phone;
             }
-        } catch(e) {
-            console.warn('[PangAuth] pending member 처리 실패:', e);
-        }
+
+            _supabaseClient.from('members').insert(memberObj).then(({ error: insertErr }) => {
+                // 만약 phone 컬럼 오류로 실패하면 phone 제외하고 재시도
+                if (insertErr && insertErr.message.includes('phone')) {
+                    delete memberObj.phone;
+                    _supabaseClient.from('members').insert(memberObj).catch(() => {});
+                } else if (insertErr && !insertErr.message.includes('duplicate')) {
+                    console.warn('[PangAuth] SIGNED_IN member 삽입 실패:', insertErr.message);
+                }
+            }).catch(e => {
+                console.warn('[PangAuth] SIGNED_IN member 처리 실패:', e);
+            });
+        }, 0);
     }
 });

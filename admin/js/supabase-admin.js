@@ -9,7 +9,12 @@ const { createClient: _createClient } = supabase;
 
 const _adminSupabase = _createClient(
     PANG_CONFIG.SUPABASE_URL,
-    PANG_CONFIG.SUPABASE_ANON_KEY
+    PANG_CONFIG.SUPABASE_ANON_KEY,
+    {
+        auth: {
+            storageKey: 'pang-admin-auth-token'
+        }
+    }
 );
 
 /* ═══════════════════════════════════════════════════════
@@ -397,12 +402,17 @@ const AdminContent = {
 
     /** 계약서 발행 */
     async issueContract(orderId, contractData) {
+        // 기존 contract_data 보존
+        const { data: current } = await _adminSupabase
+            .from('orders').select('contract_data').eq('id', orderId).single();
+        const mergedContract = { ...(current?.contract_data || {}), ...contractData };
+
         // contract_issued_at 포함 시도
         const { error } = await _adminSupabase
             .from('orders')
             .update({
                 status: 'contract_issued',
-                contract_data: contractData,
+                contract_data: mergedContract,
                 contract_issued_at: new Date().toISOString()
             })
             .eq('id', orderId);
@@ -410,7 +420,7 @@ const AdminContent = {
         if (error && error.message && error.message.includes('contract_issued_at')) {
             const { error: err2 } = await _adminSupabase
                 .from('orders')
-                .update({ status: 'contract_issued', contract_data: contractData })
+                .update({ status: 'contract_issued', contract_data: mergedContract })
                 .eq('id', orderId);
             if (err2) throw err2;
         } else if (error) {
@@ -466,11 +476,15 @@ const AdminContent = {
         return data || [];
     },
 
-    /** 관리자 대리 입력: 계약 사업자 정보 업데이트 (contract_data에 직접 병합) */
     async updateContractBizInfo(orderId, bizData) {
         const { data: current } = await _adminSupabase
             .from('orders').select('contract_data').eq('id', orderId).single();
-        const merged = { ...(current?.contract_data || {}), ...bizData };
+        const existingCD = current?.contract_data || {};
+        const existingCustBiz = existingCD.customer_business || {};
+        const merged = { 
+            ...existingCD, 
+            customer_business: { ...existingCustBiz, ...bizData } 
+        };
         const { error } = await _adminSupabase
             .from('orders')
             .update({ contract_data: merged })

@@ -1410,7 +1410,12 @@ async function openOrderDetail(orderId) {
         } else if (order.status === 'paid') {
             actionsHtml = `<button onclick="actionIssueContract(${orderId})" class="btn-save" style="${btnStyle}">계약서 발행</button>`;
         } else if (order.status === 'contract_issued') {
-            actionsHtml = `<button onclick="actionCompleteOrder(${orderId})" class="btn-save" style="${btnStyle} background:#e53c11; color:#fff; border-color:#e53c11;">체결 완료</button>`;
+            const hasSigned = !!(order.contract_data?.customer_signature);
+            if (hasSigned) {
+                actionsHtml = `<button onclick="actionCompleteOrder(${orderId})" class="btn-save" style="${btnStyle} background:#e53c11; color:#fff; border-color:#e53c11;">체결 완료</button>`;
+            } else {
+                actionsHtml = `<span title="고객이 마이페이지에서 전자서명을 완료한 후 활성화됩니다." style="display:flex; flex:1;"><button disabled class="btn-save" style="${btnStyle} background:#ddd; color:#999; border-color:#ddd; cursor:not-allowed; opacity:0.7; pointer-events:none; width:100%;">체결 완료 (고객 서명 대기중)</button></span>`;
+            }
         }
         actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}${actionsHtml}</div>`;
 
@@ -1568,7 +1573,7 @@ async function actionIssueContract(orderId) {
         const btnStyle = 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0; white-space:nowrap;';
         let pdfBtns = `<button onclick="adminDownloadQuotePDF(${orderId})" class="btn-preview" style="${btnStyle}">견적서 PDF</button>`;
         pdfBtns += `<button onclick="adminDownloadContractPDF(${orderId})" class="btn-preview" style="${btnStyle}">계약서 PDF</button>`;
-        actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}<button onclick="actionCompleteOrder(${orderId})" class="btn-save" style="${btnStyle} background:#e53c11; color:#fff; border-color:#e53c11;">체결 완료</button></div>`;
+        actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}<span title="고객이 마이페이지에서 전자서명을 완료한 후 활성화됩니다." style="display:flex; flex:1;"><button disabled class="btn-save" style="${btnStyle} background:#ddd; color:#999; border-color:#ddd; cursor:not-allowed; opacity:0.7; pointer-events:none; width:100%;">체결 완료 (고객 서명 대기중)</button></span></div>`;
     } catch (e) {
         showToast('❌ 계약서 발행 실패: ' + e.message);
     }
@@ -1664,6 +1669,14 @@ async function adminDownloadContractPDF(orderId) {
         const customerName = order.user_name || order.plan_name || '고객';
         const adminReply = order.quote_data?.admin_reply || '';
         const customerSignature = order.contract_data?.customer_signature || '';
+        const custBiz = order.contract_data?.customer_business || {};
+        const cd2 = order.contract_data || {};
+        const member = order._member || order.members || {};
+        const bizCompany = custBiz.company_name || cd2.company_name || member.company || member.company_name || customerName;
+        const bizCeo = custBiz.ceo_name || cd2.ceo_name || member.name || '';
+        const bizNum = custBiz.biz_number || cd2.biz_number || '';
+        const bizAddr = custBiz.address || cd2.address || '';
+
         const basePrice = order.plan_price || '-';
         let basePriceClean = basePrice;
         if (basePrice.includes('|')) { const p = basePrice.split('|'); basePriceClean = (p[2] || p[0]) + '원'; }
@@ -1678,7 +1691,7 @@ async function adminDownloadContractPDF(orderId) {
 <div id="adminContractP1" style="width:794px; height:1123px; padding:50px 65px; font-family:'Pretendard Variable','Malgun Gothic',sans-serif; color:#111; font-size:12px; line-height:1.7; background:#fff; box-sizing:border-box; overflow:hidden;">
     <h1 style="text-align:center; font-size:20px; font-weight:700; margin-bottom:4px; letter-spacing:2px;">광고 마케팅 업무 표준 계약서</h1>
     <div style="text-align:center; font-size:10px; color:#888; margin-bottom:20px;">THE PANG by NEXON</div>
-    <p style="margin-bottom:14px;">${customerName}(이하 "행"이라 한다)과 넥스온(이하 "동"이라 한다)은 "행"의 상품 및 브랜드 홍보를 위한 광고 마케팅 업무를 수행함에 있어 상호 신뢰를 바탕으로 다음과 같이 계약을 체결한다.</p>
+    <p style="margin-bottom:14px;">${bizCompany}(이하 "행"이라 한다)과 넥스온(이하 "동"이라 한다)은 "행"의 상품 및 브랜드 홍보를 위한 광고 마케팅 업무를 수행함에 있어 상호 신뢰를 바탕으로 다음과 같이 계약을 체결한다.</p>
     <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제1조 (목적)</h3><p>본 계약은 "행"이 의뢰한 광고 마케팅 업무를 "동"이 수행함에 있어 필요한 제반 사항과 양 당사자의 권리 및 의무를 규정함을 목적으로 한다.</p>
     <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제2조 (업무의 범위 및 내용)</h3><p>① "동"이 수행할 구체적인 업무 범위와 실행 내용은 양 당사자가 사전에 합의한 [별첨: 견적서]를 원칙으로 한다.<br>② 추가 업무 발생 시 양 당사자는 서면(전자문서 포함) 합의를 통해 업무 범위와 비용을 조정한다.</p>
     <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제3조 (계약 기간)</h3><p>본 계약 기간은 계약 체결일로부터 프로젝트 완료일까지로 하며, 연장 필요시 종료 전 상호 협의하여 결정한다.</p>
@@ -1692,7 +1705,15 @@ async function adminDownloadContractPDF(orderId) {
     <div style="margin-top:28px; text-align:center; font-size:13px; font-weight:600;">계약일자: ${y}년 ${m}월 ${d}일</div>
     <div style="display:flex; justify-content:space-between; margin-top:24px; gap:30px;">
         <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;"><div style="font-size:11px; font-weight:700; color:#7b2fff; margin-bottom:8px;">[동] 공급자</div><table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">넥스온</td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;">조교선 (서명)</td></tr></table></div>
-        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;"><div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div><table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">${customerName}</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0;">${customerSignature ? '(전자서명)' : '(온라인 결제 동의로 갈음)'}</td></tr></table>${customerSignature ? `<div style="margin-top:6px; text-align:right;"><img src="${customerSignature}" style="height:40px;" alt="전자서명"></div>` : ''}</div>
+        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
+            <div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div>
+            <table style="font-size:11px; width:100%; border-collapse:collapse;">
+                <tr><td style="padding:3px 0; color:#666; width:65px; vertical-align:middle;">업체명</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCompany}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">사업자번호</td><td style="padding:3px 0; vertical-align:middle;">${bizNum || '-'}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">주소</td><td style="padding:3px 0; vertical-align:middle;">${bizAddr || '-'}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">대표자</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCeo || '(온라인 결제 동의로 갈음)'}${customerSignature ? ` <img src="${customerSignature}" style="height:24px; vertical-align:middle; margin-left:10px;" alt="(서명)">` : ''}</td></tr>
+            </table>
+        </div>
     </div>
 </div>
 <div id="adminContractP2" style="width:794px; padding:50px 65px; font-family:'Pretendard Variable','Malgun Gothic',sans-serif; color:#111; font-size:12px; line-height:1.7; background:#fff; box-sizing:border-box;">

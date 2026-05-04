@@ -26,3 +26,33 @@ const PANG_CONFIG = {
 
 // Global export
 window.PANG_CONFIG = PANG_CONFIG;
+
+window.formatPhone = function(el) {
+    let val = el.value.replace(/[^0-9]/g, '');
+    let res = '';
+    if(val.length < 4) {
+        res = val;
+    } else if(val.startsWith('02')) {
+        if(val.length < 6) res = val.substr(0, 2) + '-' + val.substr(2);
+        else if(val.length < 10) res = val.substr(0, 2) + '-' + val.substr(2, 3) + '-' + val.substr(5);
+        else res = val.substr(0, 2) + '-' + val.substr(2, 4) + '-' + val.substr(6, 4);
+    } else {
+        if(val.length < 7) res = val.substr(0, 3) + '-' + val.substr(3);
+        else if(val.length < 11) res = val.substr(0, 3) + '-' + val.substr(3, 3) + '-' + val.substr(6);
+        else res = val.substr(0, 3) + '-' + val.substr(3, 4) + '-' + val.substr(7, 4);
+    }
+    el.value = res;
+};
+
+window.formatBizNum = function(el) {
+    let val = el.value.replace(/[^0-9]/g, '');
+    let res = '';
+    if(val.length < 4) {
+        res = val;
+    } else if(val.length < 6) {
+        res = val.substr(0, 3) + '-' + val.substr(3);
+    } else {
+        res = val.substr(0, 3) + '-' + val.substr(3, 2) + '-' + val.substr(5, 5);
+    }
+    el.value = res;
+};

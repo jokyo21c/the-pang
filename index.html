@@ -1885,7 +1885,7 @@
         <div class="auth-form__row">
             <div class="auth-form__group">
                 <label for="signupBirthday">생년월일 <span class="auth-required">*</span></label>
-                <input type="date" id="signupBirthday" required>
+                <input type="date" id="signupBirthday" max="9999-12-31" required>
             </div>
             <div class="auth-form__group">
                 <label>성별 <span class="auth-required">*</span></label>
@@ -1901,7 +1901,7 @@
         <div class="auth-form__optional-label">추가 정보 (선택)</div>
         <div class="auth-form__group">
             <label for="signupPhone">연락처</label>
-            <input type="tel" id="signupPhone" placeholder="010-1234-5678">
+            <input type="tel" id="signupPhone" placeholder="010-1234-5678" oninput="window.formatPhone(this)">
         </div>
         <div class="auth-form__group">
             <label for="signupAddress">주소</label>
@@ -1921,12 +1921,12 @@
             <div class="auth-terms__item">
                 <input type="checkbox" id="termsService" required>
                 <label for="termsService">이용약관 동의 <span class="auth-required">(필수)</span></label>
-                <button type="button" class="auth-terms__view" onclick="document.getElementById('authOverlay').click(); setTimeout(()=>document.getElementById('termsModal').style.display='flex', 300);">보기</button>
+                <button type="button" class="auth-terms__view" onclick="document.getElementById('termsModal').style.display='flex'">보기</button>
             </div>
             <div class="auth-terms__item">
                 <input type="checkbox" id="termsPrivacy" required>
                 <label for="termsPrivacy">개인정보처리방침 동의 <span class="auth-required">(필수)</span></label>
-                <button type="button" class="auth-terms__view" onclick="document.getElementById('authOverlay').click(); setTimeout(()=>document.getElementById('privacyModal').style.display='flex', 300);">보기</button>
+                <button type="button" class="auth-terms__view" onclick="document.getElementById('privacyModal').style.display='flex'">보기</button>
             </div>
             <div class="auth-terms__item">
                 <input type="checkbox" id="termsMarketing">

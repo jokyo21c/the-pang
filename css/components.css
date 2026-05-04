@@ -3600,34 +3600,35 @@
 
 /* ── 마이페이지 버튼 ── */
 .nav__auth-btn--mypage {
-    background: rgba(123, 47, 255, 0.15);
-    color: #7b2fff;
+    background: transparent;
+    color: #fff;
     padding: 6px 14px;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
 }
 .nav__auth-btn--mypage:hover {
-    background: rgba(123, 47, 255, 0.25);
-    color: #9254ff;
+    background: transparent;
+    color: #ccc;
 }
 
 .mobile-menu__auth-mypage {
     display: inline-block;
-    background: rgba(123, 47, 255, 0.15);
-    color: #7b2fff;
+    background: transparent;
+    color: #fff;
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
     margin-bottom: 8px;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
 }
 .mobile-menu__auth-mypage:hover {
-    background: rgba(123, 47, 255, 0.25);
+    background: transparent;
+    color: #ccc;
 }
 
 /* ── Quote modal mobile responsive ── */

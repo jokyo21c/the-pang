@@ -332,14 +332,21 @@
             border-color: rgba(229,60,17,0.4);
         }
         .order-action-btn--deposit {
-            background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2));
-            color: #22c55e;
-            border: 1px solid rgba(34,197,94,0.4);
+            background: linear-gradient(135deg, #7b2fff 0%, #9b6cff 100%);
+            color: #fff;
+            border: 1px solid rgba(123,47,255,0.5);
             font-weight: 700;
+            box-shadow: 0 0 15px rgba(123,47,255,0.5);
+            animation: depositGlow 2s infinite alternate;
         }
         .order-action-btn--deposit:hover {
-            background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(16,185,129,0.3));
-            border-color: rgba(34,197,94,0.6);
+            background: linear-gradient(135deg, #6c23e8 0%, #8a58f4 100%);
+            box-shadow: 0 0 20px rgba(123,47,255,0.7);
+            transform: translateY(-1px);
+        }
+        @keyframes depositGlow {
+            from { box-shadow: 0 0 10px rgba(123,47,255,0.3); }
+            to { box-shadow: 0 0 20px rgba(123,47,255,0.6); }
         }
         .order-action-btn--cancel {
             background: rgba(255,255,255,0.05);
@@ -1106,7 +1113,7 @@
                             </div>
                             <div class="profile-field">
                                 <label class="profile-field__label">연락처</label>
-                                <input type="tel" class="profile-field__input" id="pe-phone" placeholder="010-1234-5678">
+                                <input type="tel" class="profile-field__input" id="pe-phone" placeholder="010-1234-5678" oninput="window.formatPhone(this)">
                             </div>
                             <div class="profile-field">
                                 <label class="profile-field__label">생년월일</label>
@@ -1211,7 +1218,7 @@
 </div>
 
 <!-- Contract Info Modal (사업자 정보 입력) -->
-<div class="biz-modal-overlay" id="bizModalOverlay" onclick="if(event.target===this)closeBizModal()">
+<div class="biz-modal-overlay" id="bizModalOverlay">
     <div class="biz-modal">
         <div class="doc-modal__header">
             <h3 class="doc-modal__title">📋 계약 정보 등록</h3>
@@ -1241,7 +1248,7 @@
             </div>
             <div class="biz-form-group">
                 <label>담당자 연락처 <span style="color:#e53c11;">*</span></label>
-                <input type="tel" id="bizUploadPhone" placeholder="010-0000-0000">
+                <input type="tel" id="bizUploadPhone" placeholder="010-0000-0000" oninput="window.formatPhone(this)">
             </div>
             <div class="biz-form-group">
                 <label>담당자 이메일</label>
@@ -1261,7 +1268,7 @@
             </div>
             <div class="biz-form-group">
                 <label>사업자등록번호 <span style="color:#e53c11;">*</span></label>
-                <input type="text" id="bizManualBizNum" placeholder="예: 123-45-67890">
+                <input type="text" id="bizManualBizNum" placeholder="예: 123-45-67890" oninput="window.formatBizNum(this)">
             </div>
             <div class="biz-form-group">
                 <label>업체 주소 <span style="color:#e53c11;">*</span></label>
@@ -1277,7 +1284,7 @@
             </div>
             <div class="biz-form-group">
                 <label>담당자 연락처 <span style="color:#e53c11;">*</span></label>
-                <input type="tel" id="bizManualPhone" placeholder="010-0000-0000">
+                <input type="tel" id="bizManualPhone" placeholder="010-0000-0000" oninput="window.formatPhone(this)">
             </div>
             <div class="biz-form-group">
                 <label>담당자 이메일</label>
@@ -1300,39 +1307,64 @@
     const container = document.getElementById('orderContainer');
     const greeting = document.getElementById('userGreeting');
 
-    // 인증 확인: 세션 먼저 확인 (localStorage 기반), 후 user 조회
-    let user = null;
-    try {
-        const session = await PangAuth.getSession();
-        if (session && session.user) {
-            user = session.user;
-        } else {
-            // 세션 없으면 getUser()로 한번 더 시도 (refresh token 사용)
-            user = await PangAuth.getUser();
-        }
-    } catch(e) {
-        console.warn('[mypage] auth check failed:', e);
-    }
-
-    if (!user) {
-        window.location.href = '/?login=required';
-        return;
-    }
-
-    const name = user.user_metadata?.name || user.email?.split('@')[0] || '사용자';
-    greeting.textContent = `${name}님, 진행 중인 견적 및 계약 상태를 확인하세요`;
-
-    // 로그아웃
-    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+    // ── 로그아웃: try 바깥에서 항상 등록 (네트워크 장애/SDK 행 시에도 작동 보장) ──
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault();
-        try {
-            await PangAuth.signOut();
-        } catch (err) {
-            console.warn('로그아웃 오류:', err);
-        } finally {
-            window.location.href = '/';
-        }
+        // 1. 먼저 모든 세션 관련 키를 즉시 삭제
+        Object.keys(localStorage).forEach(key => {
+            if (key.includes('auth-token') || key.startsWith('sb-')) {
+                localStorage.removeItem(key);
+            }
+        });
+        // 2. Supabase signOut은 비동기로 시도하되 기다리지 않음
+        try { PangAuth.signOut().catch(() => {}); } catch(e) {}
+        // 3. 즉시 리다이렉트
+        window.location.href = '/';
     });
+
+    // ── Supabase 클라이언트 응답 안전장치 (8초 타임아웃) ──
+    // 토큰이 손상되어 SDK 전체가 멈추는 현상 방지
+    const _supabaseHealthTimer = setTimeout(() => {
+        console.warn('[mypage] Supabase 클라이언트 응답 없음 — 토큰 초기화 후 리로드');
+        Object.keys(localStorage).forEach(key => {
+            if (key.includes('auth-token') || key.startsWith('sb-')) {
+                localStorage.removeItem(key);
+            }
+        });
+        window.location.href = '/?login=required';
+    }, 8000);
+
+    try {
+        // 인증 확인: getSession()도 타임아웃 적용 (SDK 행 시 무한대기 방지)
+        let user = null;
+        try {
+            const session = await Promise.race([
+                PangAuth.getSession(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('session timeout')), 5000))
+            ]);
+            if (session && session.user) {
+                user = session.user;
+            } else {
+                // 세션 없으면 getUser()로 한번 더 시도 (5초 타임아웃)
+                user = await Promise.race([
+                    PangAuth.getUser(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('auth timeout')), 5000))
+                ]);
+            }
+        } catch(e) {
+            console.warn('[mypage] auth check failed:', e);
+        }
+
+        // 타임아웃 해제 (정상 응답 받음)
+        clearTimeout(_supabaseHealthTimer);
+
+        if (!user) {
+            window.location.href = '/?login=required';
+            return;
+        }
+
+        const name = user.user_metadata?.name || user.email?.split('@')[0] || '사용자';
+        greeting.textContent = `${name}님, 진행 중인 견적 및 계약 상태를 확인하세요`;
 
     /* ══════════════════════════════════════════════════
        회원정보 프로필 섹션
@@ -1706,9 +1738,19 @@
     // 프로필 로드 실행
     loadProfile();
 
-    // 주문 목록 로드
+    // 주문 목록 로드 (user 객체를 직접 사용하여 불필요한 getUser() 네트워크 호출 방지)
     try {
-        const orders = await PangOrders.getMyOrders();
+        // getMyOrders 내부의 getUser() 호출 대신 이미 확인된 user.id를 직접 사용
+        const { data: orders, error: ordersErr } = await Promise.race([
+            window._supabaseClient
+                .from('orders')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('주문 조회 시간 초과')), 10000))
+        ]);
+
+        if (ordersErr) throw ordersErr;
 
         if (!orders || orders.length === 0) {
             container.innerHTML = `
@@ -1931,7 +1973,7 @@
             if (!hasBizInfo) {
                 buttons += `<button class="order-action-btn order-action-btn--deposit" onclick="openBizModal(${order.id})"><i class="ri-money-dollar-circle-line"></i> 계약금 입금 완료</button>`;
             } else {
-                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:10px;font-size:12px;color:#22c55e;font-weight:600;">✅ 계약 정보 등록 완료</div>`;
+                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);border-radius:10px;font-size:12px;color:#a78bfa;font-weight:600;">✅ 계약 정보 등록 완료</div>`;
             }
         }
 
@@ -1939,7 +1981,7 @@
         if (s === 'contract_issued') {
             const hasBizInfo = order.contract_data?.customer_business || order.contract_data?.biz_license_url || order.contract_data?.contact_phone;
             if (hasBizInfo) {
-                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:10px;font-size:12px;color:#22c55e;font-weight:600;">✅ 계약 정보 등록 완료</div>`;
+                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);border-radius:10px;font-size:12px;color:#a78bfa;font-weight:600;">✅ 계약 정보 등록 완료</div>`;
             }
         }
 
@@ -2289,8 +2331,6 @@
         const bizCeo = custBiz.ceo_name || cd.ceo_name || '';
         const bizNum = custBiz.biz_number || cd.biz_number || '';
         const bizAddr = custBiz.address || cd.address || '';
-        const bizPhone = custBiz.contact_phone || cd.contact_phone || '';
-        const bizEmail = custBiz.contact_email || cd.contact_email || '';
         const basePrice = order.plan_price || '-';
         let basePriceClean = basePrice;
         if (basePrice.includes('|')) { const p = basePrice.split('|'); basePriceClean = (p[2] || p[0]) + '원'; }
@@ -2325,8 +2365,12 @@
         </div>
         <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
             <div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div>
-            <table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">${bizCompany}</td></tr>${bizNum ? `<tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">${bizNum}</td></tr>` : ''}${bizAddr ? `<tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">${bizAddr}</td></tr>` : ''}<tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;">${bizCeo || '(온라인 결제 동의로 갈음)'}</td></tr>${bizPhone ? `<tr><td style="padding:3px 0; color:#666;">연락처</td><td style="padding:3px 0;">${bizPhone}</td></tr>` : ''}${bizEmail ? `<tr><td style="padding:3px 0; color:#666;">이메일</td><td style="padding:3px 0;">${bizEmail}</td></tr>` : ''}</table>
-            ${customerSignature ? `<div style="margin-top:6px; text-align:right;"><img src="${customerSignature}" style="height:40px;" alt="전자서명"></div>` : ''}
+            <table style="font-size:11px; width:100%; border-collapse:collapse;">
+                <tr><td style="padding:3px 0; color:#666; width:65px; vertical-align:middle;">업체명</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCompany}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">사업자번호</td><td style="padding:3px 0; vertical-align:middle;">${bizNum || '-'}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">주소</td><td style="padding:3px 0; vertical-align:middle;">${bizAddr || '-'}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">대표자</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCeo || '(온라인 결제 동의로 갈음)'}${customerSignature ? ` <img src="${customerSignature}" style="height:24px; vertical-align:middle; margin-left:10px;" alt="(서명)">` : ''}</td></tr>
+            </table>
         </div>
     </div>
 </div>
@@ -2517,6 +2561,22 @@
             alert('❌ 데이터 저장 실패 (DB): ' + (e.message || JSON.stringify(e)));
         }
     };
+    } catch (err) {
+        console.error('[mypage] fatal error:', err);
+        if (container) {
+            container.innerHTML = `
+                <div class="mypage-empty">
+                    <i class="ri-error-warning-line"></i>
+                    <p>오류가 발생했습니다.</p>
+                    <p style="font-size:12px; color:#666;">${err.message || ''}</p>
+                </div>
+            `;
+        }
+    } finally {
+        // 로딩 표시 제거 보장
+        const loader = container?.querySelector('.mypage-loading');
+        if (loader) loader.style.display = 'none';
+    }
 })();
 </script>
 </body>

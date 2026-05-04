@@ -185,15 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
         testimonialTrack.style.transform = '';
         const cards = Array.from(testimonialTrack.querySelectorAll('.testimonial-card'));
         if (cards.length === 0) return;
-        cards.forEach(card => {
-            const clone = card.cloneNode(true);
-            clone.classList.add('clone');
-            clone.setAttribute('aria-hidden', 'true');
-            testimonialTrack.appendChild(clone);
-        });
+        // Clone all cards 3 times (total 4 sets) for a much longer track
+        // CSS animation translates -50%, so 4 sets = first half scrolls away seamlessly
+        for (let i = 0; i < 3; i++) {
+            cards.forEach(card => {
+                const clone = card.cloneNode(true);
+                clone.classList.add('clone');
+                clone.setAttribute('aria-hidden', 'true');
+                testimonialTrack.appendChild(clone);
+            });
+        }
         const cardWidth = 300;
-        const totalWidth = cards.length * cardWidth;
-        const speed = 180;
+        // totalWidth = half the track (2 sets worth), since animation goes to -50%
+        const totalWidth = cards.length * 2 * cardWidth;
+        const speed = 320;
         const duration = totalWidth / speed;
         testimonialTrack.style.animation = `testimonialMarquee ${duration}s linear infinite`;
     }
@@ -2496,12 +2501,18 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         const email = document.getElementById('signupEmail').value.trim().toLowerCase();
         const pw = document.getElementById('signupPassword').value;
         const pw2 = document.getElementById('signupPasswordConfirm').value;
+        
+        const birthday = document.getElementById('signupBirthday').value;
+        const gender = document.getElementById('signupGender').value;
+        const phone = document.getElementById('signupPhone').value.trim();
+        const address = document.getElementById('signupAddress').value.trim();
+        const addressDetail = document.getElementById('signupAddressDetail').value.trim();
 
         if (pw.length < 6) { signupError.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
         if (pw !== pw2) { signupError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
 
         try {
-            const data = await PangAuth.signUp(email, pw, name);
+            const data = await PangAuth.signUp(email, pw, name, phone, birthday, gender, address, addressDetail);
 
             if (data.user && data.session) {
                 // 이메일 확인 불필요 설정: 즉시 로그인 상태
@@ -2539,18 +2550,40 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
     /* ── 로그아웃 (Supabase Auth) ──────────────── */
     ['navLogoutBtn', 'mobileLogoutBtn'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.addEventListener('click', async () => {
-            try { await PangAuth.signOut(); } catch (e) { }
+        if (btn) btn.addEventListener('click', () => {
+            // 1. 먼저 모든 세션 관련 키를 즉시 삭제
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('auth-token') || key.startsWith('sb-')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            // 2. Supabase signOut은 비동기로 시도하되 기다리지 않음
+            try { PangAuth.signOut().catch(() => {}); } catch(e) {}
+            // 3. 즉시 UI 반영 및 리로드
             applyLoggedOutUI();
+            location.reload();
         });
     });
 
     /* ── 세션 복원 (Supabase) ─────────────────── */
     (async () => {
         try {
-            const user = await PangAuth.getUser();
-            if (user) applyLoggedInUI(user);
-            else applyLoggedOutUI();
+            // 세션 먼저 시도 (localStorage 기반), 5초 타임아웃
+            const session = await Promise.race([
+                PangAuth.getSession(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+            ]);
+            if (session && session.user) {
+                applyLoggedInUI(session.user);
+            } else {
+                // 세션 없으면 getUser() 시도 (5초 타임아웃)
+                const user = await Promise.race([
+                    PangAuth.getUser(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+                ]);
+                if (user) applyLoggedInUI(user);
+                else applyLoggedOutUI();
+            }
         } catch {
             applyLoggedOutUI();
         }
@@ -3220,3 +3253,34 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
 
     window.openQuoteModal = openQuoteModal;
 });
+
+// ── Global Auto-Formatting Helpers ──
+window.formatPhone = function(el) {
+    let val = el.value.replace(/[^0-9]/g, '');
+    let res = '';
+    if(val.length < 4) {
+        res = val;
+    } else if(val.startsWith('02')) {
+        if(val.length < 6) res = val.substr(0, 2) + '-' + val.substr(2);
+        else if(val.length < 10) res = val.substr(0, 2) + '-' + val.substr(2, 3) + '-' + val.substr(5);
+        else res = val.substr(0, 2) + '-' + val.substr(2, 4) + '-' + val.substr(6, 4);
+    } else {
+        if(val.length < 7) res = val.substr(0, 3) + '-' + val.substr(3);
+        else if(val.length < 11) res = val.substr(0, 3) + '-' + val.substr(3, 3) + '-' + val.substr(6);
+        else res = val.substr(0, 3) + '-' + val.substr(3, 4) + '-' + val.substr(7, 4);
+    }
+    el.value = res;
+};
+
+window.formatBizNum = function(el) {
+    let val = el.value.replace(/[^0-9]/g, '');
+    let res = '';
+    if(val.length < 4) {
+        res = val;
+    } else if(val.length < 6) {
+        res = val.substr(0, 3) + '-' + val.substr(3);
+    } else {
+        res = val.substr(0, 3) + '-' + val.substr(3, 2) + '-' + val.substr(5, 5);
+    }
+    el.value = res;
+};
