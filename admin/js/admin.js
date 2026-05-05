@@ -1035,6 +1035,10 @@ async function openMemberDetail(userId, name, email, status, createdAt) {
         </div>
     `;
     modal.style.display = 'flex';
+    if (window.innerWidth >= 768) {
+        const pcBtn = document.getElementById('adminModalClosePc');
+        if (pcBtn) { pcBtn.style.display = 'flex'; pcBtn.onclick = closeMemberDetail; }
+    }
 
     // 주문 이력 비동기 로드
     try {
@@ -1059,6 +1063,8 @@ async function openMemberDetail(userId, name, email, status, createdAt) {
 
 function closeMemberDetail() {
     document.getElementById('memberDetailModal').style.display = 'none';
+    const pcBtn = document.getElementById('adminModalClosePc');
+    if (pcBtn) pcBtn.style.display = 'none';
 }
 
 /* ── 주문 상세에서 사업자 정보 관리자 대리 입력 저장 ── */
@@ -1420,6 +1426,10 @@ async function openOrderDetail(orderId) {
         actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}${actionsHtml}</div>`;
 
         modal.style.display = 'flex';
+        if (window.innerWidth >= 768) {
+            const pcBtn = document.getElementById('adminModalClosePc');
+            if (pcBtn) { pcBtn.style.display = 'flex'; pcBtn.onclick = closeOrderDetail; }
+        }
 
         // 사업자등록증 표시 (PDF/이미지 자동 감지)
         const bizLicenseUrl = order.contract_data?.biz_license_url || '';
@@ -1494,6 +1504,8 @@ async function openOrderDetail(orderId) {
 
 function closeOrderDetail() {
     document.getElementById('orderDetailModal').style.display = 'none';
+    const pcBtn = document.getElementById('adminModalClosePc');
+    if (pcBtn) pcBtn.style.display = 'none';
 }
 
 // 천 단위 쉼표 포맷 함수
@@ -1735,14 +1747,14 @@ async function adminDownloadContractPDF(orderId) {
     <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제10조 (손해배상 및 관할 법원)</h3><p>본 계약 위반으로 발생한 손해는 위반 당사자가 배상하며, 분쟁 발생 시 "동"의 본점 소재지 관할 법원을 제1심 합의 관할 법원으로 한다.</p>
     <div style="margin-top:28px; text-align:center; font-size:13px; font-weight:600;">계약일자: ${y}년 ${m}월 ${d}일</div>
     <div style="display:flex; justify-content:space-between; margin-top:24px; gap:30px;">
-        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;"><div style="font-size:11px; font-weight:700; color:#7b2fff; margin-bottom:8px;">[동] 공급자</div><table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">넥스온</td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;">조교선 <img src="/assets/images/nexon_seal.png" style="height:36px; vertical-align:middle; margin-left:8px;" alt="(직인)"></td></tr></table></div>
+        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;"><div style="font-size:11px; font-weight:700; color:#7b2fff; margin-bottom:8px;">[동] 공급자</div><table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;"><div style="position:relative; display:inline-block;">넥스온<img src="/assets/images/nexon_seal.png" style="position:absolute; top:-52px; left:90px; height:120px; max-width:none; z-index:1;" alt="(직인)"></div></td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;"><div style="position:relative; display:inline-block;">조교선<img src="/assets/images/ceo_signature.png" style="position:absolute; top:0px; left:40px; height:34px; max-width:none; z-index:1;" alt="(서명)" onerror="this.style.display='none'"></div></td></tr></table></div>
         <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
             <div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div>
             <table style="font-size:11px; width:100%; border-collapse:collapse;">
                 <tr><td style="padding:3px 0; color:#666; width:65px; vertical-align:middle;">업체명</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCompany}</td></tr>
                 <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">사업자번호</td><td style="padding:3px 0; vertical-align:middle;">${bizNum || '-'}</td></tr>
                 <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">주소</td><td style="padding:3px 0; vertical-align:middle;">${bizAddr || '-'}</td></tr>
-                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">대표자</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCeo || '(온라인 결제 동의로 갈음)'}${customerSignature ? ` <img src="${customerSignature}" style="height:24px; vertical-align:middle; margin-left:10px;" alt="(서명)">` : ''}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">대표자</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;"><div style="position:relative; display:inline-block;">${bizCeo || '(온라인 결제 동의로 갈음)'}${customerSignature ? `<img src="${customerSignature}" style="position:absolute; top:-4px; left:100%; margin-left:10px; height:24px; max-width:none; z-index:1;" alt="(서명)">` : ''}</div></td></tr>
             </table>
         </div>
     </div>
@@ -1883,6 +1895,10 @@ async function openWithdrawnDetail(userId, name, email, createdAt, withdrawnAt) 
         </div>
     `;
     modal.style.display = 'flex';
+    if (window.innerWidth >= 768) {
+        const pcBtn = document.getElementById('adminModalClosePc');
+        if (pcBtn) { pcBtn.style.display = 'flex'; pcBtn.onclick = closeWithdrawnDetail; }
+    }
 
     // 주문 이력 로드
     try {
@@ -1907,5 +1923,7 @@ async function openWithdrawnDetail(userId, name, email, createdAt, withdrawnAt) 
 
 function closeWithdrawnDetail() {
     document.getElementById('withdrawnDetailModal').style.display = 'none';
+    const pcBtn = document.getElementById('adminModalClosePc');
+    if (pcBtn) pcBtn.style.display = 'none';
 }
 

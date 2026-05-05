@@ -23,6 +23,37 @@
             border-radius: 12px;
             display: inline-block;
         }
+        /* PC 환경에서만 모달 닫기 버튼을 화면 우측 상단에 고정 */
+        @media (min-width: 768px) {
+            .admin-modal-close--pc-fixed {
+                display: flex;
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10001;
+                background: rgba(20,20,24,0.95);
+                border: 1px solid rgba(255,255,255,0.25);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                color: #aaa;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+            .admin-modal-close--pc-fixed:hover {
+                background: rgba(255,255,255,0.12);
+                color: #fff;
+            }
+        }
+        @media (max-width: 767px) {
+            .admin-modal-close--pc-fixed {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -618,6 +649,10 @@
         </div><!-- /.admin-content -->
     </main>
 </div>
+
+
+<!-- PC 전용 고정 닫기 버튼 (관리자 모달) -->
+<button class="admin-modal-close--pc-fixed" id="adminModalClosePc" style="display:none;"><i class="ri-close-line"></i></button>
 
 <!-- Toast Notification -->
 <div class="toast" id="toast">

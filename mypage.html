@@ -419,6 +419,37 @@
             background: rgba(255,255,255,0.1);
             color: #fff;
         }
+        /* PC 환경에서만 닫기 버튼을 모달 우측 상단에 고정 */
+        @media (min-width: 768px) {
+            .doc-modal__close--pc-fixed {
+                display: flex;
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10001;
+                background: rgba(20,20,24,0.95);
+                border: 1px solid rgba(255,255,255,0.25);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                color: #aaa;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+            .doc-modal__close--pc-fixed:hover {
+                background: rgba(255,255,255,0.12);
+                color: #fff;
+            }
+        }
+        @media (max-width: 767px) {
+            .doc-modal__close--pc-fixed {
+                display: none !important;
+            }
+        }
         .doc-modal__row {
             display: flex;
             justify-content: space-between;
@@ -1216,6 +1247,8 @@
         <div id="docModalBody"></div>
     </div>
 </div>
+<!-- PC 전용 고정 닫기 버튼 -->
+<button class="doc-modal__close--pc-fixed" id="docModalClosePc" onclick="closeDocModal()" style="display:none;"><i class="ri-close-line"></i></button>
 
 <!-- Contract Info Modal (사업자 정보 입력) -->
 <div class="biz-modal-overlay" id="bizModalOverlay">
@@ -1964,7 +1997,7 @@
             buttons += `<button class="order-action-btn order-action-btn--contract" onclick='downloadContractPDF(${oj})'><i class="ri-download-2-line"></i> 계약서 PDF</button>`;
         } else {
             // disabled 버튼은 onclick이 불가하므로 wrapper span에서 클릭 처리
-            buttons += `<span onclick="${contractReady ? "alert('📝 계약서 보기에서 서명 또는 직인을 먼저 등록해주세요.')" : ''}" title="${contractReady && !hasSigned ? '📝 계약서 보기에서 서명 또는 직인을 먼저 등록해주세요.' : ''}" style="display:inline-block; cursor:${contractReady ? 'pointer' : 'not-allowed'};"><button class="order-action-btn order-action-btn--contract" disabled style="opacity:0.4; cursor:not-allowed; pointer-events:none;"><i class="ri-download-2-line"></i> 계약서 PDF</button></span>`;
+            buttons += `<span onclick="${contractReady ? "alert('📝 계약서 보기에서 서명을 먼저 완료해주세요.')" : ''}" title="${contractReady && !hasSigned ? '📝 계약서 보기에서 서명을 먼저 완료해주세요.' : ''}" style="display:inline-block; cursor:${contractReady ? 'pointer' : 'not-allowed'};"><button class="order-action-btn order-action-btn--contract" disabled style="opacity:0.4; cursor:not-allowed; pointer-events:none;"><i class="ri-download-2-line"></i> 계약서 PDF</button></span>`;
         }
 
         // 계약금 입금 완료 버튼 (견적서 발행 상태에서 표시)
@@ -2103,6 +2136,10 @@
         `;
 
         modal.classList.add('show');
+        if (window.innerWidth >= 768) {
+            const pcBtn = document.getElementById('docModalClosePc');
+            if (pcBtn) pcBtn.style.display = 'flex';
+        }
     };
 
     /* ── 계약서 보기 모달 ── */
@@ -2164,57 +2201,32 @@
                 🎉 계약 체결 완료
             </div>` : ''}
 
-            <!-- 서명/직인 선택 영역 -->
+            <!-- 전자서명 영역 -->
             <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
-                <div style="font-size:12px; font-weight:600; color:#a78bfa; margin-bottom:10px;">✍️ 고객 서명 / 직인</div>
+                <div style="font-size:12px; font-weight:600; color:#a78bfa; margin-bottom:10px;">✍️ 고객 전자서명</div>
                 ${order.contract_data?.customer_signature ? `
                 <div style="margin-bottom:12px;">
-                    <div style="font-size:11px; color:#888; margin-bottom:6px;">저장된 서명/직인:</div>
+                    <div style="font-size:11px; color:#888; margin-bottom:6px;">저장된 서명:</div>
                     <div style="background:#fff; border-radius:8px; padding:8px; display:inline-block;">
-                        <img src="${order.contract_data.customer_signature}" style="max-width:100%; height:60px;" alt="서명/직인">
+                        <img src="${order.contract_data.customer_signature}" style="max-width:100%; height:60px;" alt="전자서명">
                     </div>
                 </div>
                 ` : ''}
-                <!-- 탭 선택 -->
-                <div style="display:flex; gap:4px; margin-bottom:10px;">
-                    <button id="sigTabSign" onclick="switchSigTab('sign')" style="flex:1; height:34px; border:1px solid rgba(123,47,255,0.3); background:rgba(123,47,255,0.15); color:#a78bfa; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">✍️ 전자서명</button>
-                    <button id="sigTabSeal" onclick="switchSigTab('seal')" style="flex:1; height:34px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#888; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">🔏 직인 이미지</button>
+                <div style="background:#fff; border-radius:8px; padding:4px; margin-bottom:8px;">
+                    <canvas id="signatureCanvas" width="460" height="120" style="width:100%; height:120px; cursor:crosshair; display:block; border-radius:6px;"></canvas>
                 </div>
-                <!-- 전자서명 패널 -->
-                <div id="sigPanelSign">
-                    <div style="background:#fff; border-radius:8px; padding:4px; margin-bottom:8px;">
-                        <canvas id="signatureCanvas" width="460" height="120" style="width:100%; height:120px; cursor:crosshair; display:block; border-radius:6px;"></canvas>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button onclick="clearSignature()" style="flex:1; height:36px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#ccc; border-radius:8px; font-size:12px; cursor:pointer;">🔄 다시 서명</button>
-                        <button onclick="saveSignature(${order.id})" style="flex:1; height:36px; border:none; background:#7b2fff; color:#fff; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 서명 저장</button>
-                    </div>
-                </div>
-                <!-- 직인 이미지 패널 -->
-                <div id="sigPanelSeal" style="display:none;">
-                    <div id="sealDropzone" style="border:2px dashed rgba(123,47,255,0.3); border-radius:10px; padding:24px; text-align:center; cursor:pointer; background:rgba(123,47,255,0.04); transition:all 0.2s;">
-                        <div style="font-size:28px; margin-bottom:6px;">🔏</div>
-                        <div style="font-size:12px; color:#a78bfa; font-weight:600;">직인 이미지를 클릭하여 선택하거나 드래그하세요</div>
-                        <div style="font-size:10px; color:#666; margin-top:4px;">PNG, JPG 지원 (배경이 투명한 PNG 권장)</div>
-                        <input type="file" id="sealFileInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
-                    </div>
-                    <div id="sealPreview" style="display:none; margin-top:10px; padding:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center;">
-                        <div style="font-size:11px; color:#888; margin-bottom:6px;">선택된 직인 이미지:</div>
-                        <div style="background:#fff; border-radius:8px; padding:12px; display:inline-block;">
-                            <img id="sealPreviewImg" style="max-width:100%; max-height:100px;" alt="직인 미리보기">
-                        </div>
-                        <div style="margin-top:8px;">
-                            <button onclick="removeSealFile()" style="height:28px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#ccc; border-radius:6px; font-size:11px; cursor:pointer; padding:0 12px;">✕ 다시 선택</button>
-                        </div>
-                    </div>
-                    <div style="margin-top:8px;">
-                        <button onclick="saveSealImage(${order.id})" style="width:100%; height:36px; border:none; background:#7b2fff; color:#fff; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 직인 저장</button>
-                    </div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="clearSignature()" style="flex:1; height:36px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#ccc; border-radius:8px; font-size:12px; cursor:pointer;">🔄 다시 서명</button>
+                    <button onclick="saveSignature(${order.id})" style="flex:1; height:36px; border:none; background:#7b2fff; color:#fff; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 서명 저장</button>
                 </div>
             </div>
         `;
 
         modal.classList.add('show');
+        if (window.innerWidth >= 768) {
+            const pcBtn = document.getElementById('docModalClosePc');
+            if (pcBtn) pcBtn.style.display = 'flex';
+        }
 
         // 서명 캔버스 초기화
         setTimeout(() => {
@@ -2246,83 +2258,14 @@
                 const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke();
             };
             canvas.onmouseup = canvas.onmouseleave = canvas.ontouchend = () => { drawing = false; };
-
-            // 직인 드롭존 이벤트
-            const sealDrop = document.getElementById('sealDropzone');
-            const sealInput = document.getElementById('sealFileInput');
-            if (sealDrop && sealInput) {
-                sealDrop.addEventListener('click', () => sealInput.click());
-                sealDrop.addEventListener('dragover', (e) => { e.preventDefault(); sealDrop.style.borderColor = '#7b2fff'; sealDrop.style.background = 'rgba(123,47,255,0.1)'; });
-                sealDrop.addEventListener('dragleave', () => { sealDrop.style.borderColor = 'rgba(123,47,255,0.3)'; sealDrop.style.background = 'rgba(123,47,255,0.04)'; });
-                sealDrop.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    sealDrop.style.borderColor = 'rgba(123,47,255,0.3)';
-                    sealDrop.style.background = 'rgba(123,47,255,0.04)';
-                    if (e.dataTransfer.files.length) handleSealFile(e.dataTransfer.files[0]);
-                });
-                sealInput.addEventListener('change', (e) => { if (e.target.files.length) handleSealFile(e.target.files[0]); });
-            }
         }, 100);
-    };
-
-    /* ── 서명/직인 탭 전환 ── */
-    window.switchSigTab = function(tab) {
-        const signBtn = document.getElementById('sigTabSign');
-        const sealBtn = document.getElementById('sigTabSeal');
-        const signPanel = document.getElementById('sigPanelSign');
-        const sealPanel = document.getElementById('sigPanelSeal');
-        if (!signBtn || !sealBtn || !signPanel || !sealPanel) return;
-        if (tab === 'sign') {
-            signBtn.style.background = 'rgba(123,47,255,0.15)'; signBtn.style.borderColor = 'rgba(123,47,255,0.3)'; signBtn.style.color = '#a78bfa';
-            sealBtn.style.background = 'rgba(255,255,255,0.04)'; sealBtn.style.borderColor = 'rgba(255,255,255,0.1)'; sealBtn.style.color = '#888';
-            signPanel.style.display = 'block';
-            sealPanel.style.display = 'none';
-        } else {
-            sealBtn.style.background = 'rgba(123,47,255,0.15)'; sealBtn.style.borderColor = 'rgba(123,47,255,0.3)'; sealBtn.style.color = '#a78bfa';
-            signBtn.style.background = 'rgba(255,255,255,0.04)'; signBtn.style.borderColor = 'rgba(255,255,255,0.1)'; signBtn.style.color = '#888';
-            sealPanel.style.display = 'block';
-            signPanel.style.display = 'none';
-        }
-    };
-
-    /* ── 직인 이미지 파일 처리 ── */
-    let _sealSelectedDataUrl = null;
-    function handleSealFile(file) {
-        const validTypes = ['image/jpeg','image/png','image/gif','image/webp'];
-        if (!validTypes.includes(file.type)) { alert('이미지 파일(PNG, JPG)만 업로드 가능합니다.'); return; }
-        if (file.size > 5 * 1024 * 1024) { alert('파일 크기는 5MB 이하여야 합니다.'); return; }
-        const reader = new FileReader();
-        reader.onload = () => {
-            _sealSelectedDataUrl = reader.result;
-            document.getElementById('sealPreviewImg').src = _sealSelectedDataUrl;
-            document.getElementById('sealPreview').style.display = 'block';
-            document.getElementById('sealDropzone').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    }
-
-    window.removeSealFile = function() {
-        _sealSelectedDataUrl = null;
-        document.getElementById('sealPreview').style.display = 'none';
-        document.getElementById('sealDropzone').style.display = 'block';
-        document.getElementById('sealFileInput').value = '';
-    };
-
-    /* ── 직인 이미지 저장 ── */
-    window.saveSealImage = async function(orderId) {
-        if (!_sealSelectedDataUrl) { alert('직인 이미지를 선택해주세요.'); return; }
-        try {
-            await PangOrders.saveSignature(orderId, _sealSelectedDataUrl);
-            alert('✅ 직인 이미지가 저장되었습니다.');
-            location.reload();
-        } catch (e) {
-            alert('❌ 직인 저장 실패: ' + e.message);
-        }
     };
 
     /* ── 모달 닫기 ── */
     window.closeDocModal = function() {
         document.getElementById('docModalOverlay').classList.remove('show');
+        const pcBtn = document.getElementById('docModalClosePc');
+        if (pcBtn) pcBtn.style.display = 'none';
     };
 
     /* ── 전자서명: 캔버스 초기화 ── */
@@ -2461,7 +2404,7 @@
     <div style="display:flex; justify-content:space-between; margin-top:24px; gap:30px;">
         <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
             <div style="font-size:11px; font-weight:700; color:#7b2fff; margin-bottom:8px;">[동] 공급자</div>
-            <table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">넥스온</td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;">조교선 <img src="/assets/images/nexon_seal.png" style="height:36px; vertical-align:middle; margin-left:8px;" alt="(직인)"></td></tr></table>
+            <table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;"><div style="position:relative; display:inline-block;">넥스온<img src="/assets/images/nexon_seal.png" style="position:absolute; top:-52px; left:90px; height:120px; max-width:none; z-index:1;" alt="(직인)"></div></td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;"><div style="position:relative; display:inline-block;">조교선<img src="/assets/images/ceo_signature.png" style="position:absolute; top:0px; left:40px; height:34px; max-width:none; z-index:1;" alt="(서명)" onerror="this.style.display='none'"></div></td></tr></table>
         </div>
         <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
             <div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div>
@@ -2469,7 +2412,7 @@
                 <tr><td style="padding:3px 0; color:#666; width:65px; vertical-align:middle;">업체명</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCompany}</td></tr>
                 <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">사업자번호</td><td style="padding:3px 0; vertical-align:middle;">${bizNum || '-'}</td></tr>
                 <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">주소</td><td style="padding:3px 0; vertical-align:middle;">${bizAddr || '-'}</td></tr>
-                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">대표자</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;">${bizCeo || '(온라인 결제 동의로 갈음)'}${customerSignature ? ` <img src="${customerSignature}" style="height:24px; vertical-align:middle; margin-left:10px;" alt="(서명)">` : ''}</td></tr>
+                <tr><td style="padding:3px 0; color:#666; vertical-align:middle;">대표자</td><td style="padding:3px 0; font-weight:600; vertical-align:middle;"><div style="position:relative; display:inline-block;">${bizCeo || '(온라인 결제 동의로 갈음)'}${customerSignature ? `<img src="${customerSignature}" style="position:absolute; top:-4px; left:100%; margin-left:10px; height:24px; max-width:none; z-index:1;" alt="(서명)">` : ''}</div></td></tr>
             </table>
         </div>
     </div>
