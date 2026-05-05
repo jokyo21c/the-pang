@@ -1369,9 +1369,9 @@ async function openOrderDetail(orderId) {
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                         <div><label style="font-size:10px; color:var(--text-muted);">업체명 *</label><input id="adminBizCompany" style="${inputStyle}" value="${bizInfo.company_name || ''}" placeholder="업체명"></div>
                         <div><label style="font-size:10px; color:var(--text-muted);">대표자</label><input id="adminBizCeo" style="${inputStyle}" value="${bizInfo.ceo_name || ''}" placeholder="대표자"></div>
-                        <div><label style="font-size:10px; color:var(--text-muted);">사업자번호</label><input id="adminBizNum" style="${inputStyle}" value="${bizInfo.biz_number || ''}" placeholder="000-00-00000"></div>
+                        <div><label style="font-size:10px; color:var(--text-muted);">사업자번호</label><input id="adminBizNum" style="${inputStyle}" value="${bizInfo.biz_number || ''}" placeholder="000-00-00000" oninput="this.value = formatBizNumber(this.value)"></div>
                         <div><label style="font-size:10px; color:var(--text-muted);">주소</label><input id="adminBizAddr" style="${inputStyle}" value="${bizInfo.address || ''}" placeholder="주소"></div>
-                        <div><label style="font-size:10px; color:var(--text-muted);">연락처</label><input id="adminBizPhone" style="${inputStyle}" value="${bizInfo.contact_phone || ''}" placeholder="010-0000-0000"></div>
+                        <div><label style="font-size:10px; color:var(--text-muted);">연락처</label><input id="adminBizPhone" style="${inputStyle}" value="${bizInfo.contact_phone || ''}" placeholder="010-0000-0000" oninput="this.value = formatPhoneNumber(this.value)"></div>
                         <div><label style="font-size:10px; color:var(--text-muted);">이메일</label><input id="adminBizEmail" style="${inputStyle}" value="${bizInfo.contact_email || ''}" placeholder="email@example.com"></div>
                     </div>
                     <button onclick="saveAdminBizInfo(${orderId})" class="btn-save" style="margin-top:10px; height:34px; font-size:12px; width:100%;">사업자 정보 저장</button>
@@ -1500,6 +1500,37 @@ function closeOrderDetail() {
 function formatNumberWithCommas(value) {
     const num = value.replace(/[^0-9]/g, '');
     return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// 사업자번호 포맷 함수
+function formatBizNumber(value) {
+    let str = value.replace(/[^0-9]/g, '');
+    if (str.length > 10) str = str.slice(0, 10);
+    let res = '';
+    if (str.length < 4) res = str;
+    else if (str.length < 6) res = str.slice(0, 3) + '-' + str.slice(3);
+    else res = str.slice(0, 3) + '-' + str.slice(3, 5) + '-' + str.slice(5);
+    return res;
+}
+
+// 연락처 포맷 함수
+function formatPhoneNumber(value) {
+    let str = value.replace(/[^0-9]/g, '');
+    let res = '';
+    if (str.startsWith('02')) {
+        if (str.length > 10) str = str.slice(0, 10);
+        if (str.length < 3) res = str;
+        else if (str.length < 6) res = str.slice(0, 2) + '-' + str.slice(2);
+        else if (str.length < 10) res = str.slice(0, 2) + '-' + str.slice(2, 5) + '-' + str.slice(5);
+        else res = str.slice(0, 2) + '-' + str.slice(2, 6) + '-' + str.slice(6);
+    } else {
+        if (str.length > 11) str = str.slice(0, 11);
+        if (str.length < 4) res = str;
+        else if (str.length < 7) res = str.slice(0, 3) + '-' + str.slice(3);
+        else if (str.length < 11) res = str.slice(0, 3) + '-' + str.slice(3, 6) + '-' + str.slice(6);
+        else res = str.slice(0, 3) + '-' + str.slice(3, 7) + '-' + str.slice(7);
+    }
+    return res;
 }
 
 // 견적서 발행
@@ -1704,7 +1735,7 @@ async function adminDownloadContractPDF(orderId) {
     <h3 style="margin-top:14px; font-size:13px; font-weight:700;">제10조 (손해배상 및 관할 법원)</h3><p>본 계약 위반으로 발생한 손해는 위반 당사자가 배상하며, 분쟁 발생 시 "동"의 본점 소재지 관할 법원을 제1심 합의 관할 법원으로 한다.</p>
     <div style="margin-top:28px; text-align:center; font-size:13px; font-weight:600;">계약일자: ${y}년 ${m}월 ${d}일</div>
     <div style="display:flex; justify-content:space-between; margin-top:24px; gap:30px;">
-        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;"><div style="font-size:11px; font-weight:700; color:#7b2fff; margin-bottom:8px;">[동] 공급자</div><table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">넥스온</td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;">조교선 (서명)</td></tr></table></div>
+        <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;"><div style="font-size:11px; font-weight:700; color:#7b2fff; margin-bottom:8px;">[동] 공급자</div><table style="font-size:11px; width:100%; border-collapse:collapse;"><tr><td style="padding:3px 0; color:#666; width:65px;">업체명</td><td style="padding:3px 0; font-weight:600;">넥스온</td></tr><tr><td style="padding:3px 0; color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr><tr><td style="padding:3px 0; color:#666;">주소</td><td style="padding:3px 0;">충남 아산시 탕정면 탕정면로109번길 46-1</td></tr><tr><td style="padding:3px 0; color:#666;">대표자</td><td style="padding:3px 0; font-weight:600;">조교선 <img src="/assets/images/nexon_seal.png" style="height:36px; vertical-align:middle; margin-left:8px;" alt="(직인)"></td></tr></table></div>
         <div style="flex:1; border:1px solid #ddd; border-radius:6px; padding:14px;">
             <div style="font-size:11px; font-weight:700; color:#e53c11; margin-bottom:8px;">[행] 공급받는자</div>
             <table style="font-size:11px; width:100%; border-collapse:collapse;">
