@@ -1951,24 +1951,25 @@
                         <div class="order-detail__label">기본 가격</div>
                         <div class="order-detail__value">${formatPrice(order.plan_price)}</div>
                     </div>
-                    ${order.total_amount ? `
-                    <div class="order-detail">
-                        <div class="order-detail__label">확정 금액</div>
-                        <div class="order-detail__value" style="color:#e53c11">${getVatIncludedTotal(order.total_amount)}원 <span style="font-size:11px; color:#888;">(VAT 포함)</span></div>
-                    </div>
-                    ` : ''}
                 </div>
 
                 ${addonsHtml}
 
                 ${(() => {
                     const est = calcEstimatedTotal(order);
-                    return est > 0 ? `
+                    const estVat = est > 0 ? Math.floor(est * 1.1) : 0;
+                    return estVat > 0 ? `
                     <div style="margin-top:14px; padding:12px 16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:13px; color:#a78bfa;">예상 합계 (기본가 + 추가옵션)</span>
-                        <strong style="font-size:16px; color:#7b2fff;">${est.toLocaleString('ko-KR')}원</strong>
+                        <span style="font-size:13px; color:#a78bfa;">예상 합계 (기본가 + 추가옵션 + VAT)</span>
+                        <strong style="font-size:16px; color:#7b2fff;">${estVat.toLocaleString('ko-KR')}원 <span style="font-size:11px; font-weight:400; color:#888;">(VAT 포함)</span></strong>
                     </div>` : '';
                 })()}
+
+                ${order.total_amount ? `
+                <div style="margin-top:8px; padding:14px 16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:14px; font-weight:700; color:#fff;">확정 금액</span>
+                    <strong style="font-size:18px; color:#e53c11;">${getVatIncludedTotal(order.total_amount)}원 <span style="font-size:11px; font-weight:400; color:#888;">(VAT 포함)</span></strong>
+                </div>` : ''}
 
                 ${memoHtml}
 
