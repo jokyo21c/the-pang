@@ -1059,9 +1059,101 @@
         .withdraw-modal__submit:not(:disabled):hover {
             background: #c42f0e;
         }
+
+        /* ── 커스텀 알림 모달 (브라우저 alert/confirm 대체) ── */
+        .pang-alert-overlay {
+            display:none; position:fixed; inset:0; z-index:99999;
+            background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+            align-items:center; justify-content:center;
+        }
+        .pang-alert-overlay.show { display:flex; }
+        .pang-alert-box {
+            background:#1a1a2e; border:1px solid rgba(123,47,255,0.3);
+            border-radius:16px; padding:28px 24px 20px; width:90%; max-width:360px;
+            text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+            animation: pangAlertIn 0.2s ease;
+        }
+        @keyframes pangAlertIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+        .pang-alert-box__title {
+            font-size:15px; font-weight:700; color:#a78bfa; margin-bottom:6px; letter-spacing:1px;
+        }
+        .pang-alert-box__msg {
+            font-size:14px; color:#ddd; line-height:1.7; white-space:pre-wrap;
+            margin-bottom:20px; word-break:keep-all;
+        }
+        .pang-alert-box__actions { display:flex; gap:8px; justify-content:center; }
+        .pang-alert-box__btn {
+            flex:1; max-width:140px; padding:10px 0; border:none; border-radius:10px;
+            font-size:14px; font-weight:600; cursor:pointer; transition:background 0.15s;
+        }
+        .pang-alert-box__btn--ok {
+            background:#7b2fff; color:#fff;
+        }
+        .pang-alert-box__btn--ok:hover { background:#6a1be0; }
+        .pang-alert-box__btn--cancel {
+            background:rgba(255,255,255,0.1); color:#ccc; border:1px solid rgba(255,255,255,0.15);
+        }
+        .pang-alert-box__btn--cancel:hover { background:rgba(255,255,255,0.15); }
     </style>
 </head>
 <body>
+
+<!-- 커스텀 알림 모달 (alert/confirm 대체) -->
+<div class="pang-alert-overlay" id="pangAlertOverlay">
+    <div class="pang-alert-box">
+        <div class="pang-alert-box__title">THE PANG</div>
+        <div class="pang-alert-box__msg" id="pangAlertMsg"></div>
+        <div class="pang-alert-box__actions" id="pangAlertActions"></div>
+    </div>
+</div>
+<script>
+(function(){
+    const overlay = document.getElementById('pangAlertOverlay');
+    const msgEl   = document.getElementById('pangAlertMsg');
+    const actEl   = document.getElementById('pangAlertActions');
+    let _resolve  = null;
+
+    function showModal(msg, isConfirm) {
+        msgEl.textContent = msg;
+        actEl.innerHTML = '';
+        if (isConfirm) {
+            const btnCancel = document.createElement('button');
+            btnCancel.className = 'pang-alert-box__btn pang-alert-box__btn--cancel';
+            btnCancel.textContent = '취소';
+            btnCancel.onclick = () => { overlay.classList.remove('show'); if(_resolve) _resolve(false); };
+            const btnOk = document.createElement('button');
+            btnOk.className = 'pang-alert-box__btn pang-alert-box__btn--ok';
+            btnOk.textContent = '확인';
+            btnOk.onclick = () => { overlay.classList.remove('show'); if(_resolve) _resolve(true); };
+            actEl.appendChild(btnCancel);
+            actEl.appendChild(btnOk);
+        } else {
+            const btnOk = document.createElement('button');
+            btnOk.className = 'pang-alert-box__btn pang-alert-box__btn--ok';
+            btnOk.textContent = '확인';
+            btnOk.onclick = () => { overlay.classList.remove('show'); if(_resolve) _resolve(true); };
+            actEl.appendChild(btnOk);
+        }
+        overlay.classList.add('show');
+    }
+
+    // alert 오버라이드
+    window.alert = function(msg) {
+        return new Promise(function(resolve) {
+            _resolve = resolve;
+            showModal(msg, false);
+        });
+    };
+
+    // confirm 오버라이드 (동기 대신 Promise 반환)
+    window.pangConfirm = function(msg) {
+        return new Promise(function(resolve) {
+            _resolve = resolve;
+            showModal(msg, true);
+        });
+    };
+})();
+</script>
 
 <!-- Header -->
 <header class="mypage-header">
@@ -2032,7 +2124,7 @@
 
     /* ── 견적 요청 취소 ── */
     window.cancelMyOrder = async function(orderId) {
-        if (!confirm('견적 요청을 취소하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+        if (!(await pangConfirm('견적 요청을 취소하시겠습니까? 이 작업은 되돌릴 수 없습니다.'))) return;
         try {
             await PangOrders.cancelOrder(orderId);
             alert('견적 요청이 취소되었습니다.');
