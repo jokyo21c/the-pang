@@ -3214,7 +3214,8 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
             alert('✅ 견적 요청이 완료되었습니다!\n마이페이지에서 진행 상황을 확인하실 수 있습니다.');
 
             // 마이페이지로 이동 제안
-            if (confirm('마이페이지로 이동하시겠습니까?')) {
+            const goMypage = await pangConfirm('마이페이지로 이동하시겠습니까?');
+            if (goMypage) {
                 window.location.href = '/mypage.html';
             }
         } catch (err) {

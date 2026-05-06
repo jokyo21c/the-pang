@@ -54,6 +54,48 @@
 
 <body>
 
+<!-- 커스텀 알림 모달 (브라우저 alert/confirm 퓨니코드 URL 방지) -->
+<style>
+.pang-alert-overlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.pang-alert-overlay.show{display:flex}
+.pang-alert-box{background:#1a1a2e;border:1px solid rgba(123,47,255,0.3);border-radius:16px;padding:28px 24px 20px;width:90%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:pangAlertIn .2s ease}
+@keyframes pangAlertIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.pang-alert-box__title{font-size:15px;font-weight:700;color:#a78bfa;margin-bottom:6px;letter-spacing:1px}
+.pang-alert-box__msg{font-size:14px;color:#ddd;line-height:1.7;white-space:pre-wrap;margin-bottom:20px;word-break:keep-all}
+.pang-alert-box__actions{display:flex;gap:8px;justify-content:center}
+.pang-alert-box__btn{flex:1;max-width:140px;padding:10px 0;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
+.pang-alert-box__btn--ok{background:#7b2fff;color:#fff}
+.pang-alert-box__btn--ok:hover{background:#6a1be0}
+.pang-alert-box__btn--cancel{background:rgba(255,255,255,0.1);color:#ccc;border:1px solid rgba(255,255,255,0.15)}
+.pang-alert-box__btn--cancel:hover{background:rgba(255,255,255,0.15)}
+</style>
+<div class="pang-alert-overlay" id="pangAlertOverlay">
+    <div class="pang-alert-box">
+        <div class="pang-alert-box__title">THE PANG</div>
+        <div class="pang-alert-box__msg" id="pangAlertMsg"></div>
+        <div class="pang-alert-box__actions" id="pangAlertActions"></div>
+    </div>
+</div>
+<script>
+(function(){
+    var ov=document.getElementById('pangAlertOverlay'),mg=document.getElementById('pangAlertMsg'),ac=document.getElementById('pangAlertActions'),_r=null;
+    function show(msg,isC){
+        mg.textContent=msg;ac.innerHTML='';
+        if(isC){
+            var bc=document.createElement('button');bc.className='pang-alert-box__btn pang-alert-box__btn--cancel';bc.textContent='취소';bc.onclick=function(){ov.classList.remove('show');if(_r)_r(false);};
+            var bo=document.createElement('button');bo.className='pang-alert-box__btn pang-alert-box__btn--ok';bo.textContent='확인';bo.onclick=function(){ov.classList.remove('show');if(_r)_r(true);};
+            ac.appendChild(bc);ac.appendChild(bo);
+        }else{
+            var bo=document.createElement('button');bo.className='pang-alert-box__btn pang-alert-box__btn--ok';bo.textContent='확인';bo.onclick=function(){ov.classList.remove('show');if(_r)_r(true);};
+            ac.appendChild(bo);
+        }
+        ov.classList.add('show');
+    }
+    window.alert=function(m){return new Promise(function(r){_r=r;show(m,false);});};
+    window.pangConfirm=function(m){return new Promise(function(r){_r=r;show(m,true);});};
+})();
+</script>
+
     <!-- ════════════════════════════════════════════════════════
        [COMPONENT 01] NAVIGATION
        ════════════════════════════════════════════════════════ -->
