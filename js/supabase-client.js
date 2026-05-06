@@ -132,14 +132,27 @@ const PangAuth = {
         // 따라서 세션이 있을 때만 insert 시도하고, 없으면 onAuthStateChange에서 처리.
         if (data.user && data.session) {
             // 이메일 확인 불필요 설정 or 즉시 세션 발급된 경우
-            const { error: insertErr } = await _supabaseClient.from('members').insert({
+            const memberInsertObj = {
                 user_id: data.user.id,
                 name: name,
-                email: email,
-                phone: phone || ''
-            });
+                email: email
+            };
+            // phone 값이 있으면 포함 (컬럼 미존재 시 재시도 대비)
+            if (phone) {
+                memberInsertObj.phone = phone;
+            }
+
+            const { error: insertErr } = await _supabaseClient.from('members').insert(memberInsertObj);
             if (insertErr && !insertErr.message.includes('duplicate')) {
                 console.warn('[PangAuth] members 테이블 삽입 실패:', insertErr.message);
+                // phone 컬럼 관련 에러면 phone 제외하고 재시도
+                if (insertErr.message.includes('phone')) {
+                    delete memberInsertObj.phone;
+                    const { error: retryErr } = await _supabaseClient.from('members').insert(memberInsertObj);
+                    if (retryErr && !retryErr.message.includes('duplicate')) {
+                        console.warn('[PangAuth] members 재시도 삽입 실패:', retryErr.message);
+                    }
+                }
             }
         } else if (data.user && !data.session) {
             // 이메일 확인 대기 중: SIGNED_IN 이벤트 시 user_metadata를 이용해 자동 삽입됩니다.
@@ -168,6 +181,23 @@ const PangAuth = {
                 // 탈퇴한 회원이면 로그아웃 시키고 에러 반환
                 await this.signOut();
                 throw new Error('탈퇴한 계정입니다.');
+            }
+
+            // members에 레코드가 없으면 자동 삽입 (회원가입 시 누락 보완)
+            if (!memberData) {
+                const meta = data.user.user_metadata || {};
+                const fallbackObj = {
+                    user_id: data.user.id,
+                    name: meta.name || data.user.email?.split('@')[0] || '알 수 없음',
+                    email: data.user.email
+                };
+                if (meta.phone) fallbackObj.phone = meta.phone;
+
+                const { error: fbErr } = await _supabaseClient.from('members').insert(fallbackObj);
+                if (fbErr && fbErr.message && fbErr.message.includes('phone')) {
+                    delete fallbackObj.phone;
+                    await _supabaseClient.from('members').insert(fallbackObj);
+                }
             }
         }
         
@@ -347,12 +377,14 @@ _supabaseClient.auth.onAuthStateChange((event, session) => {
                 // 만약 phone 컬럼 오류로 실패하면 phone 제외하고 재시도
                 if (insertErr && insertErr.message.includes('phone')) {
                     delete memberObj.phone;
-                    _supabaseClient.from('members').insert(memberObj).catch(() => {});
+                    _supabaseClient.from('members').insert(memberObj).then(({ error: retryErr }) => {
+                        if (retryErr && !retryErr.message.includes('duplicate')) {
+                            console.warn('[PangAuth] SIGNED_IN member 재시도 삽입 실패:', retryErr.message);
+                        }
+                    });
                 } else if (insertErr && !insertErr.message.includes('duplicate')) {
                     console.warn('[PangAuth] SIGNED_IN member 삽입 실패:', insertErr.message);
                 }
-            }).catch(e => {
-                console.warn('[PangAuth] SIGNED_IN member 처리 실패:', e);
             });
         }, 0);
     }
