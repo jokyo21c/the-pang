@@ -2314,16 +2314,36 @@
         const totalAmount = order.total_amount ? getVatIncludedTotal(order.total_amount) : '-';
         const basePrice = order.plan_price || '-';
         let basePriceClean = basePrice;
+        let basePriceNum = 0;
         if (basePrice.includes('|')) {
             const p = basePrice.split('|');
             basePriceClean = (p[2] || p[0]) + '원';
-        } else { basePriceClean = basePrice + '원'; }
+            basePriceNum = extractNumber(p[2] || p[0]);
+        } else { basePriceClean = basePrice + '원'; basePriceNum = extractNumber(basePrice); }
 
         let addonsRows = '';
+        let addonsTotalNum = 0;
         if (order.addons && order.addons.length > 0) {
-            addonsRows = order.addons.map(a => `<tr><td style="padding:6px 10px; border:1px solid #ddd;">${a.name}</td><td style="padding:6px 10px; border:1px solid #ddd; text-align:right;">${a.price || '-'}</td></tr>`).join('');
+            addonsRows = order.addons.map(a => {
+                addonsTotalNum += extractNumber(a.price || '');
+                return `<tr><td style="padding:6px 10px; border:1px solid #ddd;">${a.name}</td><td style="padding:6px 10px; border:1px solid #ddd; text-align:right;">${a.price || '-'}</td></tr>`;
+            }).join('');
         }
         const adminReply = order.quote_data?.admin_reply || '';
+
+        // 금액 내역 계산
+        const supplyAmount = basePriceNum + addonsTotalNum;
+        const vatAmount = Math.floor(supplyAmount * 0.1);
+        const grandTotal = supplyAmount + vatAmount;
+
+        const breakdownHtml = `
+    <table style="width:100%; border-collapse:collapse; margin-top:20px; margin-bottom:8px;">
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600; width:60%;">기본 가격</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right;">${basePriceNum.toLocaleString('ko-KR')}원</td></tr>
+        <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">추가 옵션 소계</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right;">${addonsTotalNum.toLocaleString('ko-KR')}원</td></tr>
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">공급가액 (VAT 별도)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; font-weight:600;">${supplyAmount.toLocaleString('ko-KR')}원</td></tr>
+        <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">부가세 (VAT 10%)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; color:#e53c11;">${vatAmount.toLocaleString('ko-KR')}원</td></tr>
+        <tr style="background:#7b2fff;"><td style="padding:10px 12px; border:1px solid #7b2fff; font-weight:700; color:#fff; font-size:14px;">합계 (VAT 포함)</td><td style="padding:10px 12px; border:1px solid #7b2fff; text-align:right; font-weight:700; color:#fff; font-size:16px;">${grandTotal.toLocaleString('ko-KR')}원</td></tr>
+    </table>`;
 
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'position:fixed; left:-9999px; top:0; z-index:99999; background:#fff;';
@@ -2345,9 +2365,7 @@
         <tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; font-weight:600;">기본 가격</td><td style="padding:8px 12px; border:1px solid #ddd;">${basePriceClean}</td></tr>
     </table>
     ${addonsRows ? `<h3 style="font-size:14px; margin-bottom:8px; color:#7b2fff;">추가 옵션</h3><table style="width:100%; border-collapse:collapse; margin-bottom:20px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">옵션명</th><th style="padding:6px 10px; border:1px solid #ddd; text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
-    <div style="text-align:right; font-size:18px; font-weight:700; margin-top:20px; padding:16px; background:#f0f0ff; border-radius:8px;">
-        확정 금액: ${totalAmount}원 <span style="font-size:12px; color:#888;">(VAT 포함)</span>
-    </div>
+    ${breakdownHtml}
     ${order.memo ? `<div style="margin-top:24px; padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">💬 고객 요청사항</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
     ${adminReply ? `<div style="margin-top:12px; padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">📝 답변</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
 </div>`;
@@ -2384,12 +2402,31 @@
         const bizAddr = custBiz.address || cd.address || '';
         const basePrice = order.plan_price || '-';
         let basePriceClean = basePrice;
-        if (basePrice.includes('|')) { const p = basePrice.split('|'); basePriceClean = (p[2] || p[0]) + '원'; }
-        else { basePriceClean = basePrice + '원'; }
+        let basePriceNum = 0;
+        if (basePrice.includes('|')) { const p = basePrice.split('|'); basePriceClean = (p[2] || p[0]) + '원'; basePriceNum = extractNumber(p[2] || p[0]); }
+        else { basePriceClean = basePrice + '원'; basePriceNum = extractNumber(basePrice); }
         let addonsRows = '';
+        let addonsTotalNum = 0;
         if (order.addons && order.addons.length > 0) {
-            addonsRows = order.addons.map(a => `<tr><td style="padding:6px 10px; border:1px solid #ddd;">${a.name}</td><td style="padding:6px 10px; border:1px solid #ddd; text-align:right;">${a.price || '-'}</td></tr>`).join('');
+            addonsRows = order.addons.map(a => {
+                addonsTotalNum += extractNumber(a.price || '');
+                return `<tr><td style="padding:6px 10px; border:1px solid #ddd;">${a.name}</td><td style="padding:6px 10px; border:1px solid #ddd; text-align:right;">${a.price || '-'}</td></tr>`;
+            }).join('');
         }
+
+        // 금액 내역 계산
+        const supplyAmount2 = basePriceNum + addonsTotalNum;
+        const vatAmount2 = Math.floor(supplyAmount2 * 0.1);
+        const grandTotal2 = supplyAmount2 + vatAmount2;
+
+        const breakdownHtml2 = `
+    <table style="width:100%; border-collapse:collapse; margin-top:16px; margin-bottom:8px;">
+        <tr style="background:#f9f9f9;"><td style="padding:7px 12px; border:1px solid #ddd; font-weight:600; width:60%; font-size:11px;">기본 가격</td><td style="padding:7px 12px; border:1px solid #ddd; text-align:right; font-size:11px;">${basePriceNum.toLocaleString('ko-KR')}원</td></tr>
+        <tr><td style="padding:7px 12px; border:1px solid #ddd; font-weight:600; font-size:11px;">추가 옵션 소계</td><td style="padding:7px 12px; border:1px solid #ddd; text-align:right; font-size:11px;">${addonsTotalNum.toLocaleString('ko-KR')}원</td></tr>
+        <tr style="background:#f9f9f9;"><td style="padding:7px 12px; border:1px solid #ddd; font-weight:600; font-size:11px;">공급가액 (VAT 별도)</td><td style="padding:7px 12px; border:1px solid #ddd; text-align:right; font-weight:600; font-size:11px;">${supplyAmount2.toLocaleString('ko-KR')}원</td></tr>
+        <tr><td style="padding:7px 12px; border:1px solid #ddd; font-weight:600; font-size:11px;">부가세 (VAT 10%)</td><td style="padding:7px 12px; border:1px solid #ddd; text-align:right; color:#e53c11; font-size:11px;">${vatAmount2.toLocaleString('ko-KR')}원</td></tr>
+        <tr style="background:#7b2fff;"><td style="padding:9px 12px; border:1px solid #7b2fff; font-weight:700; color:#fff; font-size:12px;">합계 (VAT 포함)</td><td style="padding:9px 12px; border:1px solid #7b2fff; text-align:right; font-weight:700; color:#fff; font-size:14px;">${grandTotal2.toLocaleString('ko-KR')}원</td></tr>
+    </table>`;
 
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'position:fixed; left:-9999px; top:0; z-index:99999; background:#fff;';
@@ -2434,7 +2471,7 @@
     </div>
     <table style="width:100%; border-collapse:collapse; margin-bottom:16px;"><tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; width:110px; font-weight:600;">고객명</td><td style="padding:8px 12px; border:1px solid #ddd;">${customerName}</td></tr><tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; font-weight:600;">플랜</td><td style="padding:8px 12px; border:1px solid #ddd;">${order.plan_name} (${order.plan_tier || ''})</td></tr><tr><td style="padding:8px 12px; border:1px solid #ddd; background:#f9f9f9; font-weight:600;">기본 가격</td><td style="padding:8px 12px; border:1px solid #ddd;">${basePriceClean}</td></tr></table>
     ${addonsRows ? `<h3 style="font-size:13px; margin-bottom:6px; color:#7b2fff;">추가 옵션</h3><table style="width:100%; border-collapse:collapse; margin-bottom:16px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">옵션명</th><th style="padding:6px 10px; border:1px solid #ddd; text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
-    <div style="text-align:right; font-size:16px; font-weight:700; padding:14px; background:#f0f0ff; border-radius:8px; margin-bottom:20px;">확정 금액: ${totalAmount}원 <span style="font-size:11px; color:#888;">(VAT 포함)</span></div>
+    ${breakdownHtml2}
     ${order.memo ? `<div style="padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px; margin-bottom:12px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">💬 고객 요청사항</div><div style="font-size:12px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
     ${adminReply ? `<div style="padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px; margin-bottom:12px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">📝 답변</div><div style="font-size:12px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
     <div style="margin-top:30px; text-align:center; font-size:10px; color:#aaa;">본 별첨은 계약서와 동일한 효력을 가집니다.</div>
