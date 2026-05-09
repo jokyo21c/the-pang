@@ -2516,6 +2516,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
 
         if (pw.length < 6) { signupError.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
         if (pw !== pw2) { signupError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
+        if (!phone) { signupError.textContent = '연락처를 입력해 주세요.'; return; }
 
         try {
             const data = await PangAuth.signUp(email, pw, name, phone, birthday, gender, address, addressDetail);
@@ -3097,8 +3098,89 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
     closeBtn.addEventListener('click', closeQuoteModal);
     overlay.addEventListener('click', closeQuoteModal);
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('open')) closeQuoteModal();
+        const detailModal = document.getElementById('planDetailModal');
+        if (e.key === 'Escape') {
+            if (detailModal && detailModal.classList.contains('open')) {
+                document.getElementById('planDetailOverlay').classList.remove('open');
+                detailModal.classList.remove('open');
+            } else if (modal.classList.contains('open')) {
+                closeQuoteModal();
+            }
+        }
     });
+
+    /* ── 플랜 상세 모달 열기 ── */
+    window.openPlanDetailModal = function(planId) {
+        const plan = cachedPlans.find(p => String(p.id) === String(planId));
+        if (!plan) return;
+
+        const detailOverlay = document.getElementById('planDetailOverlay');
+        const detailModal = document.getElementById('planDetailModal');
+        const detailContent = document.getElementById('planDetailModalContent');
+        const detailClose = document.getElementById('planDetailModalClose');
+
+        if (!detailModal || !detailContent) return;
+
+        let basePrice = plan.price;
+        let discountReason = '';
+        let discountedPrice = '';
+
+        if (plan.price && plan.price.includes('|')) {
+            const parts = plan.price.split('|');
+            basePrice = parts[0] || '';
+            discountReason = parts[1] || '';
+            discountedPrice = parts[2] || '';
+        }
+
+        let priceHtml = '';
+        if (discountReason || discountedPrice) {
+            priceHtml = `
+                <div class="pricing-card__discount-reason">
+                    ${discountReason}
+                </div>
+                <div class="pricing-card__price-base">
+                    ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
+                </div>
+                <div class="pricing-card__discount-price">
+                    ${discountedPrice}<span style="font-size:16px;font-weight:400; color: var(--color-brand-orange);">원</span>
+                    <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
+                </div>
+            `;
+        } else {
+            priceHtml = `
+                ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
+                <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
+            `;
+        }
+
+        const PLAN_STYLES = ['starter', 'standard', 'premium', 'enterprise'];
+        const planIndex = cachedPlans.findIndex(p => String(p.id) === String(planId));
+        const style = PLAN_STYLES[planIndex] || 'starter';
+
+        detailContent.innerHTML = `
+            <div class="pricing-card pricing-card--${style}">
+                <div class="pricing-card__name">${plan.name}</div>
+                <div class="pricing-card__tier">${plan.tier === 'BRAND SUBSCRIPTION' ? 'HIGH-END' : plan.tier}</div>
+                <div class="pricing-card__price">
+                    ${priceHtml}
+                </div>
+                <ul class="pricing-card__features">
+                    ${Array.isArray(plan.features) ? plan.features.map(f => `<li><i class="ri-check-line"></i> ${f}</li>`).join('') : ''}
+                </ul>
+            </div>
+        `;
+
+        detailOverlay.classList.add('open');
+        detailModal.classList.add('open');
+
+        const closeDetail = () => {
+            detailOverlay.classList.remove('open');
+            detailModal.classList.remove('open');
+        };
+
+        detailClose.onclick = closeDetail;
+        detailOverlay.onclick = closeDetail;
+    };
 
     /* ── 플랜 카드 렌더링 ── */
     function renderPlans(preSelectedId) {
@@ -3122,7 +3204,10 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
                         <span class="quote-radio ${isSelected ? 'checked' : ''}"></span>
                     </div>
                     <div class="quote-plan-card__info">
-                        <strong>${plan.name}</strong>
+                        <div class="quote-plan-card__title-row">
+                            <strong>${plan.name}</strong>
+                            <button type="button" class="quote-plan-detail-btn" onclick="event.stopPropagation(); window.openPlanDetailModal('${plan.id}')">상세보기</button>
+                        </div>
                         <span class="quote-plan-card__tier">${plan.tier}</span>
                     </div>
                     <div class="quote-plan-card__price">${displayPrice}원</div>

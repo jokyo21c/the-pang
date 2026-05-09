@@ -119,7 +119,7 @@
         }
         .order-card__date {
             font-size: 13px;
-            color: #666;
+            color: #fff;
         }
 
         /* Status Badge */
@@ -146,7 +146,7 @@
         }
         .status-badge--contract {
             background: rgba(229,60,17,0.12);
-            color: #e53c11;
+            color: #fff;
         }
         .status-badge--completed {
             background: #e53c11;
@@ -180,7 +180,7 @@
             justify-content: center;
             margin: 0 auto 4px;
             font-size: 12px;
-            color: #666;
+            color: #888;
             transition: all 0.3s;
         }
         .process-bar__dot--active {
@@ -196,7 +196,7 @@
         }
         .process-bar__label {
             font-size: 11px;
-            color: #666;
+            color: #888;
             white-space: nowrap;
         }
         .process-bar__label--active {
@@ -229,7 +229,7 @@
         }
         .order-detail__label {
             font-size: 12px;
-            color: #666;
+            color: #fff;
             margin-bottom: 4px;
         }
         .order-detail__value {
@@ -242,13 +242,13 @@
         }
         .order-addons__title {
             font-size: 13px;
-            color: #888;
+            color: #fff;
             margin-bottom: 6px;
         }
         .order-addon-tag {
             display: inline-block;
             background: rgba(123,47,255,0.1);
-            color: #a78bfa;
+            color: #fff;
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 12px;
@@ -261,7 +261,7 @@
             background: rgba(255,255,255,0.03);
             border-radius: 8px;
             font-size: 13px;
-            color: #aaa;
+            color: #fff;
             line-height: 1.5;
         }
 
@@ -314,22 +314,22 @@
             transition: all 0.2s;
         }
         .order-action-btn--quote {
-            background: rgba(123,47,255,0.12);
-            color: #a78bfa;
-            border: 1px solid rgba(123,47,255,0.2);
+            background: rgba(123,47,255,0.2);
+            color: #fff;
+            border: 1px solid #7b2fff;
         }
         .order-action-btn--quote:hover {
-            background: rgba(123,47,255,0.25);
-            border-color: rgba(123,47,255,0.4);
+            background: #7b2fff;
+            box-shadow: 0 0 15px rgba(123,47,255,0.6);
         }
         .order-action-btn--contract {
-            background: rgba(229,60,17,0.12);
-            color: #e53c11;
-            border: 1px solid rgba(229,60,17,0.2);
+            background: rgba(229,60,17,0.2);
+            color: #fff;
+            border: 1px solid #e53c11;
         }
         .order-action-btn--contract:hover {
-            background: rgba(229,60,17,0.25);
-            border-color: rgba(229,60,17,0.4);
+            background: #e53c11;
+            box-shadow: 0 0 15px rgba(229,60,17,0.6);
         }
         .order-action-btn--deposit {
             background: linear-gradient(135deg, #7b2fff 0%, #9b6cff 100%);
@@ -350,13 +350,23 @@
         }
         .order-action-btn--cancel {
             background: rgba(255,255,255,0.05);
-            color: #888;
-            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid #fff;
         }
         .order-action-btn--cancel:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.2);
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
             color: #fff;
+        }
+        .order-action-btn:disabled,
+        .order-action-btn[disabled] {
+            color: #888 !important;
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            opacity: 1 !important;
         }
 
         /* ── Document Modal ── */
@@ -1917,11 +1927,11 @@
             const reason = parts[1] || '';
             const discounted = parts[2] || '';
             if (discounted) {
-                return `<span style="text-decoration:line-through; color:#666; font-size:12px;">${base}원</span> <span style="color:#7b2fff; font-size:11px;">${reason}</span> <strong style="color:#e53c11;">${discounted}원</strong>`;
+                return `<span style="text-decoration:line-through; color:#fff; font-size:12px;">${base}원</span> <span style="color:#fff; font-size:11px;">${reason}</span> <strong style="color:#e53c11;">${discounted}원</strong>`;
             }
-            return `${base}원`;
+            return `<strong style="color:#e53c11;">${base}원</strong>`;
         }
-        return `${priceStr}원`;
+        return `<strong style="color:#e53c11;">${priceStr}원</strong>`;
     }
 
     /* ── 숫자 추출 헬퍼 (쉼표 제거 후 첫 숫자 추출) ── */
@@ -1974,8 +1984,8 @@
         ];
 
         const processBarHtml = steps.map((st, i) => {
-            const isDone = s.step > st.step;
-            const isActive = s.step === st.step;
+            const isDone = s.step > st.step || (s.step === 5 && st.step === 5);
+            const isActive = s.step === st.step && !isDone;
             const dotClass = isDone ? 'process-bar__dot--done' : (isActive ? 'process-bar__dot--active' : '');
             const labelClass = isDone ? 'process-bar__label--done' : (isActive ? 'process-bar__label--active' : '');
             const icon = isDone ? '✓' : (i + 1);
@@ -1999,7 +2009,7 @@
             addonsHtml = `
                 <div class="order-addons">
                     <div class="order-addons__title">추가 옵션</div>
-                    ${order.addons.map(a => `<span class="order-addon-tag">${a.name} ${a.price || ''}</span>`).join('')}
+                    ${order.addons.map(a => `<span class="order-addon-tag">${a.name} <strong style="color:#e53c11;">${a.price || ''}</strong></span>`).join('')}
                 </div>
             `;
         }
@@ -2007,11 +2017,11 @@
         // 메모 + 관리자 답변
         let memoHtml = '';
         if (order.memo) {
-            memoHtml = `<div class="order-memo">💬 요청사항: ${order.memo}</div>`;
+            memoHtml = `<div class="order-memo">요청사항: ${order.memo}</div>`;
         }
         const adminReply = order.quote_data?.admin_reply || '';
         if (adminReply) {
-            memoHtml += `<div class="order-memo" style="background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); margin-top:8px;">📝 답변: ${adminReply}</div>`;
+            memoHtml += `<div class="order-memo" style="background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); margin-top:8px;">답변: ${adminReply}</div>`;
         }
 
         const createdDate = new Date(order.created_at).toLocaleDateString('ko-KR', {
@@ -2025,9 +2035,6 @@
                         <div class="order-card__plan">${order.plan_name}</div>
                         <div class="order-card__date">${createdDate}</div>
                     </div>
-                    <span class="status-badge status-badge--${s.badge}">
-                        ${s.icon} ${s.label}
-                    </span>
                 </div>
 
                 <div class="process-bar">
@@ -2049,18 +2056,35 @@
 
                 ${(() => {
                     const est = calcEstimatedTotal(order);
-                    const estVat = est > 0 ? Math.floor(est * 1.1) : 0;
+                    const vat = est > 0 ? Math.floor(est * 0.1) : 0;
+                    const estVat = est + vat;
                     return estVat > 0 ? `
-                    <div style="margin-top:14px; padding:12px 16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:13px; color:#a78bfa;">예상 합계 (기본가 + 추가옵션 + VAT)</span>
-                        <strong style="font-size:16px; color:#7b2fff;">${estVat.toLocaleString('ko-KR')}원 <span style="font-size:11px; font-weight:400; color:#888;">(VAT 포함)</span></strong>
+                    <div style="margin-top:14px; padding:16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 4px 0; font-size: 13px; color: #fff;">기본가 + 추가 옵션가</td>
+                                <td style="padding: 4px 0; text-align: right; color: #e53c11; font-size: 14px; white-space: nowrap;">${est.toLocaleString('ko-KR')}원</td>
+                                <td style="width: 65px; padding: 4px 0;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px 0; font-size: 13px; color: #fff;">VAT</td>
+                                <td style="padding: 4px 0; text-align: right; color: #e53c11; font-size: 14px; white-space: nowrap;">${vat.toLocaleString('ko-KR')}원</td>
+                                <td style="padding: 4px 0;"></td>
+                            </tr>
+                            <tr><td colspan="3" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-top: 8px; padding-bottom: 0;"></td></tr>
+                            <tr>
+                                <td style="padding: 12px 0 0 0; font-size: 14px; font-weight: 700; color: #fff;">예상 합계액</td>
+                                <td style="padding: 12px 0 0 0; text-align: right; color: #e53c11; font-size: 18px; font-weight: 700; white-space: nowrap;">${estVat.toLocaleString('ko-KR')}원</td>
+                                <td style="padding: 12px 0 0 6px; text-align: right; color: #fff; font-size: 11px; white-space: nowrap; vertical-align: bottom; padding-bottom: 2px;">(VAT 포함)</td>
+                            </tr>
+                        </table>
                     </div>` : '';
                 })()}
 
                 ${order.total_amount ? `
                 <div style="margin-top:8px; padding:14px 16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:14px; font-weight:700; color:#fff;">확정 금액</span>
-                    <strong style="font-size:18px; color:#e53c11;">${getVatIncludedTotal(order.total_amount)}원 <span style="font-size:11px; font-weight:400; color:#888;">(VAT 포함)</span></strong>
+                    <strong style="font-size:18px; color:#e53c11;">${getVatIncludedTotal(order.total_amount)}원 <span style="font-size:11px; font-weight:400; color:#fff;">(VAT 포함)</span></strong>
                 </div>` : ''}
 
                 ${memoHtml}
@@ -2078,7 +2102,7 @@
 
         // 견적 대기 상태: 취소 버튼
         if (s === 'quote_pending') {
-            buttons += `<button class="order-action-btn order-action-btn--cancel" onclick="cancelMyOrder(${order.id})"><i class="ri-close-circle-line"></i> 견적 요청 취소</button>`;
+            buttons += `<button class="order-action-btn order-action-btn--cancel" onclick="cancelMyOrder(${order.id})">견적 요청 취소</button>`;
         }
 
         // 견적서 보기 → 견적서 PDF → 계약서 보기 → 계약서 PDF 순서
@@ -2086,28 +2110,28 @@
         const contractReady = ['contract_issued', 'completed'].includes(s);
 
         // 견적서 보기
-        buttons += `<button class="order-action-btn order-action-btn--quote" onclick='showQuoteDoc(${oj})' ${quoteReady ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"'}><i class="ri-file-list-3-line"></i> 견적서 보기</button>`;
+        buttons += `<button class="order-action-btn order-action-btn--quote" onclick='showQuoteDoc(${oj})' ${quoteReady ? '' : 'disabled'}>견적서 보기</button>`;
         // 견적서 PDF
-        buttons += `<button class="order-action-btn order-action-btn--quote" onclick='downloadQuotePDF(${oj})' ${quoteReady ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"'}><i class="ri-download-2-line"></i> 견적서 PDF</button>`;
+        buttons += `<button class="order-action-btn order-action-btn--quote" onclick='downloadQuotePDF(${oj})' ${quoteReady ? '' : 'disabled'}>견적서 PDF</button>`;
         // 계약서 보기
-        buttons += `<button class="order-action-btn order-action-btn--contract" onclick='showContractDoc(${oj})' ${contractReady ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"'}><i class="ri-file-paper-2-line"></i> 계약서 보기</button>`;
+        buttons += `<button class="order-action-btn order-action-btn--contract" onclick='showContractDoc(${oj})' ${contractReady ? '' : 'disabled'}>계약서 보기</button>`;
         // 계약서 PDF (서명 완료 전까지 비활성화)
         const hasSigned = !!(order.contract_data?.customer_signature);
         const contractPdfEnabled = contractReady && hasSigned;
         if (contractPdfEnabled) {
-            buttons += `<button class="order-action-btn order-action-btn--contract" onclick='downloadContractPDF(${oj})'><i class="ri-download-2-line"></i> 계약서 PDF</button>`;
+            buttons += `<button class="order-action-btn order-action-btn--contract" onclick='downloadContractPDF(${oj})'>계약서 PDF</button>`;
         } else {
             // disabled 버튼은 onclick이 불가하므로 wrapper span에서 클릭 처리
-            buttons += `<span onclick="${contractReady ? "alert('📝 계약서 보기에서 서명을 먼저 완료해주세요.')" : ''}" title="${contractReady && !hasSigned ? '📝 계약서 보기에서 서명을 먼저 완료해주세요.' : ''}" style="display:inline-block; cursor:${contractReady ? 'pointer' : 'not-allowed'};"><button class="order-action-btn order-action-btn--contract" disabled style="opacity:0.4; cursor:not-allowed; pointer-events:none;"><i class="ri-download-2-line"></i> 계약서 PDF</button></span>`;
+            buttons += `<span onclick="${contractReady ? "alert('📝 계약서 보기에서 서명을 먼저 완료해주세요.')" : ''}" title="${contractReady && !hasSigned ? '📝 계약서 보기에서 서명을 먼저 완료해주세요.' : ''}" style="display:inline-block; cursor:${contractReady ? 'pointer' : 'not-allowed'};"><button class="order-action-btn order-action-btn--contract" disabled style="pointer-events:none;">계약서 PDF</button></span>`;
         }
 
         // 계약금 입금 완료 버튼 (견적서 발행 상태에서 표시)
         if (s === 'quote_issued') {
             const hasBizInfo = order.contract_data?.customer_business || order.contract_data?.biz_license_url || order.contract_data?.contact_phone;
             if (!hasBizInfo) {
-                buttons += `<button class="order-action-btn order-action-btn--deposit" onclick="openBizModal(${order.id})"><i class="ri-money-dollar-circle-line"></i> 계약금 입금 완료</button>`;
+                buttons += `<button class="order-action-btn order-action-btn--deposit" onclick="openBizModal(${order.id})">계약금 입금 완료</button>`;
             } else {
-                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);border-radius:10px;font-size:12px;color:#a78bfa;font-weight:600;">✅ 계약 정보 등록 완료</div>`;
+                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(123,47,255,0.2);border:1px solid #7b2fff;border-radius:10px;font-size:12px;color:#fff;font-weight:600;">계약 정보 등록 완료</div>`;
             }
         }
 
@@ -2115,7 +2139,7 @@
         if (s === 'contract_issued') {
             const hasBizInfo = order.contract_data?.customer_business || order.contract_data?.biz_license_url || order.contract_data?.contact_phone;
             if (hasBizInfo) {
-                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);border-radius:10px;font-size:12px;color:#a78bfa;font-weight:600;">✅ 계약 정보 등록 완료</div>`;
+                buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(123,47,255,0.2);border:1px solid #7b2fff;border-radius:10px;font-size:12px;color:#fff;font-weight:600;">계약 정보 등록 완료</div>`;
             }
         }
 

@@ -1870,6 +1870,19 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════
+   PLAN DETAIL MODAL (플랜 상세내용)
+   ════════════════════════════════════════════════════════ -->
+<div class="plan-detail-overlay" id="planDetailOverlay"></div>
+<div class="plan-detail-modal" id="planDetailModal" role="dialog" aria-modal="true">
+    <button class="plan-detail-modal__close" id="planDetailModalClose" aria-label="닫기">
+        <i class="ri-close-line"></i>
+    </button>
+    <div class="plan-detail-modal__content" id="planDetailModalContent">
+        <!-- 동적으로 플랜 상세 내용 렌더링 -->
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
    AUTH MODAL
    ════════════════════════════════════════════════════════ -->
 <div class="auth-overlay" id="authOverlay"></div>
@@ -1938,13 +1951,14 @@
                 <input type="hidden" id="signupGender" value="male">
             </div>
         </div>
+        <!-- 연락처 (필수) -->
+        <div class="auth-form__group">
+            <label for="signupPhone">연락처 <span class="auth-required">*</span></label>
+            <input type="tel" id="signupPhone" placeholder="010-1234-5678" oninput="window.formatPhone(this)" required>
+        </div>
 
         <!-- 추가 정보 (선택) -->
         <div class="auth-form__optional-label">추가 정보 (선택)</div>
-        <div class="auth-form__group">
-            <label for="signupPhone">연락처</label>
-            <input type="tel" id="signupPhone" placeholder="010-1234-5678" oninput="window.formatPhone(this)">
-        </div>
         <div class="auth-form__group">
             <label for="signupAddress">주소</label>
             <input type="text" id="signupAddress" placeholder="기본 주소">
