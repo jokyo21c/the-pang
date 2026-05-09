@@ -1277,7 +1277,7 @@ async function loadOrders() {
                 <td class="member-num">${i + 1}</td>
                 <td>${customerName}</td>
                 <td>${o.plan_name}</td>
-                <td><span class="member-badge member-badge--${s.badge === 'warning' ? 'normal' : 'online'}">${s.icon} ${s.label}</span></td>
+                <td><span class="member-badge member-badge--${s.badge}">${s.label}</span></td>
                 <td class="member-email">${date}</td>
                 <td>
                     <button class="btn-member-delete" style="background:rgba(123,47,255,0.1); color:#7b2fff;" onclick="openOrderDetail(${o.id})" title="상세">
@@ -1337,7 +1337,7 @@ async function openOrderDetail(orderId) {
                     <tr>
                         <td style="padding: 12px 0 0 0; font-size: 14px; font-weight: 700; color: var(--purple);">예상 합계액</td>
                         <td style="padding: 12px 0 0 0; text-align: right; color: #e53c11; font-size: 18px; font-weight: 700; white-space: nowrap;">${estVatTotal.toLocaleString('ko-KR')}원</td>
-                        <td style="padding: 12px 0 0 6px; text-align: right; color: var(--text-muted); font-size: 11px; white-space: nowrap; vertical-align: bottom; padding-bottom: 2px;">(VAT 포함)</td>
+                        <td style="padding: 12px 0 0 6px; text-align: right; color: #000; font-size: 11px; white-space: nowrap; vertical-align: bottom; padding-bottom: 2px;">(VAT 포함)</td>
                     </tr>
                 </table>
             </div>` : '';
@@ -1348,7 +1348,7 @@ async function openOrderDetail(orderId) {
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="padding: 0; font-size: 14px; font-weight: 600; color: var(--text-primary);">확정 금액</td>
-                        <td style="padding: 0; text-align: right; color: #e53c11; font-size: 22px; font-weight: 700; white-space: nowrap;">${getVatIncludedTotal(order.total_amount)}원</td>
+                        <td style="padding: 0; text-align: right; color: #e53c11; font-size: 22px; font-weight: 700; white-space: nowrap;">${order.total_amount}원</td>
                         <td style="width: 65px; padding: 0 0 0 6px; text-align: right; color: var(--text-muted); font-size: 12px; white-space: nowrap; vertical-align: bottom; padding-bottom: 3px;">(VAT 포함)</td>
                     </tr>
                 </table>
@@ -1737,11 +1737,6 @@ async function adminDownloadContractPDF(orderId) {
         pdf.save('계약서_' + order.plan_name + '_' + orderId + '.pdf');
         document.body.removeChild(wrapper);
         showToast('📄 계약서 PDF가 다운로드되었습니다.');
-    } catch (e) { showToast('❌ 계약서 PDF 생성 실패: ' + e.message); }
-}
-
-
-
     } catch (e) { showToast('❌ 계약서 PDF 생성 실패: ' + e.message); }
 }
 

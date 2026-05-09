@@ -942,6 +942,11 @@ textarea.form-control {
 .member-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
 .member-badge--online { background: rgba(22,163,74,0.12); color: var(--green); border: 1px solid rgba(22,163,74,0.25); }
 .member-badge--normal { background: var(--bg-panel); color: var(--text-muted); border: 1px solid var(--border); }
+.member-badge--warning { background: rgba(22,163,74,0.12); color: #16a34a; border: 1px solid #16a34a; }
+.member-badge--info { background: rgba(37,99,235,0.12); color: #2563eb; border: 1px solid #2563eb; }
+.member-badge--success { background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid #dc2626; }
+.member-badge--primary { background: rgba(123,47,255,0.12); color: #7b2fff; border: 1px solid #7b2fff; }
+.member-badge--complete { background: rgba(229,60,17,0.12); color: #e53c11; border: 1px solid #e53c11; }
 
 .btn-member-delete { background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 16px; transition: background var(--transition), color var(--transition), border-color var(--transition); }
 .btn-member-delete:hover { background: rgba(230,57,70,0.1); color: var(--red); border-color: rgba(230,57,70,0.25); }
