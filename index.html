@@ -1890,30 +1890,45 @@
     <div class="quote-modal__header">
         <i class="ri-shopping-cart-2-line"></i>
         <h2>견적 담기</h2>
-        <p>원하시는 플랜과 추가 옵션을 선택하세요</p>
+        <p id="quoteStepSubtitle">원하시는 플랜을 선택하세요</p>
+    </div>
+
+    <!-- 스텝 인디케이터 -->
+    <div class="quote-step-indicator">
+        <div class="quote-step-dot active" data-step="1">1</div>
+        <div class="quote-step-line"></div>
+        <div class="quote-step-dot" data-step="2">2</div>
+        <div class="quote-step-line"></div>
+        <div class="quote-step-dot" data-step="3">3</div>
     </div>
 
     <div class="quote-modal__body">
-        <!-- 플랜 선택 -->
-        <div class="quote-section">
-            <h3 class="quote-section__title"><i class="ri-price-tag-3-line"></i> 플랜 선택</h3>
-            <div class="quote-plan-list" id="quotePlanList">
-                <!-- 동적으로 플랜 카드 렌더링 -->
+        <!-- Step 1: 플랜 선택 -->
+        <div class="quote-step" id="quoteStep1">
+            <div class="quote-section">
+                <h3 class="quote-section__title"><i class="ri-price-tag-3-line"></i> 플랜 선택</h3>
+                <div class="quote-plan-list" id="quotePlanList">
+                    <!-- 동적으로 플랜 카드 렌더링 -->
+                </div>
             </div>
         </div>
 
-        <!-- 추가 옵션 -->
-        <div class="quote-section">
-            <h3 class="quote-section__title"><i class="ri-add-circle-line"></i> 추가 옵션 (선택)</h3>
-            <div class="quote-addon-list" id="quoteAddonList">
-                <!-- 동적으로 애드온 체크박스 렌더링 -->
+        <!-- Step 2: 추가 옵션 -->
+        <div class="quote-step" id="quoteStep2" style="display:none;">
+            <div class="quote-section">
+                <h3 class="quote-section__title"><i class="ri-add-circle-line"></i> 추가 옵션 (선택)</h3>
+                <div class="quote-addon-list" id="quoteAddonList">
+                    <!-- 동적으로 애드온 체크박스 렌더링 -->
+                </div>
             </div>
         </div>
 
-        <!-- 요청사항 -->
-        <div class="quote-section">
-            <h3 class="quote-section__title"><i class="ri-chat-1-line"></i> 요청사항 (선택)</h3>
-            <textarea class="quote-memo" id="quoteMemo" rows="3" placeholder="촬영 관련 요청사항이 있으시면 자유롭게 적어주세요"></textarea>
+        <!-- Step 3: 요청사항 -->
+        <div class="quote-step" id="quoteStep3" style="display:none;">
+            <div class="quote-section">
+                <h3 class="quote-section__title"><i class="ri-chat-1-line"></i> 요청사항 (선택)</h3>
+                <textarea class="quote-memo" id="quoteMemo" rows="5" placeholder="촬영 관련 요청사항이 있으시면 자유롭게 적어주세요"></textarea>
+            </div>
         </div>
     </div>
 
@@ -1922,10 +1937,33 @@
             <span>선택한 플랜:</span>
             <strong id="quoteSummaryPlan">-</strong>
         </div>
-        <button class="quote-submit-btn" id="quoteSubmitBtn" disabled>
-            <i class="ri-send-plane-line"></i> 견적 요청하기
-        </button>
-        <p class="quote-submit-note">견적 요청 후 관리자가 검토하여 견적서를 발행합니다.</p>
+        <div class="quote-footer-btns">
+            <!-- Step 1 -->
+            <div class="quote-step-btns" id="quoteStepBtns1">
+                <button class="quote-next-btn" id="quoteNextBtn1" disabled>
+                    다음 <i class="ri-arrow-right-line"></i>
+                </button>
+            </div>
+            <!-- Step 2 -->
+            <div class="quote-step-btns" id="quoteStepBtns2" style="display:none;">
+                <button class="quote-prev-btn" id="quotePrevBtn2">
+                    <i class="ri-arrow-left-line"></i> 이전
+                </button>
+                <button class="quote-next-btn" id="quoteNextBtn2">
+                    다음 <i class="ri-arrow-right-line"></i>
+                </button>
+            </div>
+            <!-- Step 3 -->
+            <div class="quote-step-btns" id="quoteStepBtns3" style="display:none;">
+                <button class="quote-prev-btn" id="quotePrevBtn3">
+                    <i class="ri-arrow-left-line"></i> 이전
+                </button>
+                <button class="quote-submit-btn" id="quoteSubmitBtn">
+                    <i class="ri-send-plane-line"></i> 견적 요청하기
+                </button>
+            </div>
+        </div>
+        <p class="quote-submit-note" id="quoteSubmitNote" style="display:none;">견적 요청 후 관리자가 검토하여 견적서를 발행합니다.</p>
     </div>
 </div>
 

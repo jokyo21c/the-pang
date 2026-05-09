@@ -1202,7 +1202,7 @@ function formatOrderPrice(priceStr) {
         const reason = parts[1] || '';
         const discounted = parts[2] || '';
         if (discounted) {
-            return `<span style="text-decoration:line-through; color:#999; font-size:12px;">${base}원</span> ${reason ? `<span style="color:#e53c11; font-size:11px;">${reason}</span>` : ''} <strong>${discounted}원</strong>`;
+            return `<span style="text-decoration:line-through; color:#999; font-size:12px;">${base}원</span> ${reason ? `<span style="color:var(--purple); font-size:11px;">${reason}</span>` : ''} <strong>${discounted}원</strong>`;
         }
         return `${base}원`;
     }
@@ -1310,7 +1310,7 @@ async function openOrderDetail(orderId) {
                 <div style="margin-top:16px;">
                     <strong style="font-size:13px; color:var(--text-secondary);">추가 옵션</strong>
                     <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
-                        ${order.addons.map(a => `<div style="background:rgba(123,47,255,0.05); border:1px solid rgba(123,47,255,0.15); color:var(--text-primary); padding:8px 12px; border-radius:6px; font-size:13px; display:flex; justify-content:space-between; align-items:center;"><span>${a.name}</span><span style="color:var(--purple-light); font-weight:600;">${a.price || ''}</span></div>`).join('')}
+                        ${order.addons.map(a => `<div style="background:rgba(123,47,255,0.05); border:1px solid rgba(123,47,255,0.15); color:var(--text-primary); padding:8px 12px; border-radius:6px; font-size:13px; display:flex; justify-content:space-between; align-items:center;"><span>${a.name}</span><span style="color:#e53c11; font-weight:600;">${a.price || ''}</span></div>`).join('')}
                     </div>
                 </div>
             `;
@@ -1318,17 +1318,40 @@ async function openOrderDetail(orderId) {
 
         // 합계액 계산
         const estimatedTotal = calcOrderEstimatedTotal(order);
-        const totalHtml = estimatedTotal > 0 ? `
-            <div style="margin-top:16px; padding:12px 16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:13px; color:var(--purple-light);">예상 합계 (기본가 + 추가옵션)</span>
-                <strong style="font-size:16px; color:var(--purple);">${estimatedTotal.toLocaleString('ko-KR')}원</strong>
+        const vatAmount = estimatedTotal > 0 ? Math.floor(estimatedTotal * 0.1) : 0;
+        const estVatTotal = estimatedTotal + vatAmount;
+        const totalHtml = estVatTotal > 0 ? `
+            <div style="margin-top:14px; padding:16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 4px 0; font-size: 13px; color: var(--text-primary);">기본가 + 추가 옵션</td>
+                        <td style="padding: 4px 0; text-align: right; color: #e53c11; font-size: 14px; white-space: nowrap;">${estimatedTotal.toLocaleString('ko-KR')}원</td>
+                        <td style="width: 65px; padding: 4px 0;"></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 0; font-size: 13px; color: var(--text-primary);">VAT</td>
+                        <td style="padding: 4px 0; text-align: right; color: #e53c11; font-size: 14px; white-space: nowrap;">${vatAmount.toLocaleString('ko-KR')}원</td>
+                        <td style="padding: 4px 0;"></td>
+                    </tr>
+                    <tr><td colspan="3" style="border-bottom: 1px solid var(--border); padding-top: 8px; padding-bottom: 0;"></td></tr>
+                    <tr>
+                        <td style="padding: 12px 0 0 0; font-size: 14px; font-weight: 700; color: var(--purple);">예상 합계액</td>
+                        <td style="padding: 12px 0 0 0; text-align: right; color: #e53c11; font-size: 18px; font-weight: 700; white-space: nowrap;">${estVatTotal.toLocaleString('ko-KR')}원</td>
+                        <td style="padding: 12px 0 0 6px; text-align: right; color: var(--text-muted); font-size: 11px; white-space: nowrap; vertical-align: bottom; padding-bottom: 2px;">(VAT 포함)</td>
+                    </tr>
+                </table>
             </div>` : '';
 
         // 확정 금액 (예상 합계 아래에 크게 표시)
         const confirmedTotalHtml = order.total_amount ? `
-            <div style="margin-top:12px; padding:16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:14px; font-weight:600; color:var(--text-primary);">확정 금액</span>
-                <strong style="font-size:22px; color:#e53c11;">${getVatIncludedTotal(order.total_amount)}원 <span style="font-size:12px; font-weight:400; color:var(--text-muted);">(VAT 포함)</span></strong>
+            <div style="margin-top:12px; padding:16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 0; font-size: 14px; font-weight: 600; color: var(--text-primary);">확정 금액</td>
+                        <td style="padding: 0; text-align: right; color: #e53c11; font-size: 22px; font-weight: 700; white-space: nowrap;">${getVatIncludedTotal(order.total_amount)}원</td>
+                        <td style="width: 65px; padding: 0 0 0 6px; text-align: right; color: var(--text-muted); font-size: 12px; white-space: nowrap; vertical-align: bottom; padding-bottom: 3px;">(VAT 포함)</td>
+                    </tr>
+                </table>
             </div>` : '';
 
         body.innerHTML = `
@@ -1365,7 +1388,7 @@ async function openOrderDetail(orderId) {
                     contact_name: custBiz.contact_name || cd.contact_name || ''
                 };
                 const hasBizInfo = bizInfo.company_name || bizInfo.contact_phone || bizInfo.contact_email;
-                let bizHtml = '<div style="margin-top:16px; border-top:1px solid var(--border); padding-top:16px;"><div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">📋 고객 사업자 정보</div>';
+                let bizHtml = '<div style="margin-top:16px; border-top:1px solid var(--border); padding-top:16px;"><div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">고객 사업자 정보</div>';
 
                 if (bizUrl) {
                     bizHtml += `<div style="margin-bottom:12px;"><div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">첨부된 사업자등록증</div><div id="bizLicensePreview" style="display:inline-block; max-width:100%;"><span style="color:#888; font-size:12px;">이미지 로딩 중...</span></div></div>`;
@@ -1385,7 +1408,7 @@ async function openOrderDetail(orderId) {
                 // 관리자 대리 입력 폼 (항상 표시 - 기존 정보 수정 가능)
                 const inputStyle = 'width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-primary); font-size:12px;';
                 bizHtml += `<div style="margin-top:12px; padding:12px; background:rgba(123,47,255,0.04); border:1px solid rgba(123,47,255,0.12); border-radius:8px;">
-                    <div style="font-size:11px; font-weight:600; color:var(--purple-light); margin-bottom:10px;">${hasBizInfo ? '✏️ 사업자 정보 수정' : '✏️ 사업자 정보 대리 입력'}</div>
+                    <div style="font-size:11px; font-weight:600; color:var(--purple-light); margin-bottom:10px;">${hasBizInfo ? '사업자 정보 수정' : '사업자 정보 대리 입력'}</div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                         <div><label style="font-size:10px; color:var(--text-muted);">업체명 *</label><input id="adminBizCompany" style="${inputStyle}" value="${bizInfo.company_name || ''}" placeholder="업체명"></div>
                         <div><label style="font-size:10px; color:var(--text-muted);">대표자</label><input id="adminBizCeo" style="${inputStyle}" value="${bizInfo.ceo_name || ''}" placeholder="대표자"></div>
@@ -1425,7 +1448,7 @@ async function openOrderDetail(orderId) {
             if (hasBizInfo) {
                 actionsHtml = `<button onclick="actionConfirmPayment(${orderId})" class="btn-save" style="${btnStyle}">결제 확인</button>`;
             } else {
-                actionsHtml = `<button disabled class="btn-save" style="${btnStyle} opacity:0.4; cursor:not-allowed;" title="고객이 계약 정보를 등록한 후 활성화됩니다">결제 확인 (대기 중)</button>`;
+                actionsHtml = `<button disabled class="btn-save" style="${btnStyle} flex-direction:column; line-height:1.2; white-space:normal; opacity:0.4; cursor:not-allowed;" title="고객이 계약 정보를 등록한 후 활성화됩니다"><span>결제 확인</span><span style="font-size:10px; font-weight:400;">(대기 중)</span></button>`;
             }
         } else if (order.status === 'paid') {
             actionsHtml = `<button onclick="actionIssueContract(${orderId})" class="btn-save" style="${btnStyle}">계약서 발행</button>`;
@@ -1471,7 +1494,7 @@ async function openOrderDetail(orderId) {
 
                 // PDF 새 창에서 보기 버튼
                 const btn = document.createElement('button');
-                btn.textContent = '📄 PDF 새 창에서 보기';
+                btn.textContent = 'PDF 새 창에서 보기';
                 btn.className = 'btn-preview';
                 btn.style.cssText = 'margin-top:8px; font-size:11px; padding:4px 12px; cursor:pointer;';
                 btn.onclick = () => {
@@ -1702,8 +1725,8 @@ async function adminDownloadQuotePDF(orderId) {
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600; width:60%;">기본 가격</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right;">${basePriceNum.toLocaleString('ko-KR')}원</td></tr>
         <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">추가 옵션 소계</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right;">${addonsTotalNum.toLocaleString('ko-KR')}원</td></tr>
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">공급가액 (VAT 별도)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; font-weight:600;">${supplyAmount.toLocaleString('ko-KR')}원</td></tr>
-        <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">부가세 (VAT 10%)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; color:#e53c11;">${vatAmount.toLocaleString('ko-KR')}원</td></tr>
-        <tr style="background:#7b2fff;"><td style="padding:10px 12px; border:1px solid #7b2fff; font-weight:700; color:#fff; font-size:14px;">합계 (VAT 포함)</td><td style="padding:10px 12px; border:1px solid #7b2fff; text-align:right; font-weight:700; color:#fff; font-size:16px;">${grandTotal.toLocaleString('ko-KR')}원</td></tr>
+        <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">부가세 (VAT 10%)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; color:#111;">${vatAmount.toLocaleString('ko-KR')}원</td></tr>
+        <tr style="background:#f5f0ff;"><td style="padding:10px 12px; border:1px solid #e0d4f5; font-weight:700; color:#7b2fff; font-size:14px;">합계 (VAT 포함)</td><td style="padding:10px 12px; border:1px solid #e0d4f5; text-align:right; font-weight:700; color:#e53c11; font-size:16px;">${grandTotal.toLocaleString('ko-KR')}원</td></tr>
     </table>`;
 
         const wrapper = document.createElement('div');
@@ -1720,8 +1743,8 @@ async function adminDownloadQuotePDF(orderId) {
     </table>
     ${addonsRows ? `<h3 style="font-size:14px; margin-bottom:8px; color:#7b2fff;">추가 옵션</h3><table style="width:100%; border-collapse:collapse; margin-bottom:20px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">옵션명</th><th style="padding:6px 10px; border:1px solid #ddd; text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
     ${breakdownHtml}
-    ${order.memo ? `<div style="margin-top:24px; padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">💬 고객 요청사항</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
-    ${adminReply ? `<div style="margin-top:12px; padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">📝 답변</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
+    ${order.memo ? `<div style="margin-top:24px; padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">고객 요청사항</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
+    ${adminReply ? `<div style="margin-top:12px; padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">답변</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
 </div>`;
         document.body.appendChild(wrapper);
         const el = document.getElementById('adminQuotePdf');

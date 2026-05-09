@@ -2972,13 +2972,13 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                         </div>
                         <div class="pricing-card__discount-price">
                             ${discountedPrice}<span style="font-size:16px;font-weight:400; color: var(--color-brand-orange);">원</span>
-                            <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
+                            <div style="font-size:12px; color:#fff; font-weight:400; margin-top:2px;">(VAT 별도)</div>
                         </div>
                     `;
                 } else {
                     priceHtml = `
                         ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
-                        <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
+                        <div style="font-size:12px; color:#fff; font-weight:400; margin-top:2px;">(VAT 별도)</div>
                     `;
                 }
 
@@ -3041,7 +3041,7 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
 
 
 /* ══════════════════════════════════════════════════════════
-   QUOTE CART MODULE — 견적담기 모달 로직
+   QUOTE CART MODULE — 견적담기 모달 로직 (3-Step Wizard)
    ══════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function initQuoteCart() {
     // 모달 요소
@@ -3053,6 +3053,26 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
     const memoEl = document.getElementById('quoteMemo');
     const summaryPlan = document.getElementById('quoteSummaryPlan');
     const submitBtn = document.getElementById('quoteSubmitBtn');
+    const stepSubtitle = document.getElementById('quoteStepSubtitle');
+    const submitNote = document.getElementById('quoteSubmitNote');
+
+    // 스텝 요소
+    const steps = [
+        document.getElementById('quoteStep1'),
+        document.getElementById('quoteStep2'),
+        document.getElementById('quoteStep3'),
+    ];
+    const stepBtns = [
+        document.getElementById('quoteStepBtns1'),
+        document.getElementById('quoteStepBtns2'),
+        document.getElementById('quoteStepBtns3'),
+    ];
+    const stepDots = document.querySelectorAll('.quote-step-dot');
+
+    const nextBtn1 = document.getElementById('quoteNextBtn1');
+    const prevBtn2 = document.getElementById('quotePrevBtn2');
+    const nextBtn2 = document.getElementById('quoteNextBtn2');
+    const prevBtn3 = document.getElementById('quotePrevBtn3');
 
     if (!modal || !overlay) {
         console.warn('[QuoteCart] 모달 요소를 찾을 수 없습니다.');
@@ -3063,8 +3083,32 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
     let selectedPlan = null;
     let cachedPlans = [];
     let cachedAddons = [];
+    let currentStep = 1;
     let pendingPlanAction = null; // 로그인 후 자동 열기용
 
+    const STEP_SUBTITLES = [
+        '원하시는 플랜을 선택하세요',
+        '추가 옵션을 선택하세요 (선택)',
+        '요청사항을 입력하세요 (선택)',
+    ];
+
+    /* ── 스텝 이동 ── */
+    function goToStep(step) {
+        currentStep = step;
+        steps.forEach((el, i) => {
+            if (el) el.style.display = (i === step - 1) ? '' : 'none';
+        });
+        stepBtns.forEach((el, i) => {
+            if (el) el.style.display = (i === step - 1) ? '' : 'none';
+        });
+        stepDots.forEach((dot, i) => {
+            dot.classList.toggle('active', i < step);
+            dot.classList.toggle('done', i < step - 1);
+        });
+        if (stepSubtitle) stepSubtitle.textContent = STEP_SUBTITLES[step - 1];
+        // 3단계일 때만 note 표시
+        if (submitNote) submitNote.style.display = (step === 3) ? '' : 'none';
+    }
 
     /* ── 모달 열기 ── */
     async function openQuoteModal(preSelectedPlanId) {
@@ -3082,6 +3126,7 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
         renderPlans(preSelectedPlanId);
         renderAddons();
         if (memoEl) memoEl.value = '';
+        goToStep(1);
 
         overlay.classList.add('open');
         modal.classList.add('open');
@@ -3095,19 +3140,28 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
         document.body.style.overflow = '';
     }
 
+    // ✅ 닫기: X 버튼으로만 (overlay 클릭 비활성화)
     closeBtn.addEventListener('click', closeQuoteModal);
-    overlay.addEventListener('click', closeQuoteModal);
+    // overlay.addEventListener('click', closeQuoteModal); // ← 외부 클릭 닫기 제거
+
     document.addEventListener('keydown', (e) => {
         const detailModal = document.getElementById('planDetailModal');
         if (e.key === 'Escape') {
             if (detailModal && detailModal.classList.contains('open')) {
                 document.getElementById('planDetailOverlay').classList.remove('open');
                 detailModal.classList.remove('open');
-            } else if (modal.classList.contains('open')) {
-                closeQuoteModal();
             }
+            // ESC로 quote modal 닫지 않음 (의도적으로 제거)
         }
     });
+
+    /* ── 스텝 버튼 이벤트 ── */
+    if (nextBtn1) nextBtn1.addEventListener('click', () => {
+        if (selectedPlan) goToStep(2);
+    });
+    if (prevBtn2) prevBtn2.addEventListener('click', () => goToStep(1));
+    if (nextBtn2) nextBtn2.addEventListener('click', () => goToStep(3));
+    if (prevBtn3) prevBtn3.addEventListener('click', () => goToStep(2));
 
     /* ── 플랜 상세 모달 열기 ── */
     window.openPlanDetailModal = function(planId) {
@@ -3143,13 +3197,13 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
                 </div>
                 <div class="pricing-card__discount-price">
                     ${discountedPrice}<span style="font-size:16px;font-weight:400; color: var(--color-brand-orange);">원</span>
-                    <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
+                    <div style="font-size:12px; color:#fff; font-weight:400; margin-top:2px;">(VAT 별도)</div>
                 </div>
             `;
         } else {
             priceHtml = `
                 ${basePrice}<span style="font-size:16px;font-weight:400">원</span>
-                <div style="font-size:12px; color:#888; font-weight:400; margin-top:4px;">(VAT 별도)</div>
+                <div style="font-size:12px; color:#fff; font-weight:400; margin-top:2px;">(VAT 별도)</div>
             `;
         }
 
@@ -3261,9 +3315,8 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
         if (summaryPlan) {
             summaryPlan.textContent = selectedPlan ? selectedPlan.name : '-';
         }
-        if (submitBtn) {
-            submitBtn.disabled = !selectedPlan;
-        }
+        // 다음 버튼 활성화/비활성화
+        if (nextBtn1) nextBtn1.disabled = !selectedPlan;
     }
 
     /* ── 견적 제출 ── */

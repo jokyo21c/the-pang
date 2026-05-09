@@ -583,7 +583,7 @@
         .biz-submit-btn {
             width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px;
             font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 16px;
-            background: linear-gradient(135deg, #7b2fff 0%, #e53c11 100%); color: #fff;
+            background: #7b2fff; color: #fff;
         }
         .biz-submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .biz-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
@@ -1356,12 +1356,12 @@
 <div class="biz-modal-overlay" id="bizModalOverlay">
     <div class="biz-modal">
         <div class="doc-modal__header">
-            <h3 class="doc-modal__title">📋 계약 정보 등록</h3>
+            <h3 class="doc-modal__title">계약 정보 등록</h3>
             <button class="doc-modal__close" onclick="closeBizModal()"><i class="ri-close-line"></i></button>
         </div>
         <div class="biz-tabs">
-            <button class="biz-tab active" onclick="switchBizTab('upload')">📎 간편 첨부 (추천)</button>
-            <button class="biz-tab" onclick="switchBizTab('manual')">✏️ 직접 입력</button>
+            <button class="biz-tab active" onclick="switchBizTab('upload')">간편 첨부 (추천)</button>
+            <button class="biz-tab" onclick="switchBizTab('manual')">직접 입력</button>
         </div>
         <!-- 탭 1: 간편 첨부 -->
         <div class="biz-tab-panel active" id="bizTabUpload">
@@ -2082,9 +2082,14 @@
                 })()}
 
                 ${order.total_amount ? `
-                <div style="margin-top:8px; padding:14px 16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:14px; font-weight:700; color:#fff;">확정 금액</span>
-                    <strong style="font-size:18px; color:#e53c11;">${getVatIncludedTotal(order.total_amount)}원 <span style="font-size:11px; font-weight:400; color:#fff;">(VAT 포함)</span></strong>
+                <div style="margin-top:8px; padding:14px 16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 0; font-size: 14px; font-weight: 700; color: #fff;">확정 금액</td>
+                            <td style="padding: 0; text-align: right; color: #e53c11; font-size: 18px; font-weight: 700; white-space: nowrap;">${getVatIncludedTotal(order.total_amount)}원</td>
+                            <td style="width: 65px; padding: 0 0 0 6px; text-align: right; color: #fff; font-size: 11px; white-space: nowrap; vertical-align: bottom; padding-bottom: 2px;">(VAT 포함)</td>
+                        </tr>
+                    </table>
                 </div>` : ''}
 
                 ${memoHtml}
@@ -2164,7 +2169,7 @@
         const title = document.getElementById('docModalTitle');
         const body = document.getElementById('docModalBody');
 
-        title.innerHTML = '📋 견적서';
+        title.innerHTML = '견적서';
 
         const basePrice = order.plan_price || '-';
         let basePriceDisplay = '';
@@ -2187,7 +2192,7 @@
             addonsRows = order.addons.map(a => {
                 const p = extractNumber(a.price || '');
                 addonsTotal += p;
-                return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span style="color:#ccc;">${a.name}</span><span style="color:#a78bfa; font-weight:600;">${a.price || '-'}</span></div>`;
+                return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span style="color:#ccc;">${a.name}</span><span style="color:#e53c11; font-weight:600;">${a.price || '-'}</span></div>`;
             }).join('');
         }
 
@@ -2233,29 +2238,55 @@
             </div>` : ''}
 
             <!-- 예상 합계 -->
-            <div style="display:flex; justify-content:space-between; padding:12px 16px; background:rgba(123,47,255,0.08); border:1px solid rgba(123,47,255,0.15); border-radius:8px; margin-bottom:8px;">
-                <span style="font-size:13px; color:#a78bfa;">예상 합계 (기본가 + 추가옵션)</span>
-                <strong style="font-size:15px; color:#a78bfa;">${estimatedTotal.toLocaleString('ko-KR')}원</strong>
-            </div>
+            ${(() => {
+                const vatAmount = estimatedTotal > 0 ? Math.floor(estimatedTotal * 0.1) : 0;
+                const estVatTotal = estimatedTotal + vatAmount;
+                return estVatTotal > 0 ? `
+                <div style="margin-bottom:8px; padding:16px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 4px 0; font-size: 13px; color: #fff;">기본가 + 추가 옵션</td>
+                            <td style="padding: 4px 0; text-align: right; color: #e53c11; font-size: 14px; white-space: nowrap;">${estimatedTotal.toLocaleString('ko-KR')}원</td>
+                            <td style="width: 65px; padding: 4px 0;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 0; font-size: 13px; color: #fff;">VAT</td>
+                            <td style="padding: 4px 0; text-align: right; color: #e53c11; font-size: 14px; white-space: nowrap;">${vatAmount.toLocaleString('ko-KR')}원</td>
+                            <td style="padding: 4px 0;"></td>
+                        </tr>
+                        <tr><td colspan="3" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-top: 8px; padding-bottom: 0;"></td></tr>
+                        <tr>
+                            <td style="padding: 12px 0 0 0; font-size: 14px; font-weight: 700; color: #fff;">예상 합계액</td>
+                            <td style="padding: 12px 0 0 0; text-align: right; color: #e53c11; font-size: 18px; font-weight: 700; white-space: nowrap;">${estVatTotal.toLocaleString('ko-KR')}원</td>
+                            <td style="padding: 12px 0 0 6px; text-align: right; color: #fff; font-size: 11px; white-space: nowrap; vertical-align: bottom; padding-bottom: 2px;">(VAT 포함)</td>
+                        </tr>
+                    </table>
+                </div>` : '';
+            })()}
 
             <!-- 확정 금액 -->
             ${totalAmount ? `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:10px; margin-bottom:16px;">
-                <span style="font-size:14px; font-weight:700; color:#fff;">확정 금액</span>
-                <strong style="font-size:20px; color:#e53c11;">${totalAmount}원 <span style="font-size:12px; font-weight:400; color:#888;">(VAT 포함)</span></strong>
+            <div style="margin-top:8px; padding:16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:10px; margin-bottom:16px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 0; font-size: 14px; font-weight: 700; color: #fff;">확정 금액</td>
+                        <td style="padding: 0; text-align: right; color: #e53c11; font-size: 20px; font-weight: 700; white-space: nowrap;">${totalAmount}원</td>
+                        <td style="width: 65px; padding: 0 0 0 6px; text-align: right; color: #fff; font-size: 12px; white-space: nowrap; vertical-align: bottom; padding-bottom: 2px;">(VAT 포함)</td>
+                    </tr>
+                </table>
             </div>` : ''}
 
             <!-- 고객 요청사항 -->
             ${order.memo ? `
             <div style="margin-bottom:12px; padding:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px;">
-                <div style="font-size:11px; font-weight:600; color:#a78bfa; margin-bottom:8px;">💬 고객 요청사항</div>
+                <div style="font-size:11px; font-weight:600; color:#a78bfa; margin-bottom:8px;">고객 요청사항</div>
                 <div style="font-size:13px; color:#ccc; line-height:1.6; white-space:pre-wrap;">${order.memo}</div>
             </div>` : ''}
 
             <!-- 관리자 답변 -->
             ${adminReply ? `
             <div style="padding:14px; background:rgba(123,47,255,0.06); border:1px solid rgba(123,47,255,0.15); border-radius:8px;">
-                <div style="font-size:11px; font-weight:600; color:#e53c11; margin-bottom:8px;">📝 답변</div>
+                <div style="font-size:11px; font-weight:600; color:#e53c11; margin-bottom:8px;">답변</div>
                 <div style="font-size:13px; color:#fff; line-height:1.6; white-space:pre-wrap;">${adminReply}</div>
             </div>` : ''}
         `;
@@ -2282,19 +2313,19 @@
         if (basePrice.includes('|')) {
             const parts = basePrice.split('|');
             const discounted = parts[2] || '';
-            basePriceDisplay = discounted ? `<strong style="color:#ff6b35;">${discounted}원</strong>` : `${parts[0]}원`;
+            basePriceDisplay = discounted ? `<strong style="color:#e53c11;">${discounted}원</strong>` : `<span style="color:#e53c11;">${parts[0]}원</span>`;
         } else {
-            basePriceDisplay = `${basePrice}원`;
+            basePriceDisplay = `<span style="color:#e53c11;">${basePrice}원</span>`;
         }
 
         let addonsSection = '';
         if (order.addons && order.addons.length > 0) {
             addonsSection = `
                 <div class="doc-modal__row" style="border:none; padding-bottom:4px;">
-                    <span class="doc-modal__label">포함 옵션</span>
+                    <span class="doc-modal__label">추가 옵션</span>
                 </div>
                 <div class="doc-modal__addon-list">
-                    ${order.addons.map(a => `<div class="doc-modal__addon-item"><span class="doc-modal__addon-name">${a.name}</span><span class="doc-modal__addon-price">${a.price || '-'}</span></div>`).join('')}
+                    ${order.addons.map(a => `<div class="doc-modal__addon-item"><span class="doc-modal__addon-name">${a.name}</span><span class="doc-modal__addon-price" style="color:#e53c11; font-weight:600;">${a.price || '-'}</span></div>`).join('')}
                 </div>
             `;
         }
@@ -2303,6 +2334,11 @@
         const isCompleted = order.status === 'completed';
 
         body.innerHTML = `
+            <style>
+                .sig-btn { transition: all 0.3s ease; }
+                .sig-btn-clear:hover { box-shadow: 0 0 10px rgba(255,255,255,0.3); background: rgba(255,255,255,0.15) !important; color: #fff !important; }
+                .sig-btn-save:hover { box-shadow: 0 0 15px rgba(123,47,255,0.7); background: #8a45ff !important; }
+            </style>
             <div class="doc-modal__row">
                 <span class="doc-modal__label">발행일</span>
                 <span class="doc-modal__value">${contractDate}</span>
@@ -2319,7 +2355,7 @@
             ${totalAmount ? `
             <div class="doc-modal__total doc-modal__total--contract">
                 <span class="doc-modal__total-label">계약 금액</span>
-                <span class="doc-modal__total-value doc-modal__total-value--contract">${totalAmount}원 <span style="font-size:14px; font-weight:400; color:#888;">(VAT 포함)</span></span>
+                <span class="doc-modal__total-value doc-modal__total-value--contract">${totalAmount}원 <span style="font-size:14px; font-weight:400; color:#fff;">(VAT 포함)</span></span>
             </div>` : ''}
             ${isCompleted ? `
             <div class="doc-modal__stamp doc-modal__stamp--completed">
@@ -2328,7 +2364,7 @@
 
             <!-- 전자서명 영역 -->
             <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
-                <div style="font-size:12px; font-weight:600; color:#a78bfa; margin-bottom:10px;">✍️ 고객 전자서명</div>
+                <div style="font-size:12px; font-weight:600; color:#7b2fff; margin-bottom:10px;">고객 전자서명</div>
                 ${order.contract_data?.customer_signature ? `
                 <div style="margin-bottom:12px;">
                     <div style="font-size:11px; color:#888; margin-bottom:6px;">저장된 서명:</div>
@@ -2341,8 +2377,8 @@
                     <canvas id="signatureCanvas" width="460" height="120" style="width:100%; height:120px; cursor:crosshair; display:block; border-radius:6px;"></canvas>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button onclick="clearSignature()" style="flex:1; height:36px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#ccc; border-radius:8px; font-size:12px; cursor:pointer;">🔄 다시 서명</button>
-                    <button onclick="saveSignature(${order.id})" style="flex:1; height:36px; border:none; background:#7b2fff; color:#fff; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">💾 서명 저장</button>
+                    <button onclick="clearSignature()" class="sig-btn sig-btn-clear" style="flex:1; height:36px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#ccc; border-radius:8px; font-size:12px; cursor:pointer;">다시 서명</button>
+                    <button onclick="saveSignature(${order.id})" class="sig-btn sig-btn-save" style="flex:1; height:36px; border:none; background:#7b2fff; color:#fff; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">서명 저장</button>
                 </div>
             </div>
         `;
@@ -2458,8 +2494,8 @@
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600; width:60%;">기본 가격</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right;">${basePriceNum.toLocaleString('ko-KR')}원</td></tr>
         <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">추가 옵션 소계</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right;">${addonsTotalNum.toLocaleString('ko-KR')}원</td></tr>
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">공급가액 (VAT 별도)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; font-weight:600;">${supplyAmount.toLocaleString('ko-KR')}원</td></tr>
-        <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">부가세 (VAT 10%)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; color:#e53c11;">${vatAmount.toLocaleString('ko-KR')}원</td></tr>
-        <tr style="background:#7b2fff;"><td style="padding:10px 12px; border:1px solid #7b2fff; font-weight:700; color:#fff; font-size:14px;">합계 (VAT 포함)</td><td style="padding:10px 12px; border:1px solid #7b2fff; text-align:right; font-weight:700; color:#fff; font-size:16px;">${grandTotal.toLocaleString('ko-KR')}원</td></tr>
+        <tr><td style="padding:8px 12px; border:1px solid #ddd; font-weight:600;">부가세 (VAT 10%)</td><td style="padding:8px 12px; border:1px solid #ddd; text-align:right; color:#111;">${vatAmount.toLocaleString('ko-KR')}원</td></tr>
+        <tr style="background:#f5f0ff;"><td style="padding:10px 12px; border:1px solid #e0d4f5; font-weight:700; color:#7b2fff; font-size:14px;">합계 (VAT 포함)</td><td style="padding:10px 12px; border:1px solid #e0d4f5; text-align:right; font-weight:700; color:#e53c11; font-size:16px;">${grandTotal.toLocaleString('ko-KR')}원</td></tr>
     </table>`;
 
         const wrapper = document.createElement('div');
@@ -2483,8 +2519,8 @@
     </table>
     ${addonsRows ? `<h3 style="font-size:14px; margin-bottom:8px; color:#7b2fff;">추가 옵션</h3><table style="width:100%; border-collapse:collapse; margin-bottom:20px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">옵션명</th><th style="padding:6px 10px; border:1px solid #ddd; text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
     ${breakdownHtml}
-    ${order.memo ? `<div style="margin-top:24px; padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">💬 고객 요청사항</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
-    ${adminReply ? `<div style="margin-top:12px; padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">📝 답변</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
+    ${order.memo ? `<div style="margin-top:24px; padding:14px; background:#fafafa; border:1px solid #eee; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#7b2fff; margin-bottom:6px;">고객 요청사항</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${order.memo}</div></div>` : ''}
+    ${adminReply ? `<div style="margin-top:12px; padding:14px; background:#f5f0ff; border:1px solid #e0d4f5; border-radius:8px;"><div style="font-size:12px; font-weight:700; color:#e53c11; margin-bottom:6px;">답변</div><div style="font-size:13px; color:#333; white-space:pre-wrap;">${adminReply}</div></div>` : ''}
 </div>`;
         document.body.appendChild(wrapper);
         try {
