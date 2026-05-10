@@ -549,6 +549,42 @@
                 </div>
             </div>
 
+            <!-- 환불 처리 모달 -->
+            <div id="refundModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9500; align-items:center; justify-content:center;">
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:16px; max-width:480px; width:90%; max-height:80vh; overflow-y:auto; padding:28px; box-shadow:0 8px 32px rgba(0,0,0,0.15); position:relative;">
+                    <!-- 닫기 버튼 (우측 상단) -->
+                    <button onclick="closeRefundModal()" style="position:absolute; top:16px; right:16px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; color:var(--text-secondary); width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; transition:0.2s;"><i class="ri-close-line"></i></button>
+                    <h3 style="font-size:18px; font-weight:700; color:var(--text-primary); margin-bottom:20px;">환불 처리</h3>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">환불 사유</label>
+                        <textarea id="refundReasonInput" class="form-control" rows="4" placeholder="환불 사유를 입력하세요..." style="width:100%; font-size:13px; resize:vertical;" readonly></textarea>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">환불액</label>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="text" id="refundAmountInput" class="form-control" placeholder="예: 100,000" style="flex:1; font-size:14px; font-weight:600;" oninput="this.value = formatNumberWithCommas(this.value)" readonly>
+                            <span style="color:var(--text-secondary); font-weight:600;">원</span>
+                        </div>
+                    </div>
+                    <div id="refundModalActions" style="display:flex; gap:8px; justify-content:flex-end;">
+                        <!-- 수정/저장/취소 버튼은 JS에서 동적으로 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 환불 취소 확인 모달 -->
+            <div id="refundCancelConfirmModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:9600; align-items:center; justify-content:center;">
+                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; max-width:360px; width:85%; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.2); text-align:center;">
+                    <div style="font-size:32px; margin-bottom:12px;">⚠️</div>
+                    <h4 style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:8px;">환불 취소</h4>
+                    <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:20px;">기존 환불 내용이 모두 사라집니다.<br>정말 취소하시겠습니까?</p>
+                    <div style="display:flex; gap:8px; justify-content:center;">
+                        <button onclick="closeRefundCancelConfirm()" style="flex:1; height:38px; border-radius:8px; border:1px solid var(--border); background:var(--bg-panel); color:var(--text-primary); font-size:13px; font-weight:600; cursor:pointer;">돌아가기</button>
+                        <button id="refundCancelConfirmBtn" style="flex:1; height:38px; border-radius:8px; border:1px solid #e53c11; background:rgba(229,60,17,0.1); color:#e53c11; font-size:13px; font-weight:600; cursor:pointer;">확인</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ─── SETTINGS PANEL ─── -->
             <div class="editor-panel" id="panel-settings">
                 <div class="panel-header">

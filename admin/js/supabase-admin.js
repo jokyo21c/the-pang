@@ -490,6 +490,52 @@ const AdminContent = {
             .update({ contract_data: merged })
             .eq('id', orderId);
         if (error) throw error;
+    },
+
+    /* ── 환불 관리 ─────────────────────────────────────── */
+
+    /** 환불 데이터 저장 (contract_data.refund에 병합) */
+    async saveRefund(orderId, refundData) {
+        const { data: current } = await _adminSupabase
+            .from('orders').select('contract_data').eq('id', orderId).single();
+        const existingCD = current?.contract_data || {};
+        const merged = {
+            ...existingCD,
+            refund: {
+                reason: refundData.reason || '',
+                amount: refundData.amount || '',
+                refunded_at: refundData.refunded_at || new Date().toISOString()
+            }
+        };
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({ contract_data: merged })
+            .eq('id', orderId);
+        if (error) throw error;
+    },
+
+    /** 환불 데이터 삭제 (contract_data에서 refund 키 제거) */
+    async deleteRefund(orderId) {
+        const { data: current } = await _adminSupabase
+            .from('orders').select('contract_data').eq('id', orderId).single();
+        const existingCD = current?.contract_data || {};
+        delete existingCD.refund;
+        const { error } = await _adminSupabase
+            .from('orders')
+            .update({ contract_data: existingCD })
+            .eq('id', orderId);
+        if (error) throw error;
+    },
+
+    /** 환불 데이터 조회 */
+    async getRefund(orderId) {
+        const { data, error } = await _adminSupabase
+            .from('orders')
+            .select('contract_data')
+            .eq('id', orderId)
+            .single();
+        if (error) throw error;
+        return data?.contract_data?.refund || null;
     }
 };
 

@@ -1048,7 +1048,7 @@ async function openMemberDetail(userId, name, email, status, createdAt) {
             listEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">주문 내역이 없습니다.</div>';
         } else {
             listEl.innerHTML = orders.map(o => {
-                const s = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP['quote_pending'];
+                const s = getOrderStatus(o);
                 const date = new Date(o.created_at).toLocaleDateString('ko-KR');
                 return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer;" onclick="closeMemberDetail(); openOrderDetail(${o.id})">
                     <div><strong style="font-size:13px; color:var(--text-primary);">${o.plan_name}</strong> <span style="font-size:11px; color:var(--text-muted);">${date}</span></div>
@@ -1180,6 +1180,13 @@ const ORDER_STATUS_MAP = {
     'completed':        { label: '체결 완료', badge: 'complete', icon: '🎉' }
 };
 
+function getOrderStatus(order) {
+    if (order.contract_data && order.contract_data.refund) {
+        return { label: '환불 완료', badge: 'refund', icon: '' };
+    }
+    return ORDER_STATUS_MAP[order.status] || ORDER_STATUS_MAP['quote_pending'];
+}
+
 function getVatIncludedTotal(amountStr) {
     if (!amountStr) return '';
     const num = parseInt(amountStr.toString().replace(/,/g, ''), 10);
@@ -1268,7 +1275,7 @@ async function loadOrders() {
         emptyEl.style.display = 'none';
 
         tbody.innerHTML = orders.map((o, i) => {
-            const s = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP['quote_pending'];
+            const s = getOrderStatus(o);
             const customerName = o._member?.name || o.members?.name || o.user_id?.substring(0, 8) || '-';
             const date = new Date(o.created_at).toLocaleDateString('ko-KR');
 
@@ -1302,7 +1309,7 @@ async function openOrderDetail(orderId) {
 
     try {
         const order = await AdminContent.getOrder(orderId);
-        const s = ORDER_STATUS_MAP[order.status] || ORDER_STATUS_MAP['quote_pending'];
+        const s = getOrderStatus(order);
 
         let addonsHtml = '';
         if (order.addons && Array.isArray(order.addons) && order.addons.length > 0) {
@@ -1460,7 +1467,21 @@ async function openOrderDetail(orderId) {
                 actionsHtml = `<span title="고객이 마이페이지에서 전자서명을 완료한 후 활성화됩니다." style="display:flex; flex:1;"><button disabled class="btn-save" style="${btnStyle} background:#ddd; color:#999; border-color:#ddd; cursor:not-allowed; opacity:0.7; pointer-events:none; width:100%;">체결 완료 (고객 서명 대기중)</button></span>`;
             }
         }
-        actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}${actionsHtml}</div>`;
+
+        // 환불 버튼 (고객이 계약 정보 등록한 이후부터 표시, 체결 완료 후에도 유지)
+        let refundBtnHtml = '';
+        const showRefundBtn = (order.status === 'quote_issued' && (order.contract_data?.customer_business || order.contract_data?.biz_license_url))
+            || ['paid', 'contract_issued', 'completed'].includes(order.status);
+        if (showRefundBtn) {
+            const hasRefund = !!(order.contract_data?.refund);
+            const refundBtnText = hasRefund ? '환불 완료' : '환불';
+            const refundBtnStyle = hasRefund 
+                ? 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; border:1px solid #000; background:#000; color:#fff;'
+                : 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; border:1px solid #000; background:#e0e0e0; color:#000;';
+            refundBtnHtml = `<button id="refundBtn_${orderId}" onclick="openRefundModal(${orderId})" style="${refundBtnStyle} margin-left:auto;">${refundBtnText}</button>`;
+        }
+
+        actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px; width:100%; align-items:center;">${pdfBtns}${actionsHtml}${refundBtnHtml}</div>`;
 
         modal.style.display = 'flex';
         if (window.innerWidth >= 768) {
@@ -1863,9 +1884,23 @@ async function openWithdrawnDetail(userId, name, email, createdAt, withdrawnAt) 
             listEl.innerHTML = orders.map(o => {
                 const s = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP['quote_pending'];
                 const date = new Date(o.created_at).toLocaleDateString('ko-KR');
-                return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer;" onclick="closeWithdrawnDetail(); openOrderDetail(${o.id})">
-                    <div><strong style="font-size:13px; color:var(--text-primary);">${o.plan_name}</strong> <span style="font-size:11px; color:var(--text-muted);">${date}</span></div>
-                    <span style="font-size:12px; font-weight:600; color:var(--purple-light);">${s.icon} ${s.label}</span>
+                const refund = o.contract_data?.refund;
+                let refundHtml = '';
+                if (refund) {
+                    const refundDate = refund.refunded_at ? new Date(refund.refunded_at).toLocaleDateString('ko-KR') : '-';
+                    refundHtml = `<div style="margin-top:6px; padding:8px 10px; background:rgba(229,60,17,0.06); border:1px solid rgba(229,60,17,0.15); border-radius:6px; font-size:11px; color:var(--text-secondary); line-height:1.5;">
+                        <strong style="color:#e53c11;">환불 이력</strong><br>
+                        <span>사유: ${refund.reason || '-'}</span><br>
+                        <span>환불액: ${refund.amount || '-'}원</span><br>
+                        <span>환불일: ${refundDate}</span>
+                    </div>`;
+                }
+                return `<div style="padding:10px 12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="closeWithdrawnDetail(); openOrderDetail(${o.id})">
+                        <div><strong style="font-size:13px; color:var(--text-primary);">${o.plan_name}</strong> <span style="font-size:11px; color:var(--text-muted);">${date}</span></div>
+                        <span style="font-size:12px; font-weight:600; color:var(--purple-light);">${s.icon} ${s.label}</span>
+                    </div>
+                    ${refundHtml}
                 </div>`;
             }).join('');
         }
@@ -1880,3 +1915,149 @@ function closeWithdrawnDetail() {
     if (pcBtn) pcBtn.style.display = 'none';
 }
 
+
+/* ════════════════════════════════════════════════════════
+   환불 관리 모달
+   ════════════════════════════════════════════════════════ */
+
+let _refundCurrentOrderId = null;
+
+/** 환불 모달 열기 */
+async function openRefundModal(orderId) {
+    _refundCurrentOrderId = orderId;
+    const modal = document.getElementById('refundModal');
+    const reasonInput = document.getElementById('refundReasonInput');
+    const amountInput = document.getElementById('refundAmountInput');
+    const actionsDiv = document.getElementById('refundModalActions');
+
+    // 기존 환불 데이터 확인
+    let existingRefund = null;
+    try {
+        existingRefund = await AdminContent.getRefund(orderId);
+    } catch (e) {
+        console.warn('환불 데이터 조회 실패:', e);
+    }
+
+    if (existingRefund) {
+        // 기존 환불 데이터가 있으면 읽기 전용으로 표시
+        reasonInput.value = existingRefund.reason || '';
+        amountInput.value = existingRefund.amount || '';
+        reasonInput.readOnly = true;
+        amountInput.readOnly = true;
+        renderRefundActions('view');
+    } else {
+        // 새 환불 - 편집 모드로 시작
+        reasonInput.value = '';
+        amountInput.value = '';
+        reasonInput.readOnly = false;
+        amountInput.readOnly = false;
+        renderRefundActions('edit');
+    }
+
+    modal.style.display = 'flex';
+}
+
+/** 환불 모달 닫기 (내용 유지, 저장하지 않음) */
+function closeRefundModal() {
+    document.getElementById('refundModal').style.display = 'none';
+}
+
+/** 환불 모달 하단 버튼 렌더링 */
+function renderRefundActions(mode) {
+    const actionsDiv = document.getElementById('refundModalActions');
+    const actionBtnStyle = 'height:38px; padding:0 20px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;';
+
+    if (mode === 'view') {
+        // 읽기 전용 모드: 수정 / 취소 버튼
+        actionsDiv.innerHTML = `
+            <button onclick="enableRefundEdit()" style="${actionBtnStyle} border:1px solid var(--border); background:var(--bg-panel); color:var(--text-primary);">수정</button>
+            <button onclick="confirmCancelRefund()" style="${actionBtnStyle} border:1px solid #e53c11; background:rgba(229,60,17,0.1); color:#e53c11;">취소</button>
+        `;
+    } else if (mode === 'edit') {
+        // 편집 모드: 저장 버튼
+        actionsDiv.innerHTML = `
+            <button onclick="saveRefundData()" style="${actionBtnStyle} border:1px solid #7b2fff; background:rgba(123, 47, 255, 0.1); color:#7b2fff;">저장</button>
+        `;
+    } else if (mode === 'editExisting') {
+        // 기존 내용 수정 모드: 저장 / 취소 버튼
+        actionsDiv.innerHTML = `
+            <button onclick="saveRefundData()" style="${actionBtnStyle} border:1px solid #7b2fff; background:rgba(123, 47, 255, 0.1); color:#7b2fff;">저장</button>
+            <button onclick="confirmCancelRefund()" style="${actionBtnStyle} border:1px solid #e53c11; background:rgba(229,60,17,0.1); color:#e53c11;">취소</button>
+        `;
+    }
+}
+
+/** 수정 모드 활성화 */
+function enableRefundEdit() {
+    document.getElementById('refundReasonInput').readOnly = false;
+    document.getElementById('refundAmountInput').readOnly = false;
+    document.getElementById('refundReasonInput').focus();
+    renderRefundActions('editExisting');
+}
+
+/** 환불 데이터 저장 */
+async function saveRefundData() {
+    const reason = document.getElementById('refundReasonInput').value.trim();
+    const amount = document.getElementById('refundAmountInput').value.trim();
+
+    if (!reason) { showToast('환불 사유를 입력해주세요.'); return; }
+    if (!amount) { showToast('환불액을 입력해주세요.'); return; }
+
+    try {
+        await AdminContent.saveRefund(_refundCurrentOrderId, {
+            reason: reason,
+            amount: amount,
+            refunded_at: new Date().toISOString()
+        });
+        showToast('✅ 환불 정보가 저장되었습니다.');
+
+        // 환불 버튼 텍스트를 '환불 완료'로 변경 및 스타일 업데이트
+        const refundBtn = document.getElementById(`refundBtn_${_refundCurrentOrderId}`);
+        if (refundBtn) {
+            refundBtn.textContent = '환불 완료';
+            refundBtn.style.background = '#000';
+            refundBtn.style.color = '#fff';
+        }
+
+        // 모달 닫기
+        closeRefundModal();
+    } catch (e) {
+        console.error('환불 저장 실패:', e);
+        showToast('❌ 환불 저장 실패: ' + e.message);
+    }
+}
+
+/** 환불 취소 확인 (경고 메시지 표시) */
+function confirmCancelRefund() {
+    const confirmModal = document.getElementById('refundCancelConfirmModal');
+    confirmModal.style.display = 'flex';
+    document.getElementById('refundCancelConfirmBtn').onclick = executeCancelRefund;
+}
+
+/** 환불 취소 확인 모달 닫기 */
+function closeRefundCancelConfirm() {
+    document.getElementById('refundCancelConfirmModal').style.display = 'none';
+}
+
+/** 환불 취소 실행 */
+async function executeCancelRefund() {
+    try {
+        await AdminContent.deleteRefund(_refundCurrentOrderId);
+        showToast('환불이 취소되었습니다.');
+
+        // 환불 버튼 텍스트를 '환불'로 복원 및 스타일 복원
+        const refundBtn = document.getElementById(`refundBtn_${_refundCurrentOrderId}`);
+        if (refundBtn) {
+            refundBtn.textContent = '환불';
+            refundBtn.style.background = '#e0e0e0';
+            refundBtn.style.color = '#000';
+        }
+
+        // 모달들 닫기
+        closeRefundCancelConfirm();
+        closeRefundModal();
+    } catch (e) {
+        console.error('환불 취소 실패:', e);
+        showToast('❌ 환불 취소 실패: ' + e.message);
+    }
+}

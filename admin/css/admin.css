@@ -947,6 +947,7 @@ textarea.form-control {
 .member-badge--success { background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid #dc2626; }
 .member-badge--primary { background: rgba(123,47,255,0.12); color: #7b2fff; border: 1px solid #7b2fff; }
 .member-badge--complete { background: rgba(229,60,17,0.12); color: #e53c11; border: 1px solid #e53c11; }
+.member-badge--refund { background: #000; color: #fff; border: 1px solid #000; }
 
 .btn-member-delete { background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 16px; transition: background var(--transition), color var(--transition), border-color var(--transition); }
 .btn-member-delete:hover { background: rgba(230,57,70,0.1); color: var(--red); border-color: rgba(230,57,70,0.25); }

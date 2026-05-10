@@ -1976,6 +1976,7 @@
         };
 
         const s = STATUS_MAP[order.status] || STATUS_MAP['quote_pending'];
+        const isRefunded = !!(order.contract_data && order.contract_data.refund);
         const steps = [
             { label: '견적담기', step: 1 },
             { label: '견적서', step: 2 },
@@ -2038,9 +2039,14 @@
                     </div>
                 </div>
 
+                ${isRefunded ? `
+                <div style="padding:14px 18px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:10px; text-align:center;">
+                    <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:4px;">환불 처리된 계약입니다</div>
+                    <div style="font-size:12px; color:#999;">아래에서 환불 내역을 확인할 수 있습니다.</div>
+                </div>` : `
                 <div class="process-bar">
                     ${processBarHtml}
-                </div>
+                </div>`}
 
                 <div class="order-details">
                     <div class="order-detail">
@@ -2093,6 +2099,29 @@
                     </table>
                 </div>` : ''}
 
+                ${isRefunded ? (() => {
+                    const refund = order.contract_data.refund;
+                    const refundDate = refund.refunded_at ? new Date(refund.refunded_at).toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }) : '-';
+                    return `
+                    <div style="margin-top:8px; padding:14px 16px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); border-radius:8px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 4px 0; font-size: 13px; font-weight: 600; color: #fff; vertical-align: top; white-space: nowrap; width: 80px;">환불 사유</td>
+                                <td style="padding: 4px 0; text-align: left; color: #ccc; font-size: 13px; line-height: 1.5; word-break: break-word;">${refund.reason || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px 0; font-size: 13px; font-weight: 600; color: #fff;">환불 금액</td>
+                                <td style="padding: 4px 0; text-align: right; color: #e53c11; font-size: 16px; font-weight: 700;">${refund.amount ? refund.amount + '원' : '-'}</td>
+                            </tr>
+                            <tr><td colspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-top: 6px; padding-bottom: 0;"></td></tr>
+                            <tr>
+                                <td style="padding: 8px 0 0 0; font-size: 12px; color: #999;">환불 처리일</td>
+                                <td style="padding: 8px 0 0 0; text-align: right; color: #999; font-size: 12px;">${refundDate}</td>
+                            </tr>
+                        </table>
+                    </div>`;
+                })() : ''}
+
                 ${memoHtml}
 
                 ${renderOrderActions(order)}
@@ -2103,8 +2132,17 @@
     /* ── 상태별 액션 버튼 렌더링 ── */
     function renderOrderActions(order) {
         const s = order.status;
+        const isRefunded = !!(order.contract_data && order.contract_data.refund);
         let buttons = '';
         const oj = JSON.stringify(order).replace(/'/g, "&#39;");
+
+        // 환불 완료 상태: 환불 완료 뱃지만 표시
+        if (isRefunded) {
+            const refund = order.contract_data.refund;
+            const refundDate = refund.refunded_at ? new Date(refund.refunded_at).toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }) : '';
+            buttons += `<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#000;border:1px solid #000;border-radius:10px;font-size:12px;color:#fff;font-weight:600;">환불 완료${refundDate ? ' : ' + refundDate : ''}</div>`;
+            return `<div class="order-actions">${buttons}</div>`;
+        }
 
         // 견적 대기 상태: 취소 버튼
         if (s === 'quote_pending') {
