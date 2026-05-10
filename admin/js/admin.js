@@ -1347,7 +1347,7 @@ async function openOrderDetail(orderId) {
             <div style="margin-top:12px; padding:16px; background:rgba(229,60,17,0.08); border:1px solid rgba(229,60,17,0.2); border-radius:8px;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="padding: 0; font-size: 14px; font-weight: 600; color: var(--text-primary);">확정 금액</td>
+                        <td style="padding: 0; font-size: 14px; font-weight: 600; color: var(--text-primary);">견적 확정 금액(VAT 포함)</td>
                         <td style="padding: 0; text-align: right; color: #e53c11; font-size: 22px; font-weight: 700; white-space: nowrap;">${order.total_amount}원</td>
                         <td style="width: 65px; padding: 0 0 0 6px; text-align: right; color: var(--text-muted); font-size: 12px; white-space: nowrap; vertical-align: bottom; padding-bottom: 3px;">(VAT 포함)</td>
                     </tr>
