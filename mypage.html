@@ -2544,6 +2544,12 @@
             const dataUrl = canvas.toDataURL('image/png');
             await PangOrders.saveSignature(orderId, dataUrl);
             alert('✅ 전자서명이 저장되었습니다.');
+            // 이벤트 5: 관리자에게 서명 완료 텔레그램 알림
+            try {
+                const signedOrder = await PangOrders.getOrder(orderId);
+                const myName = user.user_metadata?.name || '고객';
+                await PangNotify.notifyContractSigned(orderId, myName, signedOrder.plan_name);
+            } catch (ne) { console.warn('[notify] 이벤트5 알림 실패(무시):', ne); }
             // 주문 목록 새로고침
             location.reload();
         } catch (e) {
@@ -2702,6 +2708,12 @@
             });
             alert('✅ 사업자 정보가 제출되었습니다.\n담당 PD가 확인 후 계약서를 세팅해 드립니다.');
             closeBizModal();
+            // 이벤트 3: 관리자에게 계약정보 등록 알림
+            try {
+                const myName = user.user_metadata?.name || '고객';
+                const thisOrder = await PangOrders.getOrder(orderId);
+                await PangNotify.notifyInfoSubmitted(orderId, myName, thisOrder.plan_name);
+            } catch (ne) { console.warn('[notify] 이벤트3 알림 실패(무시):', ne); }
             location.reload();
         } catch (e) {
             btn.disabled = false; btn.textContent = '제출하기';
@@ -2741,6 +2753,12 @@
             });
             alert('✅ 사업자 정보가 저장되었습니다.\n계약서 보기/PDF에서 정보를 확인할 수 있습니다.');
             closeBizModal();
+            // 이벤트 3: 관리자에게 계약정보 등록 알림
+            try {
+                const myName = user.user_metadata?.name || '고객';
+                const thisOrder = await PangOrders.getOrder(orderId);
+                await PangNotify.notifyInfoSubmitted(orderId, myName, thisOrder.plan_name);
+            } catch (ne) { console.warn('[notify] 이벤트3 알림 실패(무시):', ne); }
             location.reload();
         } catch (e) {
             btn.disabled = false; btn.textContent = '제출하기';

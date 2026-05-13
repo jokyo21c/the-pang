@@ -3348,6 +3348,17 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
                 memo: memoEl ? memoEl.value.trim() : ''
             });
 
+            // 이벤트 1: 관리자에게 견적 요청 텔레그램 알림
+            try {
+                const newOrderList = await PangOrders.getMyOrders();
+                const newOrder = newOrderList[0]; // 최신 주문
+                const me = await PangAuth.getUser();
+                const myName = me?.user_metadata?.name || '고객';
+                if (newOrder && window.PangNotify) {
+                    await PangNotify.notifyQuoteRequested(newOrder, myName);
+                }
+            } catch (ne) { console.warn('[notify] 이벤트1 알림 실패(무시):', ne); }
+
             closeQuoteModal();
             alert('✅ 견적 요청이 완료되었습니다!\n마이페이지에서 진행 상황을 확인하실 수 있습니다.');
 

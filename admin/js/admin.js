@@ -1640,6 +1640,11 @@ async function confirmIssueQuote(orderId) {
         showToast('✅ 견적서가 발행되었습니다.');
         closeOrderDetail();
         loadOrders();
+        // 이벤트 2: 고객에게 견적서 발행 알림톡
+        try {
+            const order = await AdminContent.getOrder(orderId);
+            await AdminNotify.notifyQuoteIssued(order);
+        } catch (ne) { console.warn('[notify] 이벤트2 알림 실패(무시):', ne); }
     } catch (e) {
         showToast('❌ 견적서 발행 실패: ' + e.message);
     }
@@ -1656,6 +1661,11 @@ async function actionConfirmPayment(orderId) {
         const btnStyle = 'height:40px; padding:0 12px; font-size:12px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0; white-space:nowrap;';
         let pdfBtns = `<button onclick="adminDownloadQuotePDF(${orderId})" class="btn-preview" style="${btnStyle}">견적서 PDF</button>`;
         actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}<button onclick="actionIssueContract(${orderId})" class="btn-save" style="${btnStyle}">계약서 발행</button></div>`;
+        // 이벤트 7/8: 결제 완료 양측 알림 (중복 방지 내장)
+        try {
+            const order = await AdminContent.getOrder(orderId);
+            await AdminNotify.notifyPaymentCompleted(order);
+        } catch (ne) { console.warn('[notify] 이벤트7/8 알림 실패(무시):', ne); }
     } catch (e) {
         showToast('❌ 결제 확인 실패: ' + e.message);
     }
@@ -1675,6 +1685,11 @@ async function actionIssueContract(orderId) {
         let pdfBtns = `<button onclick="adminDownloadQuotePDF(${orderId})" class="btn-preview" style="${btnStyle}">견적서 PDF</button>`;
         pdfBtns += `<button onclick="adminDownloadContractPDF(${orderId})" class="btn-preview" style="${btnStyle}">계약서 PDF</button>`;
         actions.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${pdfBtns}<span title="고객이 마이페이지에서 전자서명을 완료한 후 활성화됩니다." style="display:flex; flex:1;"><button disabled class="btn-save" style="${btnStyle} background:#ddd; color:#999; border-color:#ddd; cursor:not-allowed; opacity:0.7; pointer-events:none; width:100%;">체결 완료 (고객 서명 대기중)</button></span></div>`;
+        // 이벤트 4: 고객에게 계약서 발행 알림톡
+        try {
+            const order = await AdminContent.getOrder(orderId);
+            await AdminNotify.notifyContractIssued(order);
+        } catch (ne) { console.warn('[notify] 이벤트4 알림 실패(무시):', ne); }
     } catch (e) {
         showToast('❌ 계약서 발행 실패: ' + e.message);
     }
@@ -1687,6 +1702,11 @@ async function actionCompleteOrder(orderId) {
         showToast('🎉 계약 체결이 완료되었습니다.');
         closeOrderDetail();
         loadOrders();
+        // 이벤트 6: 양측에 체결 완료 알림
+        try {
+            const order = await AdminContent.getOrder(orderId);
+            await AdminNotify.notifyContractCompleted(order);
+        } catch (ne) { console.warn('[notify] 이벤트6 알림 실패(무시):', ne); }
     } catch (e) {
         showToast('❌ 완료 처리 실패: ' + e.message);
     }
@@ -2021,6 +2041,11 @@ async function saveRefundData() {
 
         // 모달 닫기
         closeRefundModal();
+        // 이벤트 9: 환불 완료 양측 알림
+        try {
+            const order = await AdminContent.getOrder(_refundCurrentOrderId);
+            await AdminNotify.notifyRefundCompleted(order, amount, reason);
+        } catch (ne) { console.warn('[notify] 이벤트9 알림 실패(무시):', ne); }
     } catch (e) {
         console.error('환불 저장 실패:', e);
         showToast('❌ 환불 저장 실패: ' + e.message);

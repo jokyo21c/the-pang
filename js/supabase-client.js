@@ -389,3 +389,84 @@ _supabaseClient.auth.onAuthStateChange((event, session) => {
         }, 0);
     }
 });
+
+/* ── 알림 발송 헬퍼 (고객/관리자 양방향) ───────────────────── */
+const PangNotify = {
+
+    /** Edge Function send-notify 호출 */
+    async send(payload) {
+        try {
+            const supabaseUrl = PANG_CONFIG.SUPABASE_URL;
+            const anonKey = PANG_CONFIG.SUPABASE_ANON_KEY;
+            const url = `${supabaseUrl}/functions/v1/send-notify`;
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${anonKey}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const json = await res.json();
+            if (!json.success && json.reason !== 'already_notified') {
+                console.warn('[PangNotify] 알림 발송 실패:', json);
+            }
+            return json;
+        } catch (e) {
+            // 알림 실패는 메인 프로세스에 영향 없도록 무시
+            console.warn('[PangNotify] 알림 호출 에러:', e);
+            return { success: false };
+        }
+    },
+
+    /** 현재 고객 전화번호 조회 */
+    async getMyPhone() {
+        try {
+            const user = await PangAuth.getUser();
+            if (!user) return null;
+            const { data } = await _supabaseClient
+                .from('members')
+                .select('phone')
+                .eq('user_id', user.id)
+                .single();
+            return data?.phone || user.user_metadata?.phone || null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    /** 이벤트 1: 고객 견적 요청 → 관리자에게 텔레그램 */
+    async notifyQuoteRequested(order, customerName) {
+        return this.send({
+            event: 'quote_requested',
+            orderId: order.id,
+            customerName,
+            planName: order.plan_name,
+            planTier: order.plan_tier
+        });
+    },
+
+    /** 이벤트 3: 고객 계약정보 등록 → 관리자에게 텔레그램 */
+    async notifyInfoSubmitted(orderId, customerName, planName) {
+        return this.send({
+            event: 'info_submitted',
+            orderId,
+            customerName,
+            planName
+        });
+    },
+
+    /** 이벤트 5: 고객 서명 완료 → 관리자에게 텔레그램 */
+    async notifyContractSigned(orderId, customerName, planName) {
+        return this.send({
+            event: 'contract_signed',
+            orderId,
+            customerName,
+            planName
+        });
+    }
+};
+
+window.PangNotify = PangNotify;

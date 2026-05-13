@@ -679,3 +679,122 @@ window.AdminAuth = AdminAuth;
 window.AdminContent = AdminContent;
 window.AdminStorage = AdminStorage;
 window._adminSupabase = _adminSupabase;
+
+/* ── 관리자 알림 발송 헬퍼 ───────────────────────────────── */
+const AdminNotify = {
+
+    /** Edge Function send-notify 호출 */
+    async send(payload) {
+        try {
+            const url = `${PANG_CONFIG.SUPABASE_URL}/functions/v1/send-notify`;
+            const session = await AdminAuth.getSession();
+            const token = session?.access_token || PANG_CONFIG.SUPABASE_ANON_KEY;
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const json = await res.json();
+            if (!json.success && json.reason !== 'already_notified') {
+                console.warn('[AdminNotify] 알림 발송 실패:', json);
+            }
+            return json;
+        } catch (e) {
+            // 알림 실패는 메인 프로세스에 영향 없도록 무시
+            console.warn('[AdminNotify] 알림 호출 에러:', e);
+            return { success: false };
+        }
+    },
+
+    /** 주문 정보에서 고객 전화번호 추출 */
+    async getCustomerPhone(userId) {
+        try {
+            const { data } = await _adminSupabase
+                .from('members')
+                .select('phone')
+                .eq('user_id', userId)
+                .single();
+            return data?.phone || null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    /** 이벤트 2: 견적서 발행 → 고객에게 알림톡 */
+    async notifyQuoteIssued(order) {
+        const phone = await this.getCustomerPhone(order.user_id);
+        const customerName = order._member?.name || '고객';
+        return this.send({
+            event: 'quote_issued',
+            orderId: order.id,
+            customerName,
+            planName: order.plan_name,
+            totalAmount: order.total_amount || '-',
+            contactPhone: phone
+        });
+    },
+
+    /** 이벤트 4: 계약서 발행 → 고객에게 알림톡 */
+    async notifyContractIssued(order) {
+        const phone = await this.getCustomerPhone(order.user_id);
+        const customerName = order._member?.name || '고객';
+        return this.send({
+            event: 'contract_issued',
+            orderId: order.id,
+            customerName,
+            planName: order.plan_name,
+            contactPhone: phone
+        });
+    },
+
+    /** 이벤트 6: 체결 완료 → 양측 알림 */
+    async notifyContractCompleted(order) {
+        const phone = await this.getCustomerPhone(order.user_id);
+        const customerName = order._member?.name || '고객';
+        return this.send({
+            event: 'contract_completed',
+            orderId: order.id,
+            customerName,
+            planName: order.plan_name,
+            totalAmount: order.total_amount || '-',
+            contactPhone: phone
+        });
+    },
+
+    /** 이벤트 7/8: 결제/입금 확인 → 양측 알림 (중복 방지 내장) */
+    async notifyPaymentCompleted(order) {
+        const phone = await this.getCustomerPhone(order.user_id);
+        const customerName = order._member?.name || '고객';
+        return this.send({
+            event: 'payment_completed',
+            orderId: order.id,
+            customerName,
+            planName: order.plan_name,
+            totalAmount: order.total_amount || '-',
+            contactPhone: phone
+        });
+    },
+
+    /** 이벤트 9: 환불 처리 완료 → 양측 알림 */
+    async notifyRefundCompleted(order, refundAmount, refundReason) {
+        const phone = await this.getCustomerPhone(order.user_id);
+        const customerName = order._member?.name || '고객';
+        return this.send({
+            event: 'refund_completed',
+            orderId: order.id,
+            customerName,
+            planName: order.plan_name,
+            refundAmount,
+            refundReason,
+            contactPhone: phone
+        });
+    }
+};
+
+window.AdminNotify = AdminNotify;
+
