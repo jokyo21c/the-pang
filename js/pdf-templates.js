@@ -92,7 +92,7 @@ function buildContractPage1Html(order) {
     <div style="margin-top:50px;text-align:center;font-size:12px;font-weight:600;">계약일자: ${year}년 ${month}월 ${day}일</div>
     <div style="display:flex;justify-content:space-between;margin-top:30px;gap:30px;">
         <div style="flex:1;border:1px solid #ddd;border-radius:6px;padding:12px;">
-            <div style="font-size:11px;font-weight:700;color:#7b2fff;margin-bottom:8px;">[동] 공급자</div>
+            <div style="font-size:11px;font-weight:700;color:#111;margin-bottom:8px;">[동] 공급자</div>
             <table style="font-size:11px;width:100%;border-collapse:collapse;">
                 <tr><td style="padding:3px 0;color:#666;width:65px;">업체명</td><td style="padding:3px 0;font-weight:600;"><div style="position:relative;display:inline-block;">넥스온<img src="/assets/images/nexon_seal.png" style="position:absolute;top:-52px;left:90px;height:120px;max-width:none;z-index:1;" alt="(직인)"></div></td></tr>
                 <tr><td style="padding:3px 0;color:#666;">사업자번호</td><td style="padding:3px 0;">686-46-01233</td></tr>
@@ -101,7 +101,7 @@ function buildContractPage1Html(order) {
             </table>
         </div>
         <div style="flex:1;border:1px solid #ddd;border-radius:6px;padding:12px;">
-            <div style="font-size:11px;font-weight:700;color:#e53c11;margin-bottom:8px;">[행] 공급받는자</div>
+            <div style="font-size:11px;font-weight:700;color:#111;margin-bottom:8px;">[행] 공급받는자</div>
             <table style="font-size:11px;width:100%;border-collapse:collapse;">
                 <tr><td style="padding:3px 0;color:#666;width:65px;vertical-align:middle;">업체명</td><td style="padding:3px 0;font-weight:600;vertical-align:middle;">${bizCompany}</td></tr>
                 <tr><td style="padding:3px 0;color:#666;vertical-align:middle;">사업자번호</td><td style="padding:3px 0;vertical-align:middle;">${bizNum || '-'}</td></tr>
@@ -146,7 +146,7 @@ function buildContractPage2Html(order) {
         <tr style="background:#f9f9f9;"><td style="padding:7px 12px;border:1px solid #ddd;font-weight:600;font-size:11px;">공급가액 (VAT 별도)</td><td style="padding:7px 12px;border:1px solid #ddd;text-align:right;font-weight:600;font-size:11px;">${supply2.toLocaleString('ko-KR')}원</td></tr>
         <tr><td style="padding:7px 12px;border:1px solid #ddd;font-weight:600;font-size:11px;">부가세 (VAT 10%)</td><td style="padding:7px 12px;border:1px solid #ddd;text-align:right;color:#000;font-size:11px;">${vat2.toLocaleString('ko-KR')}원</td></tr>
         <tr style="background:#f9f9f9;"><td style="padding:9px 12px;border:1px solid #ddd;font-weight:700;color:#111;font-size:12px;">합계 (VAT 포함)</td><td style="padding:9px 12px;border:1px solid #ddd;text-align:right;font-weight:700;color:#111;font-size:12px;">${total2.toLocaleString('ko-KR')}원</td></tr>
-        ${order.total_amount ? `<tr style="background:#f5f0ff;"><td style="padding:9px 12px;border:1px solid #e0d4f5;font-weight:700;color:#7b2fff;font-size:14px;">계약 확정 금액(VAT 포함)</td><td style="padding:9px 12px;border:1px solid #e0d4f5;text-align:right;font-weight:700;color:#e53c11;font-size:14px;">${order.total_amount}원</td></tr>` : ''}
+        ${order.total_amount ? `<tr style="background:#f5f0ff;"><td style="padding:9px 12px;border:1px solid #e0d4f5;font-weight:700;color:#111;font-size:14px;">계약 확정 금액(VAT 포함)</td><td style="padding:9px 12px;border:1px solid #e0d4f5;text-align:right;font-weight:700;color:#111;font-size:14px;">${order.total_amount}원</td></tr>` : ''}
     </table>`;
 
     return `<div id="pdfContractP2" style="width:794px;padding:50px 65px;font-family:'Pretendard Variable','Malgun Gothic',sans-serif;color:#111;font-size:12px;line-height:1.7;background:#fff;box-sizing:border-box;">
@@ -161,10 +161,10 @@ function buildContractPage2Html(order) {
         <tr><td style="padding:8px 12px;border:1px solid #ddd;background:#f9f9f9;font-weight:600;">플랜</td><td style="padding:8px 12px;border:1px solid #ddd;">${order.plan_name} (${order.plan_tier || ''})</td></tr>
         <tr><td style="padding:8px 12px;border:1px solid #ddd;background:#f9f9f9;font-weight:600;">기본 가격</td><td style="padding:8px 12px;border:1px solid #ddd;">${basePriceClean}</td></tr>
     </table>
-    ${addonsRows ? `<h3 style="font-size:13px;margin-bottom:6px;color:#7b2fff;">추가 옵션</h3><table style="width:100%;border-collapse:collapse;margin-bottom:16px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">옵션명</th><th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
+    ${addonsRows ? `<h3 style="font-size:13px;margin-bottom:6px;color:#111;">추가 옵션</h3><table style="width:100%;border-collapse:collapse;margin-bottom:16px;"><tr style="background:#f9f9f9;"><th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">옵션명</th><th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">금액</th></tr>${addonsRows}</table>` : ''}
     ${breakdown2}
-    ${order.memo ? `<div style="padding:14px;background:#fafafa;border:1px solid #eee;border-radius:8px;margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:#7b2fff;margin-bottom:6px;">고객 요청사항</div><div style="font-size:12px;color:#333;white-space:pre-wrap;">${order.memo}</div></div>` : ''}
-    ${adminReply ? `<div style="padding:14px;background:#f5f0ff;border:1px solid #e0d4f5;border-radius:8px;margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:#e53c11;margin-bottom:6px;">답변</div><div style="font-size:12px;color:#333;white-space:pre-wrap;">${adminReply}</div></div>` : ''}
+    ${order.memo ? `<div style="padding:14px;background:#fafafa;border:1px solid #eee;border-radius:8px;margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:#111;margin-bottom:6px;">고객 요청사항</div><div style="font-size:12px;color:#333;white-space:pre-wrap;">${order.memo}</div></div>` : ''}
+    ${adminReply ? `<div style="padding:14px;background:#f5f0ff;border:1px solid #e0d4f5;border-radius:8px;margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:#111;margin-bottom:6px;">답변</div><div style="font-size:12px;color:#333;white-space:pre-wrap;">${adminReply}</div></div>` : ''}
     <div style="margin-top:30px;text-align:center;font-size:10px;color:#aaa;">본 별첨은 계약서와 동일한 효력을 가집니다.</div>
 </div>`;
 }
