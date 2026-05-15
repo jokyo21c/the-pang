@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="css/layout.css?v=20260425v2">
     <link rel="stylesheet" href="css/components.css?v=20260427a">
     <link rel="stylesheet" href="css/responsive.css?v=20260425v2">
+    <link rel="stylesheet" href="css/splash.css?v=20260515">
 
     <!-- Schema.org -->
     <script type="application/ld+json">
@@ -53,6 +54,32 @@
 </head>
 
 <body>
+
+<!-- ════════════════════════════════════════════════════════
+   [COMPONENT 00] SPLASH SCREEN - Opening Sequence
+   ════════════════════════════════════════════════════════ -->
+<div class="splash-container" id="splashScreen">
+    <!-- 1. Counter Phase (Loading Bar + Number) -->
+    <div class="splash-counter-layer">
+        <div class="splash-loading-wrapper">
+            <div class="splash-loading-bar">
+                <div class="splash-loading-fill" id="splashLoadingFill"></div>
+            </div>
+            <div class="splash-counter-number">001</div>
+        </div>
+    </div>
+
+    <!-- 2. Splash Phase (Logo + Video Masking) -->
+    <div class="splash-splash-layer">
+        <!-- Video will be injected by JS when this phase starts -->
+        <!-- Multiply Mask Layer -->
+        <div class="splash-mask-layer">
+            <div class="splash-logo-text">
+                <span class="splash-char" style="animation-delay:0s">T</span><span class="splash-char" style="animation-delay:0.05s">H</span><span class="splash-char" style="animation-delay:0.1s">E</span><span class="splash-char" style="animation-delay:0.15s">&nbsp;</span><span class="splash-char" style="animation-delay:0.2s">P</span><span class="splash-char" style="animation-delay:0.25s">A</span><span class="splash-char" style="animation-delay:0.3s">N</span><span class="splash-char" style="animation-delay:0.35s">G</span>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- 커스텀 알림 모달 (브라우저 alert/confirm 퓨니코드 URL 방지) -->
 <style>
@@ -2170,6 +2197,9 @@
     }
 })();
 </script>
+
+<!-- Splash Screen Script -->
+<script src="js/splash.js?v=20260515"></script>
 
 </body>
 </html>

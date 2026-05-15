@@ -1,0 +1,167 @@
+/* ═══════════════════════════════════════════════════════
+   SPLASH SCREEN - Opening Sequence
+   카운트다운(001→100) + 로고 비디오 마스킹 + 줌 시퀀스
+   ═══════════════════════════════════════════════════════ */
+
+/* Google Fonts - Anton (Superstar 대체) */
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
+/* ---- Container (Full-screen overlay) ---- */
+.splash-container {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ---- Counter Layer ---- */
+.splash-counter-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease;
+}
+
+.splash-loading-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: min(480px, 70vw);
+}
+
+.splash-loading-bar {
+  flex: 1;
+  height: 2px;
+  background: rgba(123, 47, 255, 0.15);
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+}
+
+.splash-loading-fill {
+  height: 100%;
+  width: 0%;
+  background: #7b2fff;
+  border-radius: 1px;
+  transition: width 0.05s linear;
+  box-shadow: 0 0 8px rgba(123, 47, 255, 0.4);
+}
+
+.splash-counter-number {
+  font-family: 'Anton', sans-serif;
+  font-size: 64px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: #7b2fff;
+  min-width: 120px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ---- Splash Layer ---- */
+.splash-splash-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease;
+}
+
+.splash-video-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.splash-mask-layer {
+  position: absolute;
+  inset: 0;
+  background-color: #000;
+  mix-blend-mode: multiply;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-logo-text {
+  font-family: 'Anton', sans-serif;
+  font-size: clamp(11.7rem, 35.1vw, 28.08rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #fff;
+  transform: scaleX(0.65) translateZ(0);
+  transform-origin: center;
+  will-change: transform;
+  /* Zoom Sequence: Slow grow (4s) then rapid zoom (1.2s) */
+  animation: splashSequence 5.2s ease-in 1.2s forwards;
+}
+
+.splash-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(100%);
+  /* Premium "Swoosh" Entrance */
+  animation: swooshUp 1.2s cubic-bezier(0.2, 1.8, 0.4, 1) forwards;
+}
+
+/* ---- Keyframes ---- */
+
+@keyframes swooshUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashSequence {
+  0% {
+    transform: scaleX(0.65) scale(1) translateZ(0);
+    opacity: 1;
+  }
+  76.9% { /* ~4 seconds: Slow Growth Phase (15%) */
+    transform: scaleX(0.65) scale(1.15) translateZ(0);
+    opacity: 1;
+  }
+  100% { /* ~1.2 seconds: Rapid Zoom to Fill Screen */
+    transform: scaleX(0.65) scale(50) translateZ(0);
+    opacity: 0;
+  }
+}
+
+/* ---- Fade-out transition ---- */
+.splash-container.splash-fade-out {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+
+/* ---- Mobile Responsive ---- */
+@media (max-width: 768px) {
+  .splash-loading-wrapper {
+    width: min(320px, 75vw);
+    gap: 14px;
+  }
+
+  .splash-counter-number {
+    font-size: 52px;
+    min-width: 100px;
+  }
+
+  .splash-logo-text {
+    font-size: clamp(5rem, 25vw, 15rem);
+  }
+}
