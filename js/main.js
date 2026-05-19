@@ -3035,6 +3035,31 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         }
     }
 
+    /* ── 히어로 배경 영상 동적 교체 (Supabase) ── */
+    async function renderDynamicHeroVideo() {
+        try {
+            const hero = await PangData.getSection('hero');
+            if (!hero || !hero.media || !hero.media.url) return; // DB에 영상 URL 없으면 기본 유지
+
+            const heroVideo = document.querySelector('#hero .hero__bg video');
+            if (!heroVideo) return;
+
+            const newUrl = hero.media.url;
+            const currentSrc = heroVideo.querySelector('source')?.src || heroVideo.src || '';
+
+            // 이미 같은 URL이면 스킵
+            if (currentSrc === newUrl) return;
+
+            // source 태그 교체 후 재로드
+            heroVideo.innerHTML = `<source src="${newUrl}" type="video/mp4">`;
+            heroVideo.load();
+            heroVideo.play().catch(() => { /* 자동재생 차단 시 무시 */ });
+        } catch (err) {
+            console.warn('[Hero] 동적 영상 로드 실패 (기본 영상 유지):', err.message);
+        }
+    }
+
+    renderDynamicHeroVideo();
     renderDynamicFooter();
     renderDynamicPricing();
 });
