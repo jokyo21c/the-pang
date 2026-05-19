@@ -174,7 +174,7 @@
                     <div class="section-card" onclick="showPanel('hero')">
                         <div class="section-card__icon" style="background:rgba(123,47,255,0.15);">🎬</div>
                         <div class="section-card__title">히어로 섹션</div>
-                        <div class="section-card__desc">메인 타이틀, 서브타이틀, CTA 버튼 문구 수정</div>
+                        <div class="section-card__desc">메인 배경 영상 교체 및 관리</div>
                     </div>
                     <div class="section-card" onclick="showPanel('portfolio')">
                         <div class="section-card__icon" style="background:rgba(255,94,0,0.12);">🖼️</div>
@@ -232,41 +232,80 @@
                     <h2>🎬 히어로 섹션</h2>
                 </div>
 
+                <!-- 현재 영상 정보 -->
                 <div class="editor-card">
-                    <div class="editor-card__title"><i class="ri-text"></i> 텍스트 편집</div>
+                    <div class="editor-card__title"><i class="ri-film-line"></i> 현재 히어로 배경 영상</div>
                     <div class="editor-row">
-                        <label>메인 타이틀 (줄바꿈 \n 입력)</label>
-                        <textarea class="form-control" id="hero-title" rows="3"></textarea>
-                    </div>
-                    <div class="editor-row">
-                        <label>서브타이틀</label>
-                        <textarea class="form-control" id="hero-subtitle" rows="2"></textarea>
-                    </div>
-                    <div class="editor-row">
-                        <label>CTA 버튼 1 텍스트</label>
-                        <input type="text" class="form-control" id="hero-cta">
-                    </div>
-                    <div class="editor-row">
-                        <label>CTA 버튼 2 텍스트</label>
-                        <input type="text" class="form-control" id="hero-cta-sub">
+                        <div id="hero-current-video-wrap" style="border-radius:12px; overflow:hidden; background:#000; max-width:100%; position:relative;">
+                            <video id="hero-current-video" src="/images/hero-video.mp4#t=0.5" muted playsinline loop
+                                   style="width:100%; max-height:360px; object-fit:cover; display:block;"
+                                   onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0.5;"></video>
+                            <div style="position:absolute; bottom:0; left:0; right:0; padding:12px 16px; background:linear-gradient(transparent, rgba(0,0,0,0.8)); display:flex; align-items:center; justify-content:space-between;">
+                                <span style="font-size:12px; color:rgba(255,255,255,0.7);"><i class="ri-play-circle-line"></i> 마우스를 올리면 재생됩니다</span>
+                                <span id="hero-video-fileinfo" style="font-size:12px; color:rgba(255,255,255,0.5);">영상 정보 로딩 중...</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- 영상 교체 업로드 -->
                 <div class="editor-card">
-                    <div class="editor-card__title"><i class="ri-image-line"></i> 백그라운드 미디어 (이미지 / 비디오)</div>
+                    <div class="editor-card__title"><i class="ri-upload-cloud-2-line"></i> 배경 영상 교체</div>
+                    <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+                        새로운 영상 파일(.mp4)을 업로드하면 현재 히어로 배경 영상이 교체됩니다.<br>
+                        업로드 후 <strong style="color:var(--purple-light);">저장 버튼</strong>을 눌러야 최종 반영됩니다.
+                    </p>
                     <div class="editor-row">
                         <div class="upload-zone" id="hero-upload-zone">
-                            <i class="ri-upload-cloud-2-line"></i>
-                            <p>클릭하거나 파일을 이곳으로 드래그 앤 드롭하세요</p>
-                            <input type="file" id="hero-media-input" accept="image/*,video/*" hidden>
+                            <i class="ri-video-upload-line"></i>
+                            <p>클릭하거나 영상 파일을 이곳으로 드래그 앤 드롭하세요</p>
+                            <span style="font-size:12px; color:var(--text-muted); margin-top:4px;">MP4 형식 권장 · 15MB 이하 최적</span>
+                            <input type="file" id="hero-media-input" accept="video/mp4,video/webm,video/*" hidden>
                         </div>
-                        <div class="media-preview-wrap" id="hero-preview-wrap" style="display:none;">
+                        <!-- 업로드 진행률 -->
+                        <div id="hero-upload-progress-wrap" style="display:none; margin-top:16px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                                <span style="font-size:13px; font-weight:600; color:var(--text-primary);">업로드 중...</span>
+                                <span id="hero-upload-percent" style="font-size:13px; font-weight:700; color:var(--purple-light);">0%</span>
+                            </div>
+                            <div style="width:100%; height:6px; background:var(--bg-panel); border-radius:3px; overflow:hidden;">
+                                <div id="hero-upload-bar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--purple), var(--purple-light)); border-radius:3px; transition:width 0.2s ease;"></div>
+                            </div>
+                        </div>
+                        <!-- 새 영상 미리보기 -->
+                        <div class="media-preview-wrap" id="hero-preview-wrap" style="display:none; max-width:100%; margin-top:16px;">
                             <div class="media-preview" id="hero-media-preview"></div>
-                            <button class="btn-remove-media" id="hero-media-remove" aria-label="미디어 삭제">
+                            <button class="btn-remove-media" id="hero-media-remove" aria-label="업로드 취소" title="업로드 취소">
                                 <i class="ri-close-line"></i>
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- 권장 사양 안내 -->
+                <div class="editor-card" style="background:rgba(123,47,255,0.03); border-color:rgba(123,47,255,0.15);">
+                    <div class="editor-card__title" style="color:var(--purple-light); border-bottom-color:rgba(123,47,255,0.15);"><i class="ri-lightbulb-line"></i> 히어로 영상 권장 사양</div>
+                    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; font-size:13px; color:var(--text-secondary); line-height:1.7;">
+                        <div>
+                            <div style="font-weight:600; color:var(--text-primary); margin-bottom:4px;">📐 해상도</div>
+                            1920×1080 (Full HD) 이상
+                        </div>
+                        <div>
+                            <div style="font-weight:600; color:var(--text-primary); margin-bottom:4px;">📦 파일 크기</div>
+                            5MB ~ 15MB 권장 (최대 50MB)
+                        </div>
+                        <div>
+                            <div style="font-weight:600; color:var(--text-primary); margin-bottom:4px;">🎬 형식</div>
+                            MP4 (H.264 코덱)
+                        </div>
+                        <div>
+                            <div style="font-weight:600; color:var(--text-primary); margin-bottom:4px;">⏱️ 길이</div>
+                            10초 ~ 30초 (무한 반복 재생)
+                        </div>
+                    </div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:12px; line-height:1.6;">
+                        💡 영상은 자동 재생(음소거), 무한 반복으로 배경에 표시됩니다. 영상 위에 슬로건 배너가 겹쳐지므로, 중앙에 핵심 피사체가 오도록 촬영하는 것이 좋습니다.
+                    </p>
                 </div>
             </div>
 

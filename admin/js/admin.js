@@ -122,11 +122,10 @@ window.addEventListener('popstate', (e) => {
 
 // ── Hero ─────────────────────────────────────────────────
 function loadHero() {
-    document.getElementById('hero-title').value    = content.hero.title || '';
-    document.getElementById('hero-subtitle').value = content.hero.subtitle || '';
-    document.getElementById('hero-cta').value      = content.hero.ctaText || '';
-    document.getElementById('hero-cta-sub').value  = content.hero.ctaSubText || '';
+    // 현재 영상 파일 정보 표시
+    loadHeroVideoInfo();
     
+    // 기존에 Supabase에 업로드된 미디어가 있으면 미리보기에 표시
     if (content.hero.media && content.hero.media.url) {
         renderHeroMediaPreview(content.hero.media);
     } else {
@@ -135,10 +134,34 @@ function loadHero() {
 }
 
 function saveHero() {
-    content.hero.title      = document.getElementById('hero-title').value;
-    content.hero.subtitle   = document.getElementById('hero-subtitle').value;
-    content.hero.ctaText    = document.getElementById('hero-cta').value;
-    content.hero.ctaSubText = document.getElementById('hero-cta-sub').value;
+    // 히어로 섹션은 현재 영상 전용이므로 별도 텍스트 저장 없음
+    // media 정보는 업로드 시점에 content.hero.media에 이미 반영됨
+}
+
+/* ── 현재 히어로 영상 파일 정보 표시 ── */
+function loadHeroVideoInfo() {
+    const infoEl = document.getElementById('hero-video-fileinfo');
+    const videoEl = document.getElementById('hero-current-video');
+    if (!infoEl || !videoEl) return;
+
+    // 영상 메타데이터 로드 시 길이 표시
+    videoEl.addEventListener('loadedmetadata', function onMeta() {
+        const duration = Math.round(videoEl.duration);
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+        const timeStr = mins > 0 ? `${mins}분 ${secs}초` : `${secs}초`;
+        infoEl.textContent = `🎬 ${timeStr}`;
+        videoEl.removeEventListener('loadedmetadata', onMeta);
+    });
+
+    // 비디오가 이미 로드된 경우
+    if (videoEl.readyState >= 1 && videoEl.duration) {
+        const duration = Math.round(videoEl.duration);
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+        const timeStr = mins > 0 ? `${mins}분 ${secs}초` : `${secs}초`;
+        infoEl.textContent = `🎬 ${timeStr}`;
+    }
 }
 
 /* ── Hero Media Upload (Drag & Drop + Supabase Storage) ── */
@@ -147,6 +170,9 @@ const heroMediaInput = document.getElementById('hero-media-input');
 const heroPreviewWrap = document.getElementById('hero-preview-wrap');
 const heroMediaPreview = document.getElementById('hero-media-preview');
 const heroMediaRemove = document.getElementById('hero-media-remove');
+const heroProgressWrap = document.getElementById('hero-upload-progress-wrap');
+const heroProgressBar = document.getElementById('hero-upload-bar');
+const heroProgressPercent = document.getElementById('hero-upload-percent');
 
 if (heroUploadZone) {
     heroUploadZone.addEventListener('click', () => heroMediaInput.click());
@@ -175,55 +201,82 @@ if (heroUploadZone) {
 }
 
 async function handleHeroMediaFile(file) {
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-        alert('이미지 또는 비디오 파일만 업로드 가능합니다.');
+    // 영상 파일만 허용
+    if (!file.type.startsWith('video/')) {
+        showToast('❌ 영상(비디오) 파일만 업로드 가능합니다.');
         return;
     }
 
-    showToast('히어로 미디어 업로드 중...');
+    // 파일 크기 경고 (50MB 초과 차단, 15MB 초과 경고)
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    if (file.size > 50 * 1024 * 1024) {
+        showToast(`❌ 파일이 너무 큽니다 (${sizeMB}MB). 50MB 이하로 압축해주세요.`);
+        return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+        showToast(`⚠️ 파일 크기 ${sizeMB}MB — 15MB 이하 권장. 업로드를 진행합니다...`);
+    }
+
+    // 진행률 UI 표시
+    if (heroProgressWrap) {
+        heroProgressWrap.style.display = 'block';
+        heroProgressBar.style.width = '0%';
+        heroProgressPercent.textContent = '0%';
+    }
+    heroUploadZone.style.pointerEvents = 'none';
+    heroUploadZone.style.opacity = '0.5';
 
     try {
         let result;
-        const isVideo = file.type.startsWith('video/');
 
-        if (isVideo && AdminStorage.uploadFileWithProgress) {
-            // 영상: 진행률 표시 업로드 (Supabase Storage XHR)
+        if (AdminStorage.uploadFileWithProgress) {
             result = await AdminStorage.uploadFileWithProgress(file, 'hero', (percent) => {
-                showToast(`히어로 영상 업로드 중... ${percent}%`);
+                if (heroProgressBar) heroProgressBar.style.width = percent + '%';
+                if (heroProgressPercent) heroProgressPercent.textContent = percent + '%';
             });
         } else {
-            // 이미지: 일반 업로드 (Supabase Storage)
             result = await AdminStorage.uploadFile(file, 'hero');
         }
 
-        const type = isVideo ? 'video' : 'image';
-
-        content.hero.media = { type, url: result.url, path: result.path };
+        // content에 반영
+        content.hero.media = { type: 'video', url: result.url, path: result.path };
         renderHeroMediaPreview(content.hero.media);
-        showToast('✅ 히어로 미디어가 업로드되었습니다.');
+
+        // 진행률 숨김
+        if (heroProgressWrap) heroProgressWrap.style.display = 'none';
+
+        showToast(`✅ 히어로 영상이 업로드되었습니다 (${sizeMB}MB). 저장 버튼을 눌러주세요!`);
     } catch (err) {
-        console.error('히어로 미디어 업로드 실패:', err);
+        console.error('히어로 영상 업로드 실패:', err);
         showToast('❌ 업로드 실패: ' + err.message);
+        if (heroProgressWrap) heroProgressWrap.style.display = 'none';
+    } finally {
+        heroUploadZone.style.pointerEvents = '';
+        heroUploadZone.style.opacity = '';
     }
 }
 
 function renderHeroMediaPreview(media) {
+    if (!media || !media.url) return;
     heroUploadZone.style.display = 'none';
     heroPreviewWrap.style.display = 'block';
     
-    if (media.type === 'image') {
-        heroMediaPreview.innerHTML = `<img src="${media.url}" alt="Hero Media bg">`;
-    } else if (media.type === 'video') {
-        const vidUrl = media.url.includes('#') ? media.url : media.url + '#t=0.001';
-        heroMediaPreview.innerHTML = `<video src="${vidUrl}" loop muted playsinline onmouseenter="this.play()" onmouseleave="this.pause()" style="width:100%;height:100%;object-fit:cover;"></video>`;
-    }
+    const vidUrl = media.url.includes('#') ? media.url : media.url + '#t=0.5';
+    heroMediaPreview.innerHTML = `
+        <video src="${vidUrl}" loop muted playsinline
+               onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0.5;"
+               style="width:100%;height:auto;max-height:300px;object-fit:cover;display:block;"></video>
+        <div style="padding:10px 14px; background:var(--bg-panel); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:12px; color:var(--green); font-weight:600;"><i class="ri-check-line"></i> 새 영상 업로드 완료</span>
+            <span style="font-size:12px; color:var(--text-muted);">저장 버튼을 눌러 반영하세요</span>
+        </div>`;
 }
 
 function clearHeroMediaPreview() {
-    heroPreviewWrap.style.display = 'none';
-    heroMediaPreview.innerHTML = '';
-    heroUploadZone.style.display = 'block';
-    heroMediaInput.value = '';
+    if (heroPreviewWrap) heroPreviewWrap.style.display = 'none';
+    if (heroMediaPreview) heroMediaPreview.innerHTML = '';
+    if (heroUploadZone) heroUploadZone.style.display = 'block';
+    if (heroMediaInput) heroMediaInput.value = '';
     content.hero.media = null;
 }
 
@@ -238,6 +291,7 @@ if (heroMediaRemove) {
             }
         }
         clearHeroMediaPreview();
+        showToast('업로드가 취소되었습니다.');
     });
 }
 
