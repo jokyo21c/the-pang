@@ -1325,12 +1325,14 @@
                     document.getElementById('newsModalMeta').innerText = data.meta;
                     document.getElementById('newsModalBodyText').innerHTML = data.body;
                     
-                    modal.classList.add('open');
+                    modal.style.display = 'flex'; // splash.js가 강제로 설정한 display: none 속성을 해제합니다.
+                    setTimeout(() => { modal.classList.add('open'); }, 10);
                     document.body.style.overflow = 'hidden'; // Prevent background scrolling
                 });
 
                 const closeModal = () => {
                     modal.classList.remove('open');
+                    setTimeout(() => { modal.style.display = 'none'; }, 300);
                     document.body.style.overflow = '';
                 };
 
