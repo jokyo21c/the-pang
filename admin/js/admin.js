@@ -1081,7 +1081,13 @@ async function openMemberDetail(userId, name, email, status, createdAt, phone) {
             <div><small style="color:var(--text-muted); font-size:11px;">이름</small><br><strong style="color:var(--text-primary); font-size:15px;">${name}</strong></div>
             <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br>${statusLabel}</div>
             <div><small style="color:var(--text-muted); font-size:11px;">이메일</small><br><span style="color:var(--text-secondary); font-size:13px;">${email}</span></div>
-            <div><small style="color:var(--text-muted); font-size:11px;">연락처</small><br><span id="memberDetailPhone" style="color:var(--text-secondary); font-size:13px;">${phone || '-'}</span></div>
+            <div>
+                <small style="color:var(--text-muted); font-size:11px;">연락처</small><br>
+                <div style="display:flex; gap:6px; margin-top:2px; align-items:center;">
+                    <input type="tel" id="memberDetailPhone" value="${phone && phone !== '-' ? phone : ''}" placeholder="연락처 없음" oninput="window.formatPhone(this)" style="padding:4px 8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-primary); font-size:12px; width:130px; height:28px;">
+                    <button onclick="saveMemberPhone('${userId}')" style="padding:0 8px; font-size:11px; font-weight:600; border-radius:6px; background:var(--purple); color:#fff; border:none; height:28px; cursor:pointer;">저장</button>
+                </div>
+            </div>
             <div style="grid-column: span 2;"><small style="color:var(--text-muted); font-size:11px;">가입일</small><br><span style="color:var(--text-secondary); font-size:13px;">${joinDate}</span></div>
         </div>
         <div style="border-top:1px solid var(--border); padding-top:16px;">
@@ -1114,7 +1120,7 @@ async function openMemberDetail(userId, name, email, status, createdAt, phone) {
             if (foundPhone) {
                 const phoneSpan = document.getElementById('memberDetailPhone');
                 if (phoneSpan) {
-                    phoneSpan.textContent = foundPhone;
+                    phoneSpan.value = foundPhone;
                 }
             }
         }
@@ -2160,5 +2166,20 @@ async function executeCancelRefund() {
     } catch (e) {
         console.error('환불 취소 실패:', e);
         showToast('❌ 환불 취소 실패: ' + e.message);
+    }
+}
+
+/** 회원 연락처 관리자 수동 저장 */
+async function saveMemberPhone(userId) {
+    const phoneInput = document.getElementById('memberDetailPhone');
+    if (!phoneInput) return;
+    const phone = phoneInput.value.trim();
+
+    try {
+        await AdminContent.updateMemberPhone(userId, phone);
+        showToast('✅ 회원 연락처가 저장되었습니다.');
+        await initMembersPanel(); // 회원 목록 리프레시
+    } catch (e) {
+        showToast('❌ 저장 실패: ' + e.message);
     }
 }

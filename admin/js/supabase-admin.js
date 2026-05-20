@@ -264,6 +264,15 @@ const AdminContent = {
         return data || [];
     },
 
+    /** 회원 연락처 업데이트 */
+    async updateMemberPhone(userId, phone) {
+        const { error } = await _adminSupabase
+            .from('members')
+            .update({ phone: phone })
+            .eq('user_id', userId);
+        if (error) throw error;
+    },
+
     /** 탈퇴 회원 조회 */
     async getWithdrawnMembers() {
         // withdrawn_at 컬럼이 없을 수 있으므로 created_at으로 정렬 시도

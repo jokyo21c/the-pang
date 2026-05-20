@@ -387,15 +387,25 @@ _supabaseClient.auth.onAuthStateChange((event, session) => {
             }
 
             _supabaseClient.from('members').insert(memberObj).then(({ error: insertErr }) => {
-                // 만약 phone 컬럼 오류로 실패하면 phone 제외하고 재시도
-                if (insertErr && insertErr.message.includes('phone')) {
+                // 중복 에러 발생 시: 이미 가입된 회원이므로 연락처가 비어있다면 업데이트 해줌
+                if (insertErr && insertErr.message.includes('duplicate')) {
+                    if (memberObj.phone) {
+                        _supabaseClient.from('members')
+                            .update({ phone: memberObj.phone })
+                            .eq('user_id', memberObj.user_id)
+                            .then(({ error: updateErr }) => {
+                                if (updateErr) console.warn('[PangAuth] SIGNED_IN member phone 업데이트 실패:', updateErr.message);
+                            });
+                    }
+                } else if (insertErr && insertErr.message.includes('phone')) {
+                    // 만약 phone 컬럼 오류로 실패하면 phone 제외하고 재시도
                     delete memberObj.phone;
                     _supabaseClient.from('members').insert(memberObj).then(({ error: retryErr }) => {
                         if (retryErr && !retryErr.message.includes('duplicate')) {
                             console.warn('[PangAuth] SIGNED_IN member 재시도 삽입 실패:', retryErr.message);
                         }
                     });
-                } else if (insertErr && !insertErr.message.includes('duplicate')) {
+                } else if (insertErr) {
                     console.warn('[PangAuth] SIGNED_IN member 삽입 실패:', insertErr.message);
                 }
             });
