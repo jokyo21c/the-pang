@@ -732,8 +732,7 @@ const AdminNotify = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'apikey': PANG_CONFIG.SUPABASE_ANON_KEY
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(payload)
             });
@@ -753,15 +752,42 @@ const AdminNotify = {
     /** 주문 정보에서 고객 전화번호 추출 */
     async getCustomerPhone(userId) {
         try {
+            // 1. members 테이블에서 조회
             const { data } = await _adminSupabase
                 .from('members')
                 .select('phone')
                 .eq('user_id', userId)
                 .single();
-            return data?.phone || null;
+            if (data?.phone && data.phone !== '-') {
+                return data.phone;
+            }
         } catch (e) {
-            return null;
+            console.warn('[AdminNotify] members phone 조회 실패:', e.message);
         }
+
+        // 2. 만약 members에 없거나 '-'이면, orders 테이블의 이력을 탐색하여 연락처 보완
+        try {
+            const { data: orders } = await _adminSupabase
+                .from('orders')
+                .select('contract_data, quote_data')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (orders) {
+                for (const o of orders) {
+                    const custBiz = o.contract_data?.customer_business || {};
+                    const cd = o.contract_data || {};
+                    const orderPhone = custBiz.contact_phone || cd.contact_phone || o.quote_data?.customer_phone || '';
+                    if (orderPhone && orderPhone !== '-') {
+                        return orderPhone;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[AdminNotify] orders phone 조회 실패:', e.message);
+        }
+
+        return null;
     },
 
     /** 이벤트 2: 견적서 발행 → 고객에게 알림톡 */
