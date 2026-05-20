@@ -10,7 +10,24 @@ if (-not (Test-Path $uploadDir)) {
 
 # Kill any existing process using port $port
 $existingPid = (netstat -ano 2>$null | Select-String ":$port\s" | Select-String "LISTENING" | ForEach-Object { ($_ -split '\s+')[-1] } | Select-Object -First 1)
-if ($existingPid -and $existingPid -ne $PID) {
+if ($existingPid -eq 4) {
+    # If owned by HTTP.sys (System), resolve the actual user-mode process ID registering the prefix
+    $state = netsh http show servicestate 2>$null
+    $tempPid = $null
+    foreach ($line in $state) {
+        if ($line -match 'ID:\s*(\d+)') {
+            $tempPid = $Matches[1]
+        }
+        if ($line -match ":$port/?") {
+            if ($tempPid) {
+                $existingPid = $tempPid
+                break
+            }
+        }
+    }
+}
+
+if ($existingPid -and $existingPid -ne $PID -and $existingPid -ne 4) {
     try {
         Stop-Process -Id ([int]$existingPid) -Force -ErrorAction SilentlyContinue
         Start-Sleep -Milliseconds 500
