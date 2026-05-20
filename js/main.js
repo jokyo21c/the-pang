@@ -3388,7 +3388,7 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
                 }
             });
 
-            await PangOrders.createOrder({
+            const newOrder = await PangOrders.createOrder({
                 planId: selectedPlan.id,
                 planName: selectedPlan.name,
                 planTier: selectedPlan.tier,
@@ -3399,8 +3399,6 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
 
             // 이벤트 1: 관리자에게 견적 요청 텔레그램 알림
             try {
-                const newOrderList = await PangOrders.getMyOrders();
-                const newOrder = newOrderList[0]; // 최신 주문
                 const me = await PangAuth.getUser();
                 const myName = me?.user_metadata?.name || '고객';
                 if (newOrder && window.PangNotify) {
