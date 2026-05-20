@@ -3867,48 +3867,55 @@
     opacity: 0; 
 }
 
-/* ── 📍 텍스트 위치 사전 세팅 ── */
-.pos-center {
-    top: 50%;
-    left: 50%;
+.pos-A {
+    top: 25%;
+    left: 12.5%;
     transform: translate(-50%, -50%);
 }
-.pos-bottom-right {
-    bottom: 80px;
-    right: 80px;
+.pos-B {
+    top: 25%;
+    left: 87.5%;
+    transform: translate(-50%, -50%);
 }
-.pos-top-left {
-    top: 120px;
-    left: 80px;
+.pos-C {
+    top: 75%;
+    left: 12.5%;
+    transform: translate(-50%, -50%);
 }
-.pos-bottom-left {
-    bottom: 80px;
-    left: 80px;
+.pos-D {
+    top: 75%;
+    left: 87.5%;
+    transform: translate(-50%, -50%);
 }
-.pos-bottom-center {
-    bottom: 80px;
+.pos-CD {
+    top: 87.5%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
 }
 
 @media (max-width: 768px) {
     .hero__text {
         font-size: 2.5rem;
     }
-    .pos-bottom-right {
-        bottom: 40px;
-        right: 24px;
+    .pos-A {
+        top: 20%;
+        left: 50%;
     }
-    .pos-top-left {
-        top: 80px;
-        left: 24px;
+    .pos-B {
+        top: 30%;
+        left: 50%;
     }
-    .pos-bottom-left {
-        bottom: 40px;
-        left: 24px;
+    .pos-C {
+        top: 70%;
+        left: 50%;
     }
-    .pos-bottom-center {
-        bottom: 40px;
+    .pos-D {
+        top: 80%;
+        left: 50%;
+    }
+    .pos-CD {
+        top: 75%;
+        left: 50%;
     }
 }
 
