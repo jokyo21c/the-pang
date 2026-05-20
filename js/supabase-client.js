@@ -228,10 +228,12 @@ const PangAuth = {
 /* ── 주문/견적 (고객용) ─────────────────────────────────── */
 const PangOrders = {
 
-    /** 견적 담기 (새 주문 생성) */
     async createOrder({ planId, planName, planTier, planPrice, addons, memo }) {
         const user = await PangAuth.getUser();
         if (!user) throw new Error('로그인이 필요합니다.');
+
+        const meta = user.user_metadata || {};
+        const phone = meta.contact_phone || meta.phone || '';
 
         const { data, error } = await _supabaseClient
             .from('orders')
@@ -242,7 +244,8 @@ const PangOrders = {
                 plan_price: planPrice || '',
                 addons: addons || [],
                 memo: memo || '',
-                status: 'requested'
+                status: 'requested',
+                quote_data: { customer_phone: phone }
             })
             .select()
             .single();

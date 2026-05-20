@@ -1111,7 +1111,7 @@ async function openMemberDetail(userId, name, email, status, createdAt, phone) {
             for (const order of orders) {
                 const custBiz = order.contract_data?.customer_business || {};
                 const cd = order.contract_data || {};
-                const orderPhone = custBiz.contact_phone || cd.contact_phone || '';
+                const orderPhone = custBiz.contact_phone || cd.contact_phone || order.quote_data?.customer_phone || '';
                 if (orderPhone) {
                     foundPhone = orderPhone;
                     break;
