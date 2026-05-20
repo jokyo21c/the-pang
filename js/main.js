@@ -3259,12 +3259,18 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
             </div>
         `;
 
+        detailOverlay.style.display = '';
+        detailModal.style.display = '';
         detailOverlay.classList.add('open');
         detailModal.classList.add('open');
 
         const closeDetail = () => {
             detailOverlay.classList.remove('open');
             detailModal.classList.remove('open');
+            setTimeout(() => {
+                detailOverlay.style.display = 'none';
+                detailModal.style.display = 'none';
+            }, 300);
         };
 
         detailClose.onclick = closeDetail;

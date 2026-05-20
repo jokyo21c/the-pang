@@ -306,14 +306,21 @@ const AdminContent = {
             .order('created_at', { ascending: false });
 
         if (statusFilter && statusFilter !== 'all') {
-            query = query.eq('status', statusFilter);
+            const dbFilter = statusFilter === 'quote_pending' ? 'requested' : statusFilter;
+            query = query.eq('status', dbFilter);
         }
 
         const { data, error } = await query;
         if (error) throw error;
 
-        // 주문 목록에 고객 이름/이메일 매핑
+        // 주문 목록에 고객 이름/이메일 매핑 및 status 역매핑
         const orders = data || [];
+        orders.forEach(o => {
+            if (o.status === 'requested') {
+                o.status = 'quote_pending';
+            }
+        });
+
         if (orders.length > 0) {
             try {
                 const userIds = [...new Set(orders.map(o => o.user_id))];
@@ -339,6 +346,9 @@ const AdminContent = {
             .eq('id', orderId)
             .single();
         if (error) throw error;
+        if (data && data.status === 'requested') {
+            data.status = 'quote_pending';
+        }
         return data;
     },
 
@@ -473,7 +483,13 @@ const AdminContent = {
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
         if (error) throw error;
-        return data || [];
+        const orders = data || [];
+        orders.forEach(o => {
+            if (o.status === 'requested') {
+                o.status = 'quote_pending';
+            }
+        });
+        return orders;
     },
 
     async updateContractBizInfo(orderId, bizData) {

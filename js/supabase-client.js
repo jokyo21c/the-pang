@@ -242,12 +242,15 @@ const PangOrders = {
                 plan_price: planPrice || '',
                 addons: addons || [],
                 memo: memo || '',
-                status: 'quote_pending'
+                status: 'requested'
             })
             .select()
             .single();
 
         if (error) throw error;
+        if (data && data.status === 'requested') {
+            data.status = 'quote_pending';
+        }
         return data;
     },
 
@@ -266,7 +269,14 @@ const PangOrders = {
             console.warn('[PangOrders] getMyOrders() failed:', error.message);
             return [];
         }
-        return data || [];
+
+        const orders = data || [];
+        orders.forEach(o => {
+            if (o.status === 'requested') {
+                o.status = 'quote_pending';
+            }
+        });
+        return orders;
     },
 
     /** 단일 주문 조회 */
@@ -278,6 +288,9 @@ const PangOrders = {
             .single();
 
         if (error) throw error;
+        if (data && data.status === 'requested') {
+            data.status = 'quote_pending';
+        }
         return data;
     },
 
@@ -287,7 +300,7 @@ const PangOrders = {
             .from('orders')
             .delete()
             .eq('id', orderId)
-            .eq('status', 'quote_pending');
+            .eq('status', 'requested');
 
         if (error) throw error;
     },
