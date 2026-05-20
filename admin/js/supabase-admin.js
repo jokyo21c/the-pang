@@ -349,6 +349,19 @@ const AdminContent = {
         if (data && data.status === 'requested') {
             data.status = 'quote_pending';
         }
+        // 회원 정보 매핑
+        if (data && data.user_id) {
+            try {
+                const { data: member } = await _adminSupabase
+                    .from('members')
+                    .select('user_id, name, email, phone')
+                    .eq('user_id', data.user_id)
+                    .single();
+                data._member = member || null;
+            } catch (e) {
+                data._member = null;
+            }
+        }
         return data;
     },
 
@@ -710,7 +723,8 @@ const AdminNotify = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'apikey': PANG_CONFIG.SUPABASE_ANON_KEY
                 },
                 body: JSON.stringify(payload)
             });

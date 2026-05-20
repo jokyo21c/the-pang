@@ -82,8 +82,8 @@ async function sendAlimtalk(
     return false;
   }
 
-  // 전화번호 정규화 (하이픈 제거)
-  const toClean = to.replace(/-/g, "");
+  // 전화번호 정규화 (숫자 이외 문자 모두 제거)
+  const toClean = to.replace(/[^0-9]/g, "");
 
   try {
     const authHeader = await getSolapiAuthHeader();
@@ -381,6 +381,45 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // ── 서버측 고객 정보 보완 (RLS 우회) ─────────────────────
+    if (orderId) {
+      try {
+        const { data: orderRow } = await supabase
+          .from("orders")
+          .select("user_id, plan_name, total_amount")
+          .eq("id", orderId)
+          .single();
+
+        if (orderRow) {
+          if (!payload.planName || payload.planName === "-") {
+            payload.planName = orderRow.plan_name || payload.planName;
+          }
+          if (!payload.totalAmount || payload.totalAmount === "-") {
+            payload.totalAmount = orderRow.total_amount || payload.totalAmount;
+          }
+
+          if (orderRow.user_id) {
+            const { data: memberRow } = await supabase
+              .from("members")
+              .select("name, phone")
+              .eq("user_id", orderRow.user_id)
+              .single();
+
+            if (memberRow) {
+              if (!payload.contactPhone) {
+                payload.contactPhone = memberRow.phone || "";
+              }
+              if (!payload.customerName || payload.customerName === "고객") {
+                payload.customerName = memberRow.name || payload.customerName;
+              }
+            }
+          }
+        }
+      } catch (resolveErr) {
+        console.warn("[send-notify] 고객 정보 서버측 조회 실패(무시):", resolveErr);
+      }
+    }
+
     // ── 중복 발송 방지 (결제 이벤트) ─────────────────────────
     const isDuplicate = await checkAndMarkNotified(supabase, orderId, event);
     if (isDuplicate) {
@@ -400,9 +439,9 @@ serve(async (req: Request) => {
 
     // ── 고객 → 카카오 알림톡 ─────────────────────────────────
     const alimtalkSpec = buildAlimtalkMessage(payload);
-    if (alimtalkSpec && contactPhone) {
+    if (alimtalkSpec && payload.contactPhone) {
       results.alimtalk = await sendAlimtalk(
-        contactPhone,
+        payload.contactPhone,
         alimtalkSpec.templateId,
         alimtalkSpec.variables,
         alimtalkSpec.fallback
