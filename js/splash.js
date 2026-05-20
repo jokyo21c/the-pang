@@ -14,6 +14,15 @@
   const container = document.getElementById('splashScreen');
   if (!container) return;
 
+  if (sessionStorage.getItem('splashPlayed') === 'true') {
+    container.remove();
+    return;
+  }
+
+  try {
+    sessionStorage.setItem('splashPlayed', 'true');
+  } catch (e) {}
+
   const counterLayer = container.querySelector('.splash-counter-layer');
   const counterNumber = container.querySelector('.splash-counter-number');
   const loadingFill = document.getElementById('splashLoadingFill');

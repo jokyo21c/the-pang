@@ -59,6 +59,11 @@
    [COMPONENT 00] SPLASH SCREEN - Opening Sequence
    ════════════════════════════════════════════════════════ -->
 <div class="splash-container" id="splashScreen">
+    <script>
+        if (sessionStorage.getItem('splashPlayed') === 'true') {
+            document.getElementById('splashScreen').style.display = 'none';
+        }
+    </script>
     <!-- 1. Counter Phase (Loading Bar + Number) -->
     <div class="splash-counter-layer">
         <div class="splash-loading-wrapper">
