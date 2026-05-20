@@ -1499,7 +1499,7 @@ async function openOrderDetail(orderId) {
 
         // 액션 버튼
         let actionsHtml = '';
-        if (order.status === 'quote_pending') {
+        if (order.status === 'quote_pending' || order.status === 'requested') {
             actionsHtml = `
                 <button onclick="actionIssueQuote(${orderId})" class="btn-save" style="${btnStyle}">견적서 발행</button>
             `;
