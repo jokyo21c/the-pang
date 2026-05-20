@@ -2516,7 +2516,11 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
         const address = document.getElementById('signupAddress').value.trim();
         const addressDetail = document.getElementById('signupAddressDetail').value.trim();
 
-        if (pw.length < 6) { signupError.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
+        if (pw.length < 8) { signupError.textContent = '비밀번호는 최소 8자리 이상이어야 합니다.'; return; }
+        if (!/[a-zA-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
+            signupError.textContent = '비밀번호는 영문자, 숫자, 특수문자를 조합하여 입력해 주세요.';
+            return;
+        }
         if (pw !== pw2) { signupError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
         if (!phone) { signupError.textContent = '연락처를 입력해 주세요.'; return; }
 
@@ -2658,7 +2662,11 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             const pw2 = document.getElementById('newPasswordConfirm').value;
             const submitBtn = document.getElementById('newPasswordSubmitBtn');
 
-            if (pw.length < 6) { newPasswordError.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
+            if (pw.length < 8) { newPasswordError.textContent = '비밀번호는 최소 8자리 이상이어야 합니다.'; return; }
+            if (!/[a-zA-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
+                newPasswordError.textContent = '비밀번호는 영문자, 숫자, 특수문자를 조합하여 입력해 주세요.';
+                return;
+            }
             if (pw !== pw2) { newPasswordError.textContent = '비밀번호가 일치하지 않습니다.'; return; }
 
             submitBtn.disabled = true;
