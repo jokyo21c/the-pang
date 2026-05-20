@@ -16,6 +16,10 @@
 
   if (sessionStorage.getItem('splashPlayed') === 'true') {
     container.remove();
+    const heroVideo = document.getElementById('hero-video');
+    if (heroVideo) {
+      heroVideo.play().catch(() => {});
+    }
     return;
   }
 
@@ -153,6 +157,13 @@
 
     // 스크롤 잠금 해제
     document.body.style.overflow = '';
+
+    // 히어로 비디오 재생 시작 및 처음부터 실행
+    const heroVideo = document.getElementById('hero-video');
+    if (heroVideo) {
+      heroVideo.currentTime = 0;
+      heroVideo.play().catch(() => {});
+    }
 
     // 애니메이션 완료 후 DOM에서 제거
     setTimeout(() => {
