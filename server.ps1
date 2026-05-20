@@ -30,7 +30,7 @@ if ($existingPid -eq 4) {
 if ($existingPid -and $existingPid -ne $PID -and $existingPid -ne 4) {
     try {
         Stop-Process -Id ([int]$existingPid) -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Milliseconds 500
+        Start-Sleep -Milliseconds 1500
         Write-Host "  Stopped existing process on port $port (PID: $existingPid)" -ForegroundColor Yellow
     } catch {}
 }
@@ -47,7 +47,20 @@ if ($localIp) {
 $listener.Prefixes.Add("http://+:$port/")
 
 try {
-    $listener.Start()
+    # Try starting the server with a short retry loop to allow HTTP.sys to release sockets
+    for ($i = 1; $i -le 3; $i++) {
+        try {
+            $listener.Start()
+            break
+        } catch {
+            if ($i -lt 3) {
+                Write-Host "  Waiting for socket to release (Retry $i/3)..." -ForegroundColor Yellow
+                Start-Sleep -Seconds 1
+            } else {
+                throw $_
+            }
+        }
+    }
     Write-Host "====================================================" -ForegroundColor Green
     Write-Host "  Server started!"                                     -ForegroundColor Green
     Write-Host "  Local:  http://localhost:$port/"                     -ForegroundColor Green
@@ -61,7 +74,19 @@ try {
     $listener = [System.Net.HttpListener]::new()
     $listener.Prefixes.Add("http://localhost:$port/")
     try {
-        $listener.Start()
+        for ($i = 1; $i -le 3; $i++) {
+            try {
+                $listener.Start()
+                break
+            } catch {
+                if ($i -lt 3) {
+                    Write-Host "  Waiting for localhost socket to release (Retry $i/3)..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 1
+                } else {
+                    throw $_
+                }
+            }
+        }
         Write-Host "====================================================" -ForegroundColor Green
         Write-Host "  Server started at http://localhost:$port/ (localhost only)" -ForegroundColor Green
         Write-Host "  Upload endpoint: POST http://localhost:$port/upload" -ForegroundColor Cyan
