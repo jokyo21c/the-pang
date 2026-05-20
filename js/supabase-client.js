@@ -114,7 +114,7 @@ const PangAuth = {
             email,
             password,
             options: {
-                data: { name, phone, birthday, gender, address, addressDetail }
+                data: { name, phone, contact_phone: phone, birthday, gender, address, addressDetail }
             }
         });
 
@@ -191,7 +191,7 @@ const PangAuth = {
                     name: meta.name || data.user.email?.split('@')[0] || '알 수 없음',
                     email: data.user.email
                 };
-                if (meta.phone) fallbackObj.phone = meta.phone;
+                if (meta.contact_phone || meta.phone) fallbackObj.phone = meta.contact_phone || meta.phone;
 
                 const { error: fbErr } = await _supabaseClient.from('members').insert(fallbackObj);
                 if (fbErr && fbErr.message && fbErr.message.includes('phone')) {
@@ -382,8 +382,8 @@ _supabaseClient.auth.onAuthStateChange((event, session) => {
             };
             
             // phone 컬럼이 존재할 경우에만 포함하도록 처리 (스키마 오류 방지)
-            if (meta.phone) {
-                memberObj.phone = meta.phone;
+            if (meta.contact_phone || meta.phone) {
+                memberObj.phone = meta.contact_phone || meta.phone;
             }
 
             _supabaseClient.from('members').insert(memberObj).then(({ error: insertErr }) => {

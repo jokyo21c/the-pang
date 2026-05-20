@@ -1081,7 +1081,7 @@ async function openMemberDetail(userId, name, email, status, createdAt, phone) {
             <div><small style="color:var(--text-muted); font-size:11px;">이름</small><br><strong style="color:var(--text-primary); font-size:15px;">${name}</strong></div>
             <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br>${statusLabel}</div>
             <div><small style="color:var(--text-muted); font-size:11px;">이메일</small><br><span style="color:var(--text-secondary); font-size:13px;">${email}</span></div>
-            <div><small style="color:var(--text-muted); font-size:11px;">연락처</small><br><span style="color:var(--text-secondary); font-size:13px;">${phone || '-'}</span></div>
+            <div><small style="color:var(--text-muted); font-size:11px;">연락처</small><br><span id="memberDetailPhone" style="color:var(--text-secondary); font-size:13px;">${phone || '-'}</span></div>
             <div style="grid-column: span 2;"><small style="color:var(--text-muted); font-size:11px;">가입일</small><br><span style="color:var(--text-secondary); font-size:13px;">${joinDate}</span></div>
         </div>
         <div style="border-top:1px solid var(--border); padding-top:16px;">
@@ -1098,6 +1098,27 @@ async function openMemberDetail(userId, name, email, status, createdAt, phone) {
     // 주문 이력 비동기 로드
     try {
         const orders = await AdminContent.getOrdersByUser(userId);
+        
+        // 회원의 전화번호가 없거나 '-'인 경우 주문 이력에서 찾아 동적 표시
+        if (!phone || phone === '-' || phone === 'null' || phone === 'undefined') {
+            let foundPhone = '';
+            for (const order of orders) {
+                const custBiz = order.contract_data?.customer_business || {};
+                const cd = order.contract_data || {};
+                const orderPhone = custBiz.contact_phone || cd.contact_phone || '';
+                if (orderPhone) {
+                    foundPhone = orderPhone;
+                    break;
+                }
+            }
+            if (foundPhone) {
+                const phoneSpan = document.getElementById('memberDetailPhone');
+                if (phoneSpan) {
+                    phoneSpan.textContent = foundPhone;
+                }
+            }
+        }
+
         const listEl = document.getElementById('memberOrdersList');
         if (!orders.length) {
             listEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">주문 내역이 없습니다.</div>';
