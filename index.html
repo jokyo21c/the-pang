@@ -1302,22 +1302,31 @@
             const cards = document.querySelectorAll('#newsGrid .news-card');
             const modal = document.getElementById('newsModal');
             const closeBtn = document.getElementById('newsModalClose');
+            const newsGrid = document.getElementById('newsGrid');
             
-            if (cards.length > 0 && modal && closeBtn) {
+            if (cards.length > 0 && modal && closeBtn && newsGrid) {
+                // 원본 카드들에 인덱스 번호를 달아둡니다 (나중에 생성되는 clone들도 이 값을 복사해갑니다)
                 cards.forEach((card, index) => {
-                    card.addEventListener('click', () => {
-                        const data = newsData[index];
-                        if(!data) return;
-                        
-                        document.getElementById('newsModalBadge').className = 'news-modal-badge ' + data.badgeClass;
-                        document.getElementById('newsModalBadge').innerText = data.badgeText;
-                        document.getElementById('newsModalTitle').innerText = data.title;
-                        document.getElementById('newsModalMeta').innerText = data.meta;
-                        document.getElementById('newsModalBodyText').innerHTML = data.body;
-                        
-                        modal.classList.add('open');
-                        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-                    });
+                    card.dataset.index = index;
+                });
+
+                // 이벤트 위임을 사용하여 clone된 카드들도 클릭이 작동하도록 합니다.
+                newsGrid.addEventListener('click', (e) => {
+                    const card = e.target.closest('.news-card');
+                    if (!card) return;
+
+                    const index = card.dataset.index;
+                    const data = newsData[index];
+                    if(!data) return;
+                    
+                    document.getElementById('newsModalBadge').className = 'news-modal-badge ' + data.badgeClass;
+                    document.getElementById('newsModalBadge').innerText = data.badgeText;
+                    document.getElementById('newsModalTitle').innerText = data.title;
+                    document.getElementById('newsModalMeta').innerText = data.meta;
+                    document.getElementById('newsModalBodyText').innerHTML = data.body;
+                    
+                    modal.classList.add('open');
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
                 });
 
                 const closeModal = () => {
