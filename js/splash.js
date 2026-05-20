@@ -126,7 +126,6 @@
     modalsToClose.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
-        el.style.display = 'none';
         el.classList.remove('open', 'show', 'active', 'visible');
       }
     });
