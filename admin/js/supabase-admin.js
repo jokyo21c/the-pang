@@ -748,6 +748,7 @@ const AdminNotify = {
         return this.send({
             event: 'quote_issued',
             orderId: order.id,
+            order,
             customerName,
             planName: order.plan_name,
             totalAmount: order.total_amount || '-',
@@ -762,6 +763,7 @@ const AdminNotify = {
         return this.send({
             event: 'contract_issued',
             orderId: order.id,
+            order,
             customerName,
             planName: order.plan_name,
             contactPhone: phone
@@ -775,6 +777,7 @@ const AdminNotify = {
         return this.send({
             event: 'contract_completed',
             orderId: order.id,
+            order,
             customerName,
             planName: order.plan_name,
             totalAmount: order.total_amount || '-',
@@ -789,6 +792,7 @@ const AdminNotify = {
         return this.send({
             event: 'payment_completed',
             orderId: order.id,
+            order,
             customerName,
             planName: order.plan_name,
             totalAmount: order.total_amount || '-',
@@ -803,6 +807,7 @@ const AdminNotify = {
         return this.send({
             event: 'refund_completed',
             orderId: order.id,
+            order,
             customerName,
             planName: order.plan_name,
             refundAmount,

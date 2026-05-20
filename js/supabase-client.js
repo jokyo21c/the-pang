@@ -455,6 +455,7 @@ const PangNotify = {
         return this.send({
             event: 'quote_requested',
             orderId: order.id,
+            order,
             customerName,
             planName: order.plan_name,
             planTier: order.plan_tier
@@ -466,6 +467,7 @@ const PangNotify = {
         return this.send({
             event: 'info_submitted',
             orderId,
+            order: { id: orderId, plan_name: planName },
             customerName,
             planName
         });
@@ -476,6 +478,7 @@ const PangNotify = {
         return this.send({
             event: 'contract_signed',
             orderId,
+            order: { id: orderId, plan_name: planName },
             customerName,
             planName
         });
