@@ -1,4 +1,4 @@
-﻿/* ══════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════
    THE PANG — Main Script (main.js)
    ══════════════════════════════════════════════════════════ */
 
@@ -2367,6 +2367,8 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
+        overlay.style.display = ''; // splash.js display:none 해제
+        modal.style.display = '';   // splash.js display:none 해제
         overlay.classList.add('open');
         modal.classList.add('open');
         document.body.style.overflow = 'hidden';

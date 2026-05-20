@@ -1325,6 +1325,7 @@
                     document.getElementById('newsModalMeta').innerText = data.meta;
                     document.getElementById('newsModalBodyText').innerHTML = data.body;
                     
+                    modal.style.display = ''; // splash.js display:none 해제
                     modal.classList.add('open');
                     document.body.style.overflow = 'hidden'; // Prevent background scrolling
                 });
