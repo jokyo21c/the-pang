@@ -74,12 +74,12 @@ async function sendAlimtalk(
   templateId: string,
   variables: Record<string, string>,
   fallbackText: string
-): Promise<boolean> {
+): Promise<{ success: boolean; raw?: any; error?: string }> {
   const fromPhone = Deno.env.get("SOLAPI_SENDER_PHONE") || "";
   const pfId = Deno.env.get("SOLAPI_KAKAO_PF_ID") || "";
   if (!fromPhone || !pfId) {
     console.warn("[notify] 솔라피 환경변수 미설정");
-    return false;
+    return { success: false, error: "fromPhone or pfId environment variable missing" };
   }
 
   // 전화번호 정규화 (숫자 이외 문자 모두 제거)
@@ -111,12 +111,12 @@ async function sendAlimtalk(
     const json = await res.json();
     if (json.errorCode) {
       console.error("[notify] 솔라피 발송 실패:", json);
-      return false;
+      return { success: false, raw: json, error: json.errorMessage || json.errorCode };
     }
-    return true;
+    return { success: true, raw: json };
   } catch (e) {
     console.error("[notify] 솔라피 에러:", e);
-    return false;
+    return { success: false, error: String(e) };
   }
 }
 
@@ -429,7 +429,7 @@ serve(async (req: Request) => {
       );
     }
 
-    const results: Record<string, boolean> = {};
+    const results: Record<string, any> = {};
 
     // ── 관리자 → 텔레그램 ────────────────────────────────────
     const tgMsg = buildTelegramMessage(payload);
