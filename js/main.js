@@ -3476,11 +3476,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (heroVideo && textOverlay) {
         // 🌟 시간에 따른 텍스트 및 위치 세팅 (원하시는 대로 수정 가능)
         const sceneTimetable = [
-            { start: 0,  end: 5,  text: "맛있게 팡! 먹팡 🍔", positionClass: "pos-center" },
-            { start: 5,  end: 10, text: "멋지게 팡! 멋팡 🕶️", positionClass: "pos-bottom-right" },
-            { start: 10, end: 15, text: "신나게 팡! 놀팡 🎮", positionClass: "pos-top-left" },
-            { start: 15, end: 20, text: "편안히 팡! 쉼팡 🏝️", positionClass: "pos-bottom-left" },
-            { start: 20, end: 25, text: "숏폼 광고 플랫폼, 더팡", positionClass: "pos-bottom-center" }
+            { start: 9.40,  end: 11.40, text: "먹팡", positionClass: "pos-B" },
+            { start: 11.40, end: 13.40, text: "놀팡", positionClass: "pos-A" },
+            { start: 13.40, end: 15.25, text: "쉼팡", positionClass: "pos-D" },
+            { start: 15.25, end: 17.25, text: "살팡", positionClass: "pos-CD" },
+            { start: 17.25, end: 19.00, text: "멋팡", positionClass: "pos-C" }
         ];
 
         let currentSceneIndex = -1;
@@ -3497,12 +3497,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 if (activeIndex !== -1) {
                     textOverlay.style.opacity = 0;
-                    textOverlay.style.transform = "scale(0.95)";
-                    if (sceneTimetable[activeIndex].positionClass === "pos-center") {
-                        textOverlay.style.transform = "translate(-50%, -50%) scale(0.95)";
-                    } else if (sceneTimetable[activeIndex].positionClass === "pos-bottom-center") {
-                        textOverlay.style.transform = "translateX(-50%) scale(0.95)";
-                    }
+                    textOverlay.style.transform = "translate(-50%, -50%) scale(0.95)";
                     
                     setTimeout(() => {
                         const activeScene = sceneTimetable[activeIndex];
@@ -3510,13 +3505,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         textOverlay.className = "hero__text " + activeScene.positionClass; 
                         
                         textOverlay.style.opacity = 1;
-                        if (activeScene.positionClass === "pos-center") {
-                            textOverlay.style.transform = "translate(-50%, -50%) scale(1)";
-                        } else if (activeScene.positionClass === "pos-bottom-center") {
-                            textOverlay.style.transform = "translateX(-50%) scale(1)";
-                        } else {
-                            textOverlay.style.transform = "scale(1)";
-                        }
+                        textOverlay.style.transform = "translate(-50%, -50%) scale(1)";
                     }, 300);
                 } else {
                     textOverlay.style.opacity = 0;
