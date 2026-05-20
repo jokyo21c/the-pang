@@ -1010,7 +1010,7 @@ function renderMembers(members) {
             <td class="member-email">${m.email}</td>
             <td>${statusBadge}</td>
             <td>
-                <button class="btn-member-delete" style="background:rgba(123,47,255,0.1); color:#7b2fff;" onclick="openMemberDetail('${m.user_id}', '${m.name}', '${m.email}', '${m.status}', '${m.created_at}')" title="상세">
+                <button class="btn-member-delete" style="background:rgba(123,47,255,0.1); color:#7b2fff;" onclick="openMemberDetail('${m.user_id}', '${m.name}', '${m.email}', '${m.status}', '${m.created_at}', '${(m.phone || '').replace(/'/g, "\\'")}')" title="상세">
                     <i class="ri-eye-line"></i>
                 </button>
                 <button class="btn-member-delete" onclick="openMemberDeleteModal(${m.id}, '${m.name}', '${m.email}')" title="삭제" style="margin-left:4px;">
@@ -1067,7 +1067,7 @@ async function confirmDeleteMember() {
 }
 
 /* ── 회원 상세 보기 ── */
-async function openMemberDetail(userId, name, email, status, createdAt) {
+async function openMemberDetail(userId, name, email, status, createdAt, phone) {
     const modal = document.getElementById('memberDetailModal');
     const body = document.getElementById('memberDetailBody');
 
@@ -1081,7 +1081,8 @@ async function openMemberDetail(userId, name, email, status, createdAt) {
             <div><small style="color:var(--text-muted); font-size:11px;">이름</small><br><strong style="color:var(--text-primary); font-size:15px;">${name}</strong></div>
             <div><small style="color:var(--text-muted); font-size:11px;">상태</small><br>${statusLabel}</div>
             <div><small style="color:var(--text-muted); font-size:11px;">이메일</small><br><span style="color:var(--text-secondary); font-size:13px;">${email}</span></div>
-            <div><small style="color:var(--text-muted); font-size:11px;">가입일</small><br><span style="color:var(--text-secondary); font-size:13px;">${joinDate}</span></div>
+            <div><small style="color:var(--text-muted); font-size:11px;">연락처</small><br><span style="color:var(--text-secondary); font-size:13px;">${phone || '-'}</span></div>
+            <div style="grid-column: span 2;"><small style="color:var(--text-muted); font-size:11px;">가입일</small><br><span style="color:var(--text-secondary); font-size:13px;">${joinDate}</span></div>
         </div>
         <div style="border-top:1px solid var(--border); padding-top:16px;">
             <h4 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">📋 주문/견적 이력</h4>
