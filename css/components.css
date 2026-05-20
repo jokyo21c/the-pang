@@ -3851,4 +3851,64 @@
 .plan-detail-modal__content .pricing-card__btn {
     display: none; /* 모달 안에서는 시작하기 버튼 숨김 */
 }
-
+
+/* ── 히어로 영상 위 텍스트 기본 스타일 ── */
+.hero__text {
+    position: absolute;
+    z-index: 10;
+    color: #ffffff;
+    font-size: 4rem; /* 모바일에 맞춰 조절되는 큰 글씨 크기 */
+    font-weight: 800;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* 글씨가 잘 보이도록 그림자 추가 */
+    font-family: var(--font-kr);
+    
+    /* 🌟 글자가 바뀔 때 스르륵 나타나는 마법의 효과 */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0; 
+}
+
+/* ── 📍 텍스트 위치 사전 세팅 ── */
+.pos-center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.pos-bottom-right {
+    bottom: 80px;
+    right: 80px;
+}
+.pos-top-left {
+    top: 120px;
+    left: 80px;
+}
+.pos-bottom-left {
+    bottom: 80px;
+    left: 80px;
+}
+.pos-bottom-center {
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+    .hero__text {
+        font-size: 2.5rem;
+    }
+    .pos-bottom-right {
+        bottom: 40px;
+        right: 24px;
+    }
+    .pos-top-left {
+        top: 80px;
+        left: 24px;
+    }
+    .pos-bottom-left {
+        bottom: 40px;
+        left: 24px;
+    }
+    .pos-bottom-center {
+        bottom: 40px;
+    }
+}
+
