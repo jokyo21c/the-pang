@@ -1,4 +1,4 @@
-/* ══════════════════════════════════════════════════════════
+﻿/* ══════════════════════════════════════════════════════════
    THE PANG — Main Script (main.js)
    ══════════════════════════════════════════════════════════ */
 
@@ -3153,8 +3153,12 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
         if (memoEl) memoEl.value = '';
         goToStep(1);
 
-        overlay.classList.add('open');
-        modal.classList.add('open');
+        overlay.style.display = '';
+        modal.style.display = '';
+        setTimeout(() => {
+            overlay.classList.add('open');
+            modal.classList.add('open');
+        }, 10);
         document.body.style.overflow = 'hidden';
     }
 
@@ -3162,6 +3166,10 @@ document.addEventListener('DOMContentLoaded', function initQuoteCart() {
     function closeQuoteModal() {
         overlay.classList.remove('open');
         modal.classList.remove('open');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+        }, 300);
         document.body.style.overflow = '';
     }
 
@@ -3514,4 +3522,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
 
