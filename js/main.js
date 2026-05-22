@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardWidth = cards[0].offsetWidth || 300;
         // totalWidth = half the track (2 sets worth), since animation goes to -50%
         const totalWidth = cards.length * 2 * cardWidth;
-        const speed = window.innerWidth <= 768 ? 200 : 320;
+        const speed = window.innerWidth <= 768 ? 180 : 320;
         const duration = totalWidth / speed;
         testimonialTrack.style.animation = `testimonialMarquee ${duration}s linear infinite`;
     }
