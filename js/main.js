@@ -2305,7 +2305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 견적 받기 버튼 반응형 DOM 이동
         const repositionQuoteButtons = (isMobile) => {
             document.querySelectorAll('.category-content').forEach(content => {
-                const btn = content.querySelector('.btn[href="#order"]');
+                const btn = content.querySelector('.btn');
                 const info = content.querySelector('.category-info');
 
                 if (!btn || !info) return;
