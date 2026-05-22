@@ -23,5 +23,7 @@ admin/uploads/*
 !admin/uploads/.gitkeep
 
 # Temp files
-temp.txt
 *.log
+
+# Development-only files (not related to homepage)
+_dev_only/
