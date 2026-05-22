@@ -33,6 +33,29 @@
   const splashLayer = container.querySelector('.splash-splash-layer');
 
   // ═══════════════════════════════════════════════════
+  // 비디오 백그라운드 사전 생성 및 로딩 시작 (1, 2, 5번 병행)
+  // ═══════════════════════════════════════════════════
+  const video = document.createElement('video');
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.preload = 'auto'; // [2번: 백그라운드 선로딩]
+  video.poster = 'images/splash-poster.jpg'; // [5번: 포스터 첫 프레임 이미지]
+  video.className = 'splash-video-bg';
+  video.style.opacity = '0'; // 로딩 중에는 완벽히 숨김
+  video.style.transition = 'opacity 0.6s ease';
+
+  const source = document.createElement('source');
+  source.src = 'images/splash.mp4';
+  source.type = 'video/mp4';
+  video.appendChild(source);
+
+  // Phase 1 시작과 동시에 DOM에 미리 삽입하여 브라우저가 선로딩하도록 유도
+  if (splashLayer) {
+    splashLayer.insertBefore(video, splashLayer.firstChild);
+  }
+
+  // ═══════════════════════════════════════════════════
   // 스크롤 잠금 + 최상단 고정
   // ═══════════════════════════════════════════════════
   document.body.style.overflow = 'hidden';
@@ -95,17 +118,8 @@
     splashLayer.style.opacity = '1';
     splashLayer.style.visibility = 'visible';
 
-    // 비디오 엘리먼트 생성 및 삽입
-    const video = document.createElement('video');
-    video.autoplay = true;
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.className = 'splash-video-bg';
-    video.innerHTML = '<source src="images/splash.mp4" type="video/mp4">';
-    splashLayer.insertBefore(video, splashLayer.firstChild);
-
-    // 비디오 재생 (모바일 대응)
+    // [0.001초 무렉 재생] 선로딩된 비디오를 서서히 드러내며 즉시 재생
+    video.style.opacity = '1';
     video.play().catch(() => { /* 자동재생 차단 시 무시 */ });
 
     // 로고 글자별 swoosh 딜레이 적용

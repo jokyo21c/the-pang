@@ -5,7 +5,7 @@ import base64
 import os
 import datetime
 
-PORT = 8082
+PORT = 8085
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), 'admin', 'uploads')
 
 if not os.path.exists(UPLOAD_DIR):
