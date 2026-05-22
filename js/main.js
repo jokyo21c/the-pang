@@ -2908,26 +2908,43 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
             }
         } else {
             window.navJustClicked = true;
-            // 모바일: 슬라이드 이동 로직 (무한 슬라이더 함수 호출)
-            if (typeof window.goToPangMobile === 'function') {
-                window.goToPangMobile(slideIndex);
-            } else {
-                // 폴백 (안전망)
-                const track = document.getElementById('pangSliderTrack');
-                if (track) {
-                    track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
-                    track.style.transform = `translateX(-${slideIndex * 20}%)`;
-                    document.querySelectorAll('.pang-nav-dot').forEach(dot => {
-                        dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === slideIndex);
-                    });
-                    document.querySelectorAll('.floating-sidebar__link[href^="#"]').forEach(link => {
-                        if (link.closest('.floating-sidebar__item--kakao')) return;
-                        link.classList.remove('active');
-                        if (link.getAttribute('href') === `#${pangId}`) link.classList.add('active');
-                    });
+            
+            // 모바일: 슬라이드를 직접 조작하여 확실하게 이동
+            const track = document.getElementById('pangSliderTrack');
+            if (track) {
+                const allSlides = track.querySelectorAll('.pang-slide');
+                const totalSlides = allSlides.length; // 클론 포함 (보통 6)
+                
+                // 자동 슬라이더 정지 (goToPangMobile 사용 시 내부에서 처리되지만, 여기서도 확실히 처리)
+                if (typeof window.goToPangMobile === 'function') {
+                    window.goToPangMobile(slideIndex);
                 }
+                
+                // goToPangMobile 호출과 무관하게, 직접 트랙 위치를 강제 설정
+                // (클로저 내부 상태와 동기화 문제를 완전히 우회)
+                const translatePct = slideIndex * (100 / totalSlides);
+                track.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
+                track.style.transform = `translateX(-${translatePct}%)`;
+                
+                // dot 동기화
+                document.querySelectorAll('.pang-nav-dot').forEach(dot => {
+                    dot.classList.toggle('active', parseInt(dot.dataset.index, 10) === slideIndex);
+                });
+                
+                // 모바일 탭 버튼 동기화
+                document.querySelectorAll('.mobile-pang-tab-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-target') === pangId);
+                });
+                
+                // 사이드바 동기화
+                document.querySelectorAll('.floating-sidebar__link[href^="#"]').forEach(link => {
+                    if (link.closest('.floating-sidebar__item--kakao')) return;
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${pangId}`) link.classList.add('active');
+                });
             }
-            // 팡 슬라이더 영역(또는 모바일 탭)으로 스크롤 (헤더 높이 72px에 맞춰 정렬)
+            
+            // 팡 슬라이더 영역(또는 모바일 탭)으로 스크롤
             const sliderNodeMobile = document.getElementById('pangSectionSlider');
             if (sliderNodeMobile) {
                 const tabsWrapper = document.querySelector('.mobile-pang-tabs-wrapper');
