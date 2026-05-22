@@ -1039,6 +1039,7 @@
     .testimonial-track {
         /* marquee animation 허용 (PC와 동일) */
         transition: none;
+        width: max-content;
     }
 
     .testimonial-card {
