@@ -2080,6 +2080,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 트랜지션이 끝났을 때 영구 무한 슬라이딩 처리 (클론 도착 -> 원본 복귀)
         track.addEventListener('transitionend', (e) => {
             if (e.target !== track) return; // 자식 요소(캐러셀 아이템 등)의 transition 이벤트 무시
+            if (e.propertyName !== 'transform') return; // transform 외 속성 전환 이벤트 무시
             isTransitioning = false;
             if (currentPang === TOTAL_ORIGINAL) {
                 currentPang = 0;
@@ -2931,9 +2932,9 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
                 const targetEl = tabsWrapper && window.getComputedStyle(tabsWrapper).display !== 'none' ? tabsWrapper : sliderNodeMobile;
                 const top = targetEl.getBoundingClientRect().top + window.pageYOffset - 72;
                 window.scrollTo({ top, behavior: 'smooth' });
-                setTimeout(() => { window.navJustClicked = false; }, 900);
+                setTimeout(() => { window.navJustClicked = false; }, 2500);
             } else {
-                setTimeout(() => { window.navJustClicked = false; }, 900);
+                setTimeout(() => { window.navJustClicked = false; }, 2500);
             }
         }
     };
