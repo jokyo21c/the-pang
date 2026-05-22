@@ -3898,15 +3898,15 @@
         font-size: 2.5rem;
     }
     .pos-A {
-        top: 20%;
+        top: 80%;
         left: 50%;
     }
     .pos-B {
-        top: 30%;
+        top: 80%;
         left: 50%;
     }
     .pos-C {
-        top: 70%;
+        top: 80%;
         left: 50%;
     }
     .pos-D {
@@ -3914,7 +3914,7 @@
         left: 50%;
     }
     .pos-CD {
-        top: 75%;
+        top: 80%;
         left: 50%;
     }
 }

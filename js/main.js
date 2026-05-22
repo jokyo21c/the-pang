@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 testimonialTrack.appendChild(clone);
             });
         }
-        const cardWidth = 300;
+        const cardWidth = cards[0].offsetWidth || 300;
         // totalWidth = half the track (2 sets worth), since animation goes to -50%
         const totalWidth = cards.length * 2 * cardWidth;
         const speed = 320;
@@ -231,8 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ── Decide which mode to use ── */
     function initTestimonialMode() {
-        if (window.innerWidth > 768) { setupPCMarquee(); }
-        else { setupMobileSlider(); }
+        // 모바일에서도 PC와 동일한 자동 무한 슬라이딩(marquee) 사용
+        setupPCMarquee();
     }
 
     let testimonialResizeTimer;

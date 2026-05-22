@@ -1028,38 +1028,43 @@
         grid-column: 1 / -1;
     }
 
-    /* Slider — Mobile: restore single-card swipe slider */
+    /* Slider — Mobile: PC와 동일한 자동 무한 슬라이딩(marquee) */
     .testimonial-slider {
-        padding: 0 16px;
+        padding: 0;
+        /* PC와 동일한 양쪽 페이드 마스크 */
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
     }
 
     .testimonial-track {
-        animation: none !important;
-        transition: transform 0.5s ease;
+        /* marquee animation 허용 (PC와 동일) */
+        transition: none;
     }
 
     .testimonial-card {
-        min-width: 100%;
-        flex: 0 0 100%;
-        width: 100%;
-        padding: 0 12px;
+        /* PC marquee 카드 사이즈로 복원 */
+        min-width: auto;
+        flex: 0 0 260px;
+        width: 260px;
+        padding: 0 8px;
     }
 
     .testimonial-card__inner {
-        padding: 28px 20px;
+        padding: 0;
         flex-direction: column;
         text-align: center;
-        gap: 24px;
+        gap: 0;
     }
 
     .testimonial-card__content {
         align-items: center;
+        padding: 16px 16px 20px;
     }
 
     .testimonial-card__photo {
-        width: 160px;
-        height: 160px;
-        border-radius: 24px;
+        width: 100%;
+        height: 180px;
+        border-radius: 0;
     }
 
     .testimonial-card__footer {
@@ -1071,15 +1076,16 @@
     }
 
     .testimonial-card__text {
-        font-size: 16px;
-        display: block;
-        -webkit-line-clamp: unset;
-        overflow: visible;
+        font-size: 13px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
-    /* Mobile: show slider controls */
+    /* Mobile: 후기 슬라이더 컨트롤(화살표+dots) 숨김 — PC marquee 방식 사용 */
     .slider-controls {
-        display: flex;
+        display: none !important;
     }
 
     /* Floating Sidebar - Left Vertical (Mobile) */
