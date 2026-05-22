@@ -2032,7 +2032,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 isTransitioning = false;
             }
 
-            if (currentPang === index && track.style.transform) {
+            // forceManual이 아닐 때만 early return (자동 슬라이더에서 같은 인덱스 요청 무시)
+            // forceManual일 때는 항상 강제 이동 (푸터/탭 클릭 등 사용자 명시 조작)
+            if (!forceManual && currentPang === index && track.style.transform) {
                 syncAllPangDots(currentPang);
                 if (window.matchMedia('(max-width: 768px)').matches) syncSidebarActive(currentPang);
                 return;
