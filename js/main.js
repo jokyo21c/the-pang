@@ -2714,9 +2714,9 @@ document.addEventListener('DOMContentLoaded', function initAuth() {
 
             const snsLinks = document.querySelectorAll('.footer__social a');
             if (snsLinks.length >= 3) {
-                if (f.sns?.instagram) snsLinks[0].href = f.sns.instagram;
-                if (f.sns?.youtube) snsLinks[1].href = f.sns.youtube;
-                if (f.sns?.tiktok) snsLinks[2].href = f.sns.tiktok;
+                if (f.sns?.instagram && f.sns.instagram !== '#') snsLinks[0].href = f.sns.instagram;
+                if (f.sns?.youtube && f.sns.youtube !== '#') snsLinks[1].href = f.sns.youtube;
+                if (f.sns?.tiktok && f.sns.tiktok !== '#') snsLinks[2].href = f.sns.tiktok;
             }
 
             const gridDivs = document.querySelectorAll('.footer__grid > div');
@@ -3558,3 +3558,41 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+/* ════════════════════════════════════════════════════════
+   FAQ ACCORDION — 기존 JS와 완전 독립된 블록
+   ════════════════════════════════════════════════════════ */
+(function () {
+    function initFaqAccordion() {
+        var faqItems = document.querySelectorAll('.faq-item');
+        if (!faqItems.length) return;
+
+        faqItems.forEach(function (item) {
+            var btn = item.querySelector('.faq-question');
+            var answer = item.querySelector('.faq-answer');
+            if (!btn || !answer) return;
+
+            btn.addEventListener('click', function () {
+                var isOpen = item.classList.contains('faq-open');
+
+                // 다른 항목 모두 닫기
+                faqItems.forEach(function (other) {
+                    other.classList.remove('faq-open');
+                    var otherBtn = other.querySelector('.faq-question');
+                    if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+                });
+
+                // 클릭한 항목 토글
+                if (!isOpen) {
+                    item.classList.add('faq-open');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFaqAccordion);
+    } else {
+        initFaqAccordion();
+    }
+})();
