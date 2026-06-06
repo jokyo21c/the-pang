@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /_dev_only/
+Disallow: /supabase/
+
+# Sitemap location (Both Punycode and Korean versions for safety)
+Sitemap: https://더팡.store/sitemap.xml
+Sitemap: https://xn--9m1b261d.store/sitemap.xml
