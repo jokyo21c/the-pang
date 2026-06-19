@@ -237,8 +237,8 @@ section { position: relative; overflow: hidden; }
 }
 
 .hero-s__title {
-  font-size: clamp(32px, 9vw, 46px);
-  font-weight: 800;
+  font-size: clamp(35px, 9.9vw, 51px);
+  font-weight: 900;
   line-height: 1.2;
   letter-spacing: -1px;
   margin-bottom: 30px;
@@ -408,25 +408,21 @@ section { position: relative; overflow: hidden; }
 }
 
 .pain-card__icon {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  background: var(--pain-icon-bg);
-  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 26px;
   color: var(--accent-orange);
-  transition: background 0.35s ease;
+  min-width: 26px;
+  height: 26px;
+  margin-top: 3px;
 }
 
 .pain-card__text {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.5;
-  padding-top: 10px;
+  line-height: 1.4;
 }
 
 .pain-card__sub {
@@ -683,6 +679,10 @@ section { position: relative; overflow: hidden; }
   transition: background 0.35s ease;
 }
 
+.feature-s .section-title {
+  text-align: center;
+}
+
 
 .feature-list {
   display: flex;
@@ -769,6 +769,10 @@ section { position: relative; overflow: hidden; }
   transition: background 0.35s ease;
 }
 
+.process-s .section-title {
+  text-align: center;
+}
+
 
 .process-list {
   display: flex;
@@ -847,6 +851,10 @@ section { position: relative; overflow: hidden; }
   padding: 80px 0;
   background: var(--bg-primary);
   transition: background 0.35s ease;
+}
+
+.review-s .section-title {
+  text-align: center;
 }
 
 
@@ -1152,6 +1160,10 @@ section { position: relative; overflow: hidden; }
   transition: background 0.35s ease;
 }
 
+.faq-mini-s .section-title {
+  text-align: center;
+}
+
 
 .faq-mini-list {
   display: flex;
@@ -1254,10 +1266,10 @@ section { position: relative; overflow: hidden; }
     </p>
     <div class="hero-s__actions">
       <a href="https://pf.kakao.com/_CCxcCX" target="_blank" class="hero-s__cta">
-        <i class="ri-kakao-talk-fill"></i> 무료 상담 받기
+        <i class="ri-kakao-talk-fill"></i> 상담 받기
       </a>
       <button class="hero-s__share" id="shareBtn">
-        <i class="ri-share-line"></i> 친구에게 공유하기
+        <i class="ri-share-line"></i> 친구 공유
       </button>
     </div>
   </div>
@@ -1270,7 +1282,7 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S2. PAIN POINTS ══════════ -->
 <section class="pain-s" id="pain">
   <div class="container">
-    <p class="section-label">PAIN POINT</p>
+
     <h2 class="section-title">혹시 이런 경험<br>있으시지 않나요?</h2>
     <p class="section-sub">많은 사장님들이 겪고 있는 마케팅 고민입니다</p>
 
@@ -1279,28 +1291,24 @@ section { position: relative; overflow: hidden; }
         <div class="pain-card__icon"><i class="ri-coupon-line"></i></div>
         <div>
           <p class="pain-card__text">전단지를 돌렸는데 손님이 없다</p>
-          <p class="pain-card__sub">수십만 원 썼는데 반응 제로...</p>
         </div>
       </div>
       <div class="pain-card" data-delay="100">
         <div class="pain-card__icon"><i class="ri-article-line"></i></div>
         <div>
           <p class="pain-card__text">블로그 체험단, 돈만 나간다</p>
-          <p class="pain-card__sub">리뷰 올라와도 예약은 그대로</p>
         </div>
       </div>
       <div class="pain-card" data-delay="200">
         <div class="pain-card__icon"><i class="ri-instagram-line"></i></div>
         <div>
-          <p class="pain-card__text">SNS는 해야 하는데 뭘 올릴지 모르겠다</p>
-          <p class="pain-card__sub">시간도 없고, 찍어봐도 퀄리티가...</p>
+          <p class="pain-card__text">SNS? 뭘 올릴지 모르겠다</p>
         </div>
       </div>
       <div class="pain-card" data-delay="300">
         <div class="pain-card__icon"><i class="ri-vidicon-line"></i></div>
         <div>
-          <p class="pain-card__text">영상 제작? 장비도 없고 시간도 없다</p>
-          <p class="pain-card__sub">전문 업체는 너무 비싸고 복잡하다</p>
+          <p class="pain-card__text">영상 제작? 장비도 시간도 없다</p>
         </div>
       </div>
     </div>
@@ -1310,7 +1318,7 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S3. WHY SHORTS ══════════ -->
 <section class="trend-s" id="trend">
   <div class="container">
-    <p class="section-label">WHY SHORTS</p>
+
     <h2 class="section-title">지금은<br><em>숏폼의 시대</em>입니다</h2>
     <p class="section-sub">소비자들이 매장을 발견하는 방법이 바뀌었습니다</p>
 
@@ -1340,7 +1348,7 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S4. SOLUTION ══════════ -->
 <section class="solution-s" id="solution">
   <div class="container">
-    <p class="section-label">THE PANG</p>
+
     <h2 class="section-title">더팡이<br><em>30초로</em> 터뜨립니다</h2>
     <p class="section-sub">먹팡부터 멋팡까지, 모든 업종의 숏폼을 전담합니다</p>
 
@@ -1434,7 +1442,7 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S5. FEATURES ══════════ -->
 <section class="feature-s" id="features">
   <div class="container">
-    <p class="section-label">WHY THE PANG</p>
+
     <h2 class="section-title">왜 <em>더팡</em>인가요?</h2>
 
     <div class="feature-list">
@@ -1489,9 +1497,8 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S6. PROCESS ══════════ -->
 <section class="process-s" id="process">
   <div class="container">
-    <p class="section-label">HOW IT WORKS</p>
-    <h2 class="section-title">이렇게 진행됩니다</h2>
-    <p class="section-sub">복잡한 절차 없이, 딱 4단계입니다</p>
+
+    <h2 class="section-title">이렇게 <em>진행</em>됩니다</h2>
 
     <div class="process-list">
       <div class="process-item" data-delay="0">
@@ -1529,8 +1536,8 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S7. TESTIMONIALS ══════════ -->
 <section class="review-s" id="reviews">
   <div class="container">
-    <p class="section-label">REAL REVIEWS</p>
-    <h2 class="section-title">사장님들의<br>실제 후기</h2>
+
+    <h2 class="section-title">사장님들의 실제 <em>후기</em></h2>
 
     <div class="review-list">
       <div class="review-card" data-delay="0">
@@ -1580,34 +1587,13 @@ section { position: relative; overflow: hidden; }
   </div>
 </section>
 
-<!-- ══════════ S8. STATS ══════════ -->
-<section class="stats-s" id="stats">
-  <div class="container">
-    <p class="section-label">BY THE NUMBERS</p>
-    <h2 class="section-title">숫자로 보는<br>더팡의 실력</h2>
 
-    <div class="big-stat-grid">
-      <div class="big-stat">
-        <div class="big-stat__num"><span class="counter" data-target="500">0</span><span class="big-stat__unit">+</span></div>
-        <div class="big-stat__label">누적 제작<br>편수</div>
-      </div>
-      <div class="big-stat">
-        <div class="big-stat__num"><span class="counter" data-target="150">0</span><span class="big-stat__unit">만+</span></div>
-        <div class="big-stat__label">평균 월<br>노출 수</div>
-      </div>
-      <div class="big-stat">
-        <div class="big-stat__num"><span class="counter" data-target="98">0</span><span class="big-stat__unit">%</span></div>
-        <div class="big-stat__label">고객<br>만족도</div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ══════════ FAQ MINI ══════════ -->
 <section class="faq-mini-s" id="faq">
   <div class="container">
-    <p class="section-label">FAQ</p>
-    <h2 class="section-title">자주 묻는<br>질문</h2>
+
+    <h2 class="section-title">자주 묻는 <em>질문</em></h2>
 
     <div class="faq-mini-list">
       <div class="faq-mini-item">
@@ -1653,7 +1639,7 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S9. FINAL CTA ══════════ -->
 <section class="cta-s" id="cta">
   <div class="container">
-    <p class="section-label" style="position:relative;z-index:1;">지금 바로 시작하세요</p>
+
     <h2 class="section-title" style="position:relative;z-index:1;">지금 <em>한 방</em><br>내볼까요?</h2>
     <p class="section-sub" style="position:relative;z-index:1;">
       무료 상담, 부담 없이 시작하세요.<br>
@@ -1678,7 +1664,7 @@ section { position: relative; overflow: hidden; }
     <i class="ri-share-line"></i> 친구공유
   </button>
   <a href="https://pf.kakao.com/_CCxcCX" target="_blank" class="sticky-bar__kakao">
-    <i class="ri-kakao-talk-fill"></i> 카카오 상담
+    <i class="ri-kakao-talk-fill"></i> 카톡 상담
   </a>
   <a href="https://더팡.store" target="_blank" class="sticky-bar__cta">
     <i class="ri-rocket-line"></i> 견적 신청
