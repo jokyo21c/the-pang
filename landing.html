@@ -464,15 +464,51 @@ section { position: relative; overflow: hidden; }
   gap: 24px;
   margin: 64px 0 40px; /* 타이틀과의 상단 간격을 5% (24px) 추가하여 벌림 */
   flex-wrap: wrap;
+  overflow: visible;
+}
+
+/* ── 데굴데굴 롤인 키프레임 ── */
+@keyframes rollInFromLeft {
+  0% {
+    transform: translateX(-150vw) rotate(-720deg);
+    opacity: 0;
+  }
+  70% {
+    transform: translateX(8px) rotate(20deg);
+    opacity: 1;
+  }
+  85% {
+    transform: translateX(-4px) rotate(-8deg);
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .platform-badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
+  /* 초기 상태: 숨김 (애니메이션 전) */
+  opacity: 0;
+  transform: translateX(-150vw) rotate(-720deg);
+  transition: transform 0.25s ease; /* hover용 */
 }
 
+/* 롤인 트리거 후 hover 시 translateY만 살짝 */
+.platform-badge.rolled-in {
+  opacity: 1;
+  transform: translateX(0) rotate(0deg);
+  transition: none; /* 애니메이션 끝난 후 hover 전환 초기화 */
+}
+
+.platform-badge.rolled-in:hover {
+  transition: transform 0.2s ease;
+  transform: translateY(-6px) scale(1.08);
+}
+
+/* ── 기존 offset 유지 ── */
 .platform-badge:nth-child(1) {
   position: relative;
   left: clamp(-24px, -5vw, -12px); /* 틱톡 좌로 5% 이동 */
@@ -486,8 +522,16 @@ section { position: relative; overflow: hidden; }
   left: clamp(12px, 5vw, 24px); /* 릴스 우로 5% 이동 */
 }
 
-.platform-badge:hover {
-  transform: translateY(-4px);
+/* 순서별 롤인 애니메이션 딜레이
+   릴스(3번째) 0s → 쇼츠(2번째) 0.35s → 틱톡(1번째) 0.7s */
+.platform-badge:nth-child(3).do-roll {
+  animation: rollInFromLeft 2.5s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
+}
+.platform-badge:nth-child(2).do-roll {
+  animation: rollInFromLeft 2.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+}
+.platform-badge:nth-child(1).do-roll {
+  animation: rollInFromLeft 2.5s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards;
 }
 
 .platform-badge img {
@@ -495,6 +539,7 @@ section { position: relative; overflow: hidden; }
   height: 72px;
   object-fit: contain;
   display: block;
+  pointer-events: none;
 }
 
 .stat-grid {
@@ -709,6 +754,18 @@ section { position: relative; overflow: hidden; }
   margin-top: 36px;
 }
 
+/* ── feature-card 슬라이드인 키프레임 ── */
+@keyframes featureSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-110vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .feature-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -717,21 +774,18 @@ section { position: relative; overflow: hidden; }
   display: flex;
   gap: 18px;
   align-items: flex-start;
-  transition: background 0.35s ease, border-color 0.35s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  opacity: 0;
-  transform: translateX(-20px);
+  opacity: 0; /* transform 없이 opacity만 — Observer가 DOM 위치로 정상 감지 */
 }
 
 .feature-card.visible {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 0.5s ease, transform 0.5s ease, background 0.35s ease;
+  animation: featureSlideIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.feature-card:hover {
+.feature-card.visible:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-purple);
   border-color: var(--accent-purple);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .feature-card__icon {
@@ -750,7 +804,7 @@ section { position: relative; overflow: hidden; }
 .feature-card__icon--orange { background: linear-gradient(135deg, #e53c11, #ff7043); }
 
 .feature-card__title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   margin-bottom: 6px;
   color: var(--text-primary);
@@ -824,7 +878,7 @@ section { position: relative; overflow: hidden; }
 .process-item.visible {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 2s ease, transform 2s ease;
 }
 
 .process-item:last-child { padding-bottom: 0; }
@@ -850,7 +904,7 @@ section { position: relative; overflow: hidden; }
 .process-item__content { padding-top: 10px; }
 
 .process-item__title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   margin-bottom: 4px;
   color: var(--text-primary);
@@ -896,7 +950,7 @@ section { position: relative; overflow: hidden; }
 .review-card.visible {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.5s ease, transform 0.5s ease, background 0.35s ease;
+  transition: opacity 2s ease, transform 2s ease, background 0.35s ease;
 }
 
 .review-card__stars {
@@ -1028,9 +1082,7 @@ section { position: relative; overflow: hidden; }
   pointer-events: none;
 }
 
-.cta-s .section-title { margin-bottom: 12px; }
-
-.cta-s .section-sub { margin-bottom: 36px; }
+.cta-s .section-title { margin-bottom: 29px; }
 
 .cta-buttons {
   display: flex;
@@ -1372,7 +1424,6 @@ section { position: relative; overflow: hidden; }
   <div class="container">
 
     <h2 class="section-title">더팡이<br><em>30초로</em> 터뜨립니다</h2>
-    <p class="section-sub">먹팡부터 멋팡까지, 모든 업종의 숏폼을 전담합니다</p>
 
     <div class="pang-categories">
       <div class="pang-cat active" data-cat="meok">
@@ -1663,17 +1714,14 @@ section { position: relative; overflow: hidden; }
   <div class="container">
 
     <h2 class="section-title" style="position:relative;z-index:1;">지금 <em>한 방</em><br>내볼까요?</h2>
-    <p class="section-sub" style="position:relative;z-index:1;">
-      무료 상담, 부담 없이 시작하세요.<br>
-      지금 문의하시면 <strong>당일 회신</strong>해드립니다.
-    </p>
+
 
     <div class="cta-buttons">
       <a href="https://더팡.store" target="_blank" class="btn-primary">
-        <i class="ri-rocket-line"></i> 무료 견적 신청하기
+        <i class="ri-rocket-line"></i> 견적 신청하기
       </a>
       <a href="https://pf.kakao.com/_CCxcCX" target="_blank" class="btn-kakao">
-        <i class="ri-kakao-talk-fill"></i> 카카오톡으로 문의
+        <i class="ri-kakao-talk-fill"></i> 카톡으로 문의
       </a>
     </div>
     <p class="cta-s__note">📌 상담은 무료이며, 부담 없이 문의 가능합니다</p>
@@ -1795,8 +1843,26 @@ section { position: relative; overflow: hidden; }
   }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 
   document.querySelectorAll(
-    '.pain-card, .stat-item, .feature-card, .process-item, .review-card'
+    '.pain-card, .stat-item, .process-item, .review-card'
   ).forEach(function (el) { observer.observe(el); });
+
+  /* ── Feature Card 전용 Observer (threshold:0 — -110vw 슬라이드인) ── */
+  const featureObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const delay = parseInt(el.dataset.delay || '0', 10);
+        setTimeout(function () {
+          el.classList.add('visible');
+        }, delay);
+        featureObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0, rootMargin: '0px 0px 0px 0px' });
+
+  document.querySelectorAll('.feature-card').forEach(function (el) {
+    featureObserver.observe(el);
+  });
 
   /* ── Counter Animation ────────────── */
   const counterObserver = new IntersectionObserver(function (entries) {
@@ -1823,6 +1889,37 @@ section { position: relative; overflow: hidden; }
 
   const statsSection = document.getElementById('stats');
   if (statsSection) counterObserver.observe(statsSection);
+
+  /* ── Platform Badge Roll-in Animation ─────────── */
+  const platformBadges = document.querySelectorAll('.platform-badge');
+  let platformRolled = false;
+
+  const platformObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting && !platformRolled) {
+        platformRolled = true;
+        platformObserver.disconnect();
+
+        // 릴스(3번째) → 쇼츠(2번째) → 틱톡(1번째) 순서로 do-roll 추가
+        platformBadges.forEach(function (badge) {
+          badge.classList.add('do-roll');
+        });
+
+        // 각 배지 애니메이션 완료 후 rolled-in 클래스로 교체 (hover 효과 활성화)
+        // delay: 3번째 0s+0.85s, 2번째 0.35s+0.85s, 1번째 0.7s+0.85s
+        var finishDelays = [0.7 + 2.5, 0.35 + 2.5, 0 + 2.5]; // 1번, 2번, 3번 (0-index)
+        platformBadges.forEach(function (badge, i) {
+          setTimeout(function () {
+            badge.classList.remove('do-roll');
+            badge.classList.add('rolled-in');
+          }, finishDelays[i] * 1000);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  var trendSection = document.getElementById('trend');
+  if (trendSection) platformObserver.observe(trendSection);
 
   /* ── Pang Category Tabs ───────────── */
   const pangCats = document.querySelectorAll('.pang-cat');
