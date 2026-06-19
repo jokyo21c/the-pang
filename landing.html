@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -171,7 +171,7 @@ section { position: relative; overflow: hidden; }
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-[data-theme="light"] .theme-toggle__switch::after {
+[data-theme="dark"] .theme-toggle__switch::after {
   transform: translateX(16px);
 }
 
@@ -241,7 +241,7 @@ section { position: relative; overflow: hidden; }
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -1px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   animation: fadeUp 0.7s 0.15s ease both;
 }
 
@@ -253,7 +253,7 @@ section { position: relative; overflow: hidden; }
 .hero-s__sub {
   font-size: 16px;
   color: var(--text-secondary);
-  margin-bottom: 40px;
+  margin-bottom: 60px;
   line-height: 1.8;
   animation: fadeUp 0.7s 0.3s ease both;
 }
@@ -269,11 +269,65 @@ section { position: relative; overflow: hidden; }
   font-size: 13px;
   font-weight: 700;
   box-shadow: var(--shadow-purple);
-  animation: fadeUp 0.7s 0.45s ease both;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hero-s__cta:active { transform: scale(0.97); }
+
+.hero-s__actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.7s 0.45s ease both;
+}
+
+.hero-s__share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--accent-purple);
+  color: var(--text-primary);
+  padding: 11.5px 24px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.hero-s__share:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+.hero-s__share:active {
+  transform: scale(0.97);
+}
+
+.toast-msg {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.toast-msg.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
 
 .hero-s__scroll {
   position: absolute;
@@ -1065,6 +1119,30 @@ section { position: relative; overflow: hidden; }
   font-weight: 700;
 }
 
+.sticky-bar__share {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--accent-purple);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 12.5px 0;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.sticky-bar__share:hover {
+  background: var(--bg-card-hover);
+}
+.sticky-bar__share:active {
+  transform: scale(0.97);
+}
+
 /* ══════════════════════════════════════════
    FAQ MINI
 ══════════════════════════════════════════ */
@@ -1155,9 +1233,9 @@ section { position: relative; overflow: hidden; }
   <div class="lp-header__inner">
     <span class="lp-header__logo">THE PANG</span>
     <button class="theme-toggle" id="themeToggle" aria-label="다크/라이트 모드 전환">
-      <i class="ri-moon-line theme-toggle__icon theme-toggle__icon--moon"></i>
-      <div class="theme-toggle__switch"></div>
       <i class="ri-sun-line theme-toggle__icon theme-toggle__icon--sun"></i>
+      <div class="theme-toggle__switch"></div>
+      <i class="ri-moon-line theme-toggle__icon theme-toggle__icon--moon"></i>
     </button>
   </div>
 </header>
@@ -1165,9 +1243,6 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S1. HERO ══════════ -->
 <section class="hero-s" id="hero">
   <div class="hero-s__inner">
-    <div class="hero-s__badge">
-      <i class="ri-fire-line"></i> F&B 숏폼 광고 전문
-    </div>
     <h1 class="hero-s__title">
       아직도<br>
       <em>전단지 돌리시나요?</em>
@@ -1177,9 +1252,14 @@ section { position: relative; overflow: hidden; }
       효과가 없었다면—<br>
       이제 <strong>30초 숏폼</strong>으로 터뜨릴 시간입니다.
     </p>
-    <a href="https://pf.kakao.com/_CCxcCX" target="_blank" class="hero-s__cta">
-      <i class="ri-kakao-talk-fill"></i> 무료 상담 받기
-    </a>
+    <div class="hero-s__actions">
+      <a href="https://pf.kakao.com/_CCxcCX" target="_blank" class="hero-s__cta">
+        <i class="ri-kakao-talk-fill"></i> 무료 상담 받기
+      </a>
+      <button class="hero-s__share" id="shareBtn">
+        <i class="ri-share-line"></i> 친구에게 공유하기
+      </button>
+    </div>
   </div>
   <div class="hero-s__scroll">
     <span>스크롤</span>
@@ -1594,6 +1674,9 @@ section { position: relative; overflow: hidden; }
 
 <!-- ══════════ STICKY BAR ══════════ -->
 <div class="sticky-bar" id="stickyBar">
+  <button class="sticky-bar__share" id="stickyShareBtn">
+    <i class="ri-share-line"></i> 친구공유
+  </button>
   <a href="https://pf.kakao.com/_CCxcCX" target="_blank" class="sticky-bar__kakao">
     <i class="ri-kakao-talk-fill"></i> 카카오 상담
   </a>
@@ -1610,7 +1693,7 @@ section { position: relative; overflow: hidden; }
   /* ── Theme Toggle ─────────────────── */
   const html = document.documentElement;
   const toggleBtn = document.getElementById('themeToggle');
-  const saved = localStorage.getItem('lp-theme') || 'dark';
+  const saved = localStorage.getItem('lp-theme') || 'light';
   html.dataset.theme = saved;
 
   toggleBtn.addEventListener('click', function () {
@@ -1618,6 +1701,56 @@ section { position: relative; overflow: hidden; }
     html.dataset.theme = next;
     localStorage.setItem('lp-theme', next);
   });
+
+  /* ── Share Buttons ─────────────────── */
+  function sharePage() {
+    const url = window.location.href;
+    
+    // 1. Copy to clipboard
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('링크가 복사되었습니다!');
+      
+      // 2. Open SNS Share
+      if (navigator.share) {
+        navigator.share({
+          title: 'THE PANG',
+          text: 'F&B 전문 숏폼 광고 대행 플랫폼 THE PANG',
+          url: url
+        }).catch(err => console.log('Share canceled or failed', err));
+      } else {
+        // Fallback to KakaoTalk Web Sharer
+        window.open(`https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}`, '_blank');
+      }
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  }
+
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', sharePage);
+  }
+
+  const stickyShareBtn = document.getElementById('stickyShareBtn');
+  if (stickyShareBtn) {
+    stickyShareBtn.addEventListener('click', sharePage);
+  }
+
+  function showToast(message) {
+    let toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    
+    // Force reflow
+    toast.offsetHeight;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.addEventListener('transitionend', () => toast.remove());
+    }, 2000);
+  }
 
   /* ── Sticky Bar ───────────────────── */
   const stickyBar = document.getElementById('stickyBar');
