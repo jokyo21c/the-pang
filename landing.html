@@ -261,10 +261,13 @@ section { position: relative; overflow: hidden; }
 .hero-s__cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  height: 52px;
+  padding: 0 28px;
+  line-height: 1;
   background: linear-gradient(135deg, var(--accent-purple), #9b4fff);
   color: #fff;
-  padding: 14px 28px;
   border-radius: 50px;
   font-size: 16px;
   font-weight: 700;
@@ -288,11 +291,13 @@ section { position: relative; overflow: hidden; }
   align-items: center;
   justify-content: center;
   gap: 8px;
+  height: 52px;
+  padding: 0 28px;
+  line-height: 1;
   background: var(--bg-card);
   border: none;
   box-shadow: inset 0 0 0 1.5px var(--accent-purple);
   color: var(--text-primary);
-  padding: 14px 28px;
   border-radius: 50px;
   font-size: 16px;
   font-weight: 700;
@@ -1280,6 +1285,140 @@ section { position: relative; overflow: hidden; }
 .faq-mini-a__inner { padding: 0 20px 16px; }
 
 /* ══════════════════════════════════════════
+   S1. FLYER BUNDLE ANIMATION
+══════════════════════════════════════════ */
+
+/* hero 섹션에서 전단지가 밖으로 날아갈 수 있도록 overflow 허용 */
+.hero-s { overflow: visible; }
+
+/* 전체 래퍼: 3D 공간 활성화 */
+.flyer-wrap {
+  position: relative;
+  width: 110px;
+  height: 135px;
+  margin: 0 auto 28px;
+  perspective: 1200px;
+  animation: fadeDown 0.7s ease both;
+}
+
+/* 전단지 묶음 베이스 */
+.flyer-pile {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+}
+
+.flyer-pile svg {
+  display: block;
+  animation: pileBob 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.22));
+  transform-origin: center bottom;
+}
+
+@keyframes pileBob {
+  0%, 100% { transform: translateY(0)    rotate(0deg); }
+  35%       { transform: translateY(-7px) rotate(-2deg); }
+  70%       { transform: translateY(-4px) rotate(1.5deg); }
+}
+
+/* 날아가는 낱장 전단지 공통 */
+.flyer-sheet {
+  position: absolute;
+  left: 50%;
+  margin-left: -26px;   /* -1/2 of 52px width, for centering */
+  bottom: 22px;
+  width: 52px;
+  height: 68px;
+  border-radius: 4px;
+  transform-style: preserve-3d;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.flyer-sheet__inner {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.10);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+/* 전단지 상단 오렌지 헤더 */
+.flyer-sheet__inner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 18px;
+  background: #e53c11;
+}
+
+/* 전단지 본문 줄 표현 */
+.flyer-sheet__inner::after {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 7px;
+  right: 7px;
+  bottom: 7px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #dde0e7 0px, #dde0e7 3px,
+    transparent 3px, transparent 9px
+  );
+  border-radius: 1px;
+}
+
+/* ── 6개 개별 비행 경로 keyframes ── */
+@keyframes flyAway1 {
+  0%   { transform: translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(-4deg) scale(0.92); opacity: 0; }
+  8%   { opacity: 1; }
+  78%  { opacity: 0; }
+  100% { transform: translate3d(-185px,-315px,88px) rotateX(210deg) rotateY(-540deg) rotateZ(-195deg) scale(0.18); opacity: 0; }
+}
+@keyframes flyAway2 {
+  0%   { transform: translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(5deg)  scale(0.92); opacity: 0; }
+  8%   { opacity: 1; }
+  78%  { opacity: 0; }
+  100% { transform: translate3d(160px,-285px,72px) rotateX(-270deg) rotateY(480deg) rotateZ(178deg) scale(0.2); opacity: 0; }
+}
+@keyframes flyAway3 {
+  0%   { transform: translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(-2deg) scale(0.92); opacity: 0; }
+  8%   { opacity: 1; }
+  78%  { opacity: 0; }
+  100% { transform: translate3d(-72px,-372px,115px) rotateX(360deg) rotateY(-360deg) rotateZ(-255deg) scale(0.16); opacity: 0; }
+}
+@keyframes flyAway4 {
+  0%   { transform: translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(7deg)  scale(0.92); opacity: 0; }
+  8%   { opacity: 1; }
+  78%  { opacity: 0; }
+  100% { transform: translate3d(125px,-245px,52px) rotateX(450deg) rotateY(270deg) rotateZ(218deg) scale(0.26); opacity: 0; }
+}
+@keyframes flyAway5 {
+  0%   { transform: translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(-6deg) scale(0.92); opacity: 0; }
+  8%   { opacity: 1; }
+  78%  { opacity: 0; }
+  100% { transform: translate3d(28px,-400px,108px) rotateX(-360deg) rotateY(720deg) rotateZ(-148deg) scale(0.14); opacity: 0; }
+}
+@keyframes flyAway6 {
+  0%   { transform: translate3d(0,0,0) rotateX(0deg) rotateY(0deg) rotateZ(3deg)  scale(0.92); opacity: 0; }
+  8%   { opacity: 1; }
+  78%  { opacity: 0; }
+  100% { transform: translate3d(-148px,-305px,82px) rotateX(270deg) rotateY(-480deg) rotateZ(292deg) scale(0.19); opacity: 0; }
+}
+
+/* ── stagger 딜레이 + infinite loop ── */
+.sheet-1 { animation: flyAway1 2.8s cubic-bezier(0.15, 0.85, 0.35, 1) 0.0s  infinite backwards; }
+.sheet-2 { animation: flyAway2 2.6s cubic-bezier(0.15, 0.85, 0.35, 1) 0.35s infinite backwards; }
+.sheet-3 { animation: flyAway3 3.0s cubic-bezier(0.15, 0.85, 0.35, 1) 0.65s infinite backwards; }
+.sheet-4 { animation: flyAway4 2.5s cubic-bezier(0.15, 0.85, 0.35, 1) 0.9s  infinite backwards; }
+.sheet-5 { animation: flyAway5 2.9s cubic-bezier(0.15, 0.85, 0.35, 1) 1.15s infinite backwards; }
+.sheet-6 { animation: flyAway6 2.7s cubic-bezier(0.15, 0.85, 0.35, 1) 1.4s  infinite backwards; }
+
+/* ══════════════════════════════════════════
    ANIMATIONS
 ══════════════════════════════════════════ */
 @keyframes fadeUp {
@@ -1325,6 +1464,51 @@ section { position: relative; overflow: hidden; }
 <!-- ══════════ S1. HERO ══════════ -->
 <section class="hero-s" id="hero">
   <div class="hero-s__inner">
+    <!-- ── 전단지 묶음 3D 흩날림 애니메이션 ── -->
+    <div class="flyer-wrap" aria-hidden="true">
+      <!-- 전단지 묶음 베이스 SVG -->
+      <div class="flyer-pile">
+        <svg width="90" height="112" viewBox="0 0 90 112" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="전단지 묶음 아이콘">
+          <!-- 그림자 -->
+          <ellipse cx="45" cy="110" rx="26" ry="4" fill="rgba(0,0,0,0.13)"/>
+          <!-- 뒷장 2 (왼쪽으로 기울어짐) -->
+          <g transform="rotate(-9, 45, 98)">
+            <rect x="10" y="8" width="60" height="82" rx="4" fill="#eeeeee" stroke="#d8d8d8" stroke-width="1"/>
+          </g>
+          <!-- 뒷장 1 (오른쪽으로 기울어짐) -->
+          <g transform="rotate(6, 45, 98)">
+            <rect x="12" y="6" width="60" height="82" rx="4" fill="#f5f5f5" stroke="#e2e2e2" stroke-width="1"/>
+          </g>
+          <!-- 앞장 기본 -->
+          <rect x="15" y="4" width="60" height="82" rx="4" fill="white" stroke="#cfcfcf" stroke-width="1.5"/>
+          <!-- 앞장 오렌지 헤더 -->
+          <rect x="15" y="4" width="60" height="22" rx="4" fill="#e53c11"/>
+          <rect x="15" y="17" width="60" height="9"  fill="#e53c11"/>
+          <!-- 헤더 텍스트 줄 -->
+          <rect x="24" y="10" width="34" height="4" rx="2" fill="rgba(255,255,255,0.65)"/>
+          <!-- 본문 내용 줄 -->
+          <rect x="24" y="33" width="42" height="3.5" rx="1.5" fill="#dedede"/>
+          <rect x="24" y="42" width="34" height="3.5" rx="1.5" fill="#dedede"/>
+          <rect x="24" y="51" width="38" height="3.5" rx="1.5" fill="#dedede"/>
+          <rect x="24" y="60" width="28" height="3.5" rx="1.5" fill="#dedede"/>
+          <!-- 하단 퍼플 CTA 버튼 -->
+          <rect x="24" y="70" width="42" height="11" rx="5.5" fill="#7b2fff" opacity="0.85"/>
+          <rect x="32" y="73.5" width="26" height="4" rx="2" fill="rgba(255,255,255,0.68)"/>
+          <!-- 고무줄 (가로 밴드) -->
+          <rect x="15" y="48" width="60" height="5" rx="2.5" fill="#7b2fff" opacity="0.22"/>
+          <rect x="15" y="48" width="60" height="1.5" rx="0.75" fill="#7b2fff" opacity="0.5"/>
+          <rect x="15" y="51.5" width="60" height="1.5" rx="0.75" fill="#7b2fff" opacity="0.5"/>
+        </svg>
+      </div>
+      <!-- 공중으로 날아갈 낱장 전단지 6장 -->
+      <div class="flyer-sheet sheet-1"><div class="flyer-sheet__inner"></div></div>
+      <div class="flyer-sheet sheet-2"><div class="flyer-sheet__inner"></div></div>
+      <div class="flyer-sheet sheet-3"><div class="flyer-sheet__inner"></div></div>
+      <div class="flyer-sheet sheet-4"><div class="flyer-sheet__inner"></div></div>
+      <div class="flyer-sheet sheet-5"><div class="flyer-sheet__inner"></div></div>
+      <div class="flyer-sheet sheet-6"><div class="flyer-sheet__inner"></div></div>
+    </div>
+
     <h1 class="hero-s__title">
       아직도<br>
       <em>전단지 돌리시나요?</em>
