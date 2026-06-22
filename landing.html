@@ -1634,8 +1634,8 @@ section { position: relative; overflow: hidden; }
           <i class="ri-restaurant-2-line pang-card__icon"></i>
           <span class="pang-card__name">먹팡</span>
         </div>
-        <div class="pang-card__thumb">
-          <img src="images/pang-meok-thumb.png" alt="먹팡 숏츠 광고 예시">
+        <div class="pang-card__thumb" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }">
+          <video src="https://trrbnqsoonntafpeamkf.supabase.co/storage/v1/object/public/media/portfolio/meokpang/1782115875001_0vfz6s.mp4" muted playsinline webkit-playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
           <div class="pang-card__play"><i class="ri-play-circle-fill"></i></div>
         </div>
         <a href="https://더팡.store" target="_blank" class="pang-card__btn">지금 견적 받기 <i class="ri-arrow-right-line"></i></a>
@@ -1648,7 +1648,7 @@ section { position: relative; overflow: hidden; }
           <span class="pang-card__name">놀팡</span>
         </div>
         <div class="pang-card__thumb" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }">
-          <video src="https://trrbnqsoonntafpeamkf.supabase.co/storage/v1/object/public/media/portfolio/nolpang/1780630315354_trhuto.mp4" muted playsinline webkit-playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+          <video src="https://trrbnqsoonntafpeamkf.supabase.co/storage/v1/object/public/media/portfolio/nolpang/1782115894872_c0w0b3.mp4" muted playsinline webkit-playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
           <div class="pang-card__play"><i class="ri-play-circle-fill"></i></div>
         </div>
         <a href="https://더팡.store" target="_blank" class="pang-card__btn">지금 견적 받기 <i class="ri-arrow-right-line"></i></a>
@@ -1660,8 +1660,8 @@ section { position: relative; overflow: hidden; }
           <i class="ri-hotel-line pang-card__icon"></i>
           <span class="pang-card__name">쉼팡</span>
         </div>
-        <div class="pang-card__thumb">
-          <img src="images/pang-swim-thumb.png" alt="쉼팡 숏츠 광고 예시">
+        <div class="pang-card__thumb" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }">
+          <video src="https://trrbnqsoonntafpeamkf.supabase.co/storage/v1/object/public/media/portfolio/swimpang/1782115936438_f7xpix.mp4" muted playsinline webkit-playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
           <div class="pang-card__play"><i class="ri-play-circle-fill"></i></div>
         </div>
         <a href="https://더팡.store" target="_blank" class="pang-card__btn">지금 견적 받기 <i class="ri-arrow-right-line"></i></a>
@@ -1673,8 +1673,8 @@ section { position: relative; overflow: hidden; }
           <i class="ri-shopping-bag-line pang-card__icon"></i>
           <span class="pang-card__name">살팡</span>
         </div>
-        <div class="pang-card__thumb">
-          <img src="images/pang-sal-thumb.png" alt="살팡 숏츠 광고 예시">
+        <div class="pang-card__thumb" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }">
+          <video src="https://trrbnqsoonntafpeamkf.supabase.co/storage/v1/object/public/media/portfolio/salpang/1782115951857_7jqdax.mp4" muted playsinline webkit-playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
           <div class="pang-card__play"><i class="ri-play-circle-fill"></i></div>
         </div>
         <a href="https://더팡.store" target="_blank" class="pang-card__btn">지금 견적 받기 <i class="ri-arrow-right-line"></i></a>
@@ -1686,8 +1686,8 @@ section { position: relative; overflow: hidden; }
           <i class="ri-magic-line pang-card__icon"></i>
           <span class="pang-card__name">멋팡</span>
         </div>
-        <div class="pang-card__thumb">
-          <img src="images/pang-meot-thumb.png" alt="멋팡 숏츠 광고 예시">
+        <div class="pang-card__thumb" onmouseenter="const v=this.querySelector('video'); if(v) v.play().catch(e=>{});" onmouseleave="const v=this.querySelector('video'); if(v) { v.pause(); v.currentTime=0; }">
+          <video src="https://trrbnqsoonntafpeamkf.supabase.co/storage/v1/object/public/media/portfolio/meotpang/1782115963520_ty2crd.mp4" muted playsinline webkit-playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
           <div class="pang-card__play"><i class="ri-play-circle-fill"></i></div>
         </div>
         <a href="https://더팡.store" target="_blank" class="pang-card__btn">지금 견적 받기 <i class="ri-arrow-right-line"></i></a>
@@ -1926,9 +1926,89 @@ section { position: relative; overflow: hidden; }
 </div>
 
 <!-- ══════════ JAVASCRIPT ══════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=20260416"></script>
+<script src="js/supabase-client.js?v=20260520_2"></script>
 <script>
 (function () {
   'use strict';
+
+  /* ── Sync Portfolio Thumbnails from Supabase ── */
+  (async function syncPortfolioThumbs() {
+    try {
+      if (!window.PangData) return;
+      const items = await window.PangData.getPortfolio();
+      if (!items || items.length === 0) return;
+
+      const catMapping = {
+        meokpang: 'meok',
+        nolpang: 'nol',
+        swimpang: 'swim',
+        salpang: 'sal',
+        meotpang: 'meot'
+      };
+
+      const firstItems = {};
+      items.forEach(item => {
+        const lpCat = catMapping[item.category];
+        if (!lpCat) return;
+        if (!firstItems[lpCat]) {
+          firstItems[lpCat] = item;
+        } else if (item.order_index < firstItems[lpCat].order_index) {
+          firstItems[lpCat] = item;
+        }
+      });
+
+      const mediaStyle = 'width: 100%; height: 100%; object-fit: cover; display: block;';
+      const isVideoUrl = (url) => {
+        if (!url) return false;
+        if (url.startsWith('data:video/')) return true;
+        if (/\.(mp4|webm|ogg|mov|avi)([\?\#].*)?$/i.test(url)) return true;
+        return false;
+      };
+
+      Object.entries(firstItems).forEach(([lpCat, item]) => {
+        const card = document.querySelector(`.pang-card[data-cat="${lpCat}"]`);
+        if (!card) return;
+        const thumb = card.querySelector('.pang-card__thumb');
+        if (!thumb) return;
+
+        let url = item.media_url || '';
+        if (!url) return;
+
+        const isVid = item.media_type === 'video' || isVideoUrl(url);
+        
+        let mediaHtml = '';
+        if (isVid) {
+          mediaHtml = `<video src="${url}" muted playsinline webkit-playsinline preload="metadata" style="${mediaStyle}"></video>`;
+        } else {
+          mediaHtml = `<img src="${url}" alt="${lpCat} 숏츠 광고 예시" style="${mediaStyle}">`;
+        }
+        
+        mediaHtml += `<div class="pang-card__play"><i class="ri-play-circle-fill"></i></div>`;
+        thumb.innerHTML = mediaHtml;
+
+        if (isVid) {
+          thumb.onmouseenter = function() {
+            const v = thumb.querySelector('video');
+            if (v) v.play().catch(() => {});
+          };
+          thumb.onmouseleave = function() {
+            const v = thumb.querySelector('video');
+            if (v) {
+              v.pause();
+              v.currentTime = 0;
+            }
+          };
+        } else {
+          thumb.onmouseenter = null;
+          thumb.onmouseleave = null;
+        }
+      });
+    } catch (err) {
+      console.warn('포트폴리오 썸네일 동적 동기화 실패:', err);
+    }
+  })();
 
   /* ── Theme Toggle ─────────────────── */
   const html = document.documentElement;
