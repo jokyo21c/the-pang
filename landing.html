@@ -2369,10 +2369,8 @@ section { position: relative; overflow: hidden; }
   let nextImgNum = 6; // 처음 1~5는 HTML에 기본 탑재되어 있으므로 다음 채워질 이미지는 6번부터 시작
 
   function getFlightVariables() {
-    // 비행 상승 궤도 각도 제한: 위쪽 정 중앙(90도)을 기준으로 좌측과 우측으로 각각 10도~45도 랜덤
-    const isLeft = Math.random() > 0.5;
-    const angleOffset = Math.random() * 35 + 10; // 10deg ~ 45deg
-    const angleDeg = isLeft ? (90 + angleOffset) : (90 - angleOffset);
+    // 비행 상승 궤도 각도 제한: -30도 ~ 210도 사이로 무작위 설정
+    const angleDeg = Math.random() * 240 - 30; // -30deg ~ 210deg
     const angleRad = angleDeg * Math.PI / 180;
     
     // 비행 거리 250px ~ 350px 으로 수정
