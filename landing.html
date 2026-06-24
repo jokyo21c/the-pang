@@ -1444,8 +1444,6 @@ section { position: relative; overflow: hidden; }
   overflow: visible !important;
   /* 안정적인 원근 왜곡: 250px로 넓혀 3D 투영 시 찢어짐이나 깨짐을 완벽 방지 */
   perspective: 250px;
-  /* 비행 카드를 3D 공간 상에서 120px 앞으로 띄워 대기 카드(최대 29px) 뒤로 가려짐을 원천 방지 */
-  transform: translateZ(120px) !important;
   transform-style: preserve-3d;
   border: none !important;
   box-shadow: none !important;
@@ -1454,11 +1452,11 @@ section { position: relative; overflow: hidden; }
   animation: flyAwayTrajectory var(--fly-duration, 3.5s) ease-out forwards;
 }
 
-/* ── 비행 궤적 (translate + opacity) ── */
+/* ── 비행 궤적 (transform + opacity) ── */
 @keyframes flyAwayTrajectory {
-  0%   { translate: 0px 0px; opacity: 1; }
+  0%   { transform: rotate(-4deg) translate3d(0px, -6px, 29px) scale(1.1); opacity: 1; }
   80%  { opacity: 1; }
-  100% { translate: var(--fly-x) var(--fly-y); opacity: 0; }
+  100% { transform: rotate(-4deg) translate3d(var(--fly-x), var(--fly-y), 120px) scale(1.1); opacity: 0; }
 }
 
 /* ── 우측 상단에서 자연스럽게 말림 ── */
