@@ -1313,8 +1313,8 @@ section { position: relative; overflow: hidden; }
    S1. FLYER BUNDLE ANIMATION
 ══════════════════════════════════════════ */
 
-/* hero 섹션에서 전단지가 밖으로 날아갈 수 있도록 overflow 허용 */
-.hero-s { overflow: visible; }
+/* 전단지가 날아갈 때 브라우저 전체 레이아웃이 흔들리거나 확대/축소(스크롤바 튐)되는 현상을 방지하기 위해 overflow: hidden 지정 */
+.hero-s { overflow: hidden; }
 
 /* 전체 3D 래퍼 */
 .flyer-wrap-real {
@@ -1551,7 +1551,7 @@ section { position: relative; overflow: hidden; }
 ══════════════════════════════════════════ */
 @media (min-width: 480px) {
   body { display: flex; flex-direction: column; align-items: center; }
-  .lp-header { max-width: 480px; left: 50%; transform: translateX(-50%); border-radius: 0 0 16px 16px; }
+  .lp-header { max-width: 480px; left: 0; right: 0; margin: 0 auto; transform: none; border-radius: 0 0 16px 16px; }
   section, .sticky-bar, .faq-mini-s { width: 100%; max-width: 480px; }
 }
 </style>
@@ -2353,9 +2353,16 @@ section { position: relative; overflow: hidden; }
   let nextImgNum = 6; // 처음 1~5는 HTML에 기본 탑재되어 있으므로 다음 채워질 이미지는 6번부터 시작
 
   function getFlightVariables() {
-    // flyAwayTrajectory 에서 translate CSS 속성만 사용하므로 x/y 방향만 무작위로 생성
-    const flyX = (Math.random() * 500 - 250) + 'px';
-    const flyY = -(Math.random() * 200 + 350) + 'px';
+    const isMobile = window.innerWidth < 480;
+    // 모바일 환경에서 화면 바깥 이탈로 인한 전체 레이아웃 튐 및 스크롤바/fixed 엘리먼트 흔들림 방지
+    const flyX = isMobile 
+      ? (Math.random() * 160 - 80) + 'px'    // 좌우 -80px ~ +80px
+      : (Math.random() * 400 - 200) + 'px'; // 좌우 -200px ~ +200px
+      
+    const flyY = isMobile
+      ? -(Math.random() * 100 + 150) + 'px'   // 위 -150px ~ -250px
+      : -(Math.random() * 200 + 300) + 'px'; // 위 -300px ~ -500px
+      
     return { flyX, flyY };
   }
 
