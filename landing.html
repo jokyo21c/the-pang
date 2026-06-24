@@ -1444,7 +1444,7 @@ section { position: relative; overflow: hidden; }
   box-shadow: none !important;
   border-radius: 4px;
   transition: none !important;
-  animation: flyAwayTrajectory 4.5s ease-out forwards;
+  animation: flyAwayTrajectory 3.5s ease-out forwards;
 }
 
 /* ── 비행 궤적 (translate + opacity) ── */
@@ -1456,12 +1456,12 @@ section { position: relative; overflow: hidden; }
 
 /* ── 우측 상단에서 자연스럽게 말림 ── */
 .real-flyer.is-flying .real-flyer__inner.curl-right {
-  animation: paperCurlRight 4.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: paperCurlRight 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 /* ── 좌측 상단에서 자연스럽게 말림 ── */
 .real-flyer.is-flying .real-flyer__inner.curl-left {
-  animation: paperCurlLeft 4.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: paperCurlLeft 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 /*
@@ -2428,11 +2428,12 @@ section { position: relative; overflow: hidden; }
         imgEl.src = 'images/' + nextImgNum + '.webp';
       }
       nextImgNum = (nextImgNum % 12) + 1;
-    }, 4500);
+    }, 3500);
   }
 
-  // 2초 마다 새로운 카드 날리기
-  setInterval(tossFrontCard, 2000);
+  // 즉시 첫 카드 날리기 실행 후 1.5초 마다 새로운 카드 날리기
+  tossFrontCard();
+  setInterval(tossFrontCard, 1500);
 
 })();
 </script>
