@@ -2449,8 +2449,8 @@ section { position: relative; overflow: hidden; }
     frontCard.style.setProperty('--fly-x', vars.flyX);
     frontCard.style.setProperty('--fly-y', vars.flyY);
 
-    // 1-2. 비행 속도/시간 랜덤화 (2.7초 ~ 4.2초로 수정)
-    const durationMs = Math.floor(Math.random() * 1500 + 2700); // 2700ms ~ 4200ms
+    // 1-2. 비행 속도/시간 랜덤화 (1.5초 ~ 2.7초로 조정하여 비행 속도 증가)
+    const durationMs = Math.floor(Math.random() * 1200 + 1500); // 1500ms ~ 2700ms
     frontCard.style.setProperty('--fly-duration', (durationMs / 1000).toFixed(2) + 's');
 
     // 2. 랜덤으로 우측/좌측 상단 말림 방향 선택
@@ -2493,7 +2493,7 @@ section { position: relative; overflow: hidden; }
     frontCard.classList.remove('real-flyer--front');
     frontCard.classList.add('is-flying');
 
-    // 4. 1초 후에 나머지 대기 카드들의 스택 클래스를 한 칸씩 밀어서 이동
+    // 4. 0.7초 후에 나머지 대기 카드들의 스택 클래스를 한 칸씩 밀어서 이동
     setTimeout(function() {
       // 4-1. middle -> front 승격
       const middleCard = cards.find(c => c.classList.contains('real-flyer--middle'));
@@ -2520,7 +2520,7 @@ section { position: relative; overflow: hidden; }
       if (pendingCard) {
         pendingCard.classList.add('real-flyer--back');
       }
-    }, 1000);
+    }, 700);
 
     // 5. 날아간 카드가 충분히 비행을 마치면 대기 상태로 회수 및 리셋
     setTimeout(function() {
@@ -2559,9 +2559,9 @@ section { position: relative; overflow: hidden; }
   // 첫 카드 즉시 날리기
   tossFrontCard();
 
-  // 대기 카드 토싱 주기를 1.4s ~ 2.6s 사이에서 매번 다르게 무작위로 예약
+  // 대기 카드 토싱 주기를 1.0s ~ 2.0s 사이에서 매번 다르게 무작위로 예약
   function scheduleNextToss() {
-    const nextInterval = Math.floor(Math.random() * 1200 + 1400); // 1400ms ~ 2600ms
+    const nextInterval = Math.floor(Math.random() * 1000 + 1000); // 1000ms ~ 2000ms
     setTimeout(function() {
       tossFrontCard();
       scheduleNextToss();
