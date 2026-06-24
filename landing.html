@@ -1463,12 +1463,12 @@ section { position: relative; overflow: hidden; }
 
 /* ── 우측 상단에서 자연스럽게 말림 ── */
 .real-flyer.is-flying .real-flyer__inner.curl-right {
-  animation: paperCurlRight var(--fly-duration, 3.5s) cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: paperCurlRight var(--fly-duration, 3.5s) linear forwards;
 }
 
 /* ── 좌측 상단에서 자연스럽게 말림 ── */
 .real-flyer.is-flying .real-flyer__inner.curl-left {
-  animation: paperCurlLeft var(--fly-duration, 3.5s) cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: paperCurlLeft var(--fly-duration, 3.5s) linear forwards;
 }
 
 /*
@@ -1478,22 +1478,22 @@ section { position: relative; overflow: hidden; }
  */
 @keyframes paperCurlRight {
   0% {
-    transform: rotate3d(0, 0, 0, 0deg) scale(1);
+    transform: rotate3d(0, 0, 0, 0deg) rotateZ(0deg) scale(1);
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   }
   /* 모서리가 깊게 말리며 부드럽게 감기는 강도 보정 */
   22% {
-    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-22, 55deg)) scale3d(1.08, 1.08, 1.08);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-22, 55deg)) rotateZ(0deg) scale3d(1.08, 1.08, 1.08);
     box-shadow: -12px 18px 30px rgba(0,0,0,0.3);
   }
   /* 말림 피크 시점 안정화 */
   42% {
-    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-42, 95deg)) scale3d(0.95, 0.95, 0.95);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-42, 95deg)) rotateZ(0deg) scale3d(0.95, 0.95, 0.95);
     box-shadow: -18px 26px 45px rgba(0,0,0,0.35);
   }
   /* 부드러운 회전 뒤집힘 및 그림자 이동 */
   60% {
-    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-60, 180deg)) scale3d(0.85, 0.85, 0.85);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-60, 180deg)) rotateZ(0deg) scale3d(0.85, 0.85, 0.85);
     box-shadow: -10px 14px 26px rgba(0,0,0,0.25);
   }
   80% {
@@ -1508,19 +1508,19 @@ section { position: relative; overflow: hidden; }
 
 @keyframes paperCurlLeft {
   0% {
-    transform: rotate3d(0, 0, 0, 0deg) scale(1);
+    transform: rotate3d(0, 0, 0, 0deg) rotateZ(0deg) scale(1);
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   }
   22% {
-    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-22, 55deg)) scale3d(1.08, 1.08, 1.08);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-22, 55deg)) rotateZ(0deg) scale3d(1.08, 1.08, 1.08);
     box-shadow: 12px 18px 30px rgba(0,0,0,0.3);
   }
   42% {
-    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-42, 95deg)) scale3d(0.95, 0.95, 0.95);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-42, 95deg)) rotateZ(0deg) scale3d(0.95, 0.95, 0.95);
     box-shadow: 18px 26px 45px rgba(0,0,0,0.35);
   }
   60% {
-    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-60, 180deg)) scale3d(0.85, 0.85, 0.85);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-60, 180deg)) rotateZ(0deg) scale3d(0.85, 0.85, 0.85);
     box-shadow: 10px 14px 26px rgba(0,0,0,0.25);
   }
   80% {
@@ -2371,24 +2371,75 @@ section { position: relative; overflow: hidden; }
   let nextImgNum = 6; // 처음 1~5는 HTML에 기본 탑재되어 있으므로 다음 채워질 이미지는 6번부터 시작
 
   function getFlightVariables() {
-    const isMobile = window.innerWidth < 480;
-    
-    // 비행 방향 및 각도 난수화 (30도 ~ 150도 범위로 주로 위 방향이지만 좌우 편차가 크도록)
-    const angleDeg = Math.random() * 120 + 30; // 30deg ~ 150deg
+    // 비행 상승 궤도 각도 제한: 위쪽 정 중앙(90도)을 기준으로 좌측과 우측으로 각각 10도~45도 랜덤
+    const isLeft = Math.random() > 0.5;
+    const angleOffset = Math.random() * 35 + 10; // 10deg ~ 45deg
+    const angleDeg = isLeft ? (90 + angleOffset) : (90 - angleOffset);
     const angleRad = angleDeg * Math.PI / 180;
     
-    // 날아가는 거리 랜덤화
-    const distance = isMobile 
-      ? (Math.random() * 120 + 160) // 160px ~ 280px
-      : (Math.random() * 250 + 350); // 350px ~ 600px
+    // 비행 거리 250px ~ 350px 으로 수정
+    const distance = Math.random() * 100 + 250; // 250px ~ 350px
       
     const flyX = (Math.cos(angleRad) * distance).toFixed(1) + 'px';
     const flyY = (-Math.sin(angleRad) * distance).toFixed(1) + 'px'; // 항상 음수로 위 방향 비행
       
-    return { flyX, flyY };
+    return { flyX, flyY, distance };
+  }
+
+  // 스택 무결성 복구 함수 (애니메이션 멈춤 현상 원천 방지)
+  function ensureStackIntegrity() {
+    const idleCards = cards.filter(c => !c.classList.contains('is-flying'));
+    
+    // 1. --front 보장
+    const hasFront = cards.some(c => c.classList.contains('real-flyer--front'));
+    if (!hasFront) {
+      const middleCard = cards.find(c => c.classList.contains('real-flyer--middle'));
+      if (middleCard) {
+        middleCard.classList.remove('real-flyer--middle');
+        middleCard.classList.add('real-flyer--front');
+      } else {
+        const anyIdle = idleCards.find(c => 
+          !c.classList.contains('real-flyer--front') && 
+          !c.classList.contains('real-flyer--middle') && 
+          !c.classList.contains('real-flyer--back')
+        );
+        if (anyIdle) anyIdle.classList.add('real-flyer--front');
+      }
+    }
+    
+    // 2. --middle 보장
+    const hasMiddle = cards.some(c => c.classList.contains('real-flyer--middle'));
+    if (!hasMiddle) {
+      const backCard = cards.find(c => c.classList.contains('real-flyer--back'));
+      if (backCard) {
+        backCard.classList.remove('real-flyer--back');
+        backCard.classList.add('real-flyer--middle');
+      } else {
+        const anyIdle = idleCards.find(c => 
+          !c.classList.contains('real-flyer--front') && 
+          !c.classList.contains('real-flyer--middle') && 
+          !c.classList.contains('real-flyer--back')
+        );
+        if (anyIdle) anyIdle.classList.add('real-flyer--middle');
+      }
+    }
+    
+    // 3. --back 보장
+    const hasBack = cards.some(c => c.classList.contains('real-flyer--back'));
+    if (!hasBack) {
+      const anyIdle = idleCards.find(c => 
+        !c.classList.contains('real-flyer--front') && 
+        !c.classList.contains('real-flyer--middle') && 
+        !c.classList.contains('real-flyer--back')
+      );
+      if (anyIdle) anyIdle.classList.add('real-flyer--back');
+    }
   }
 
   function tossFrontCard() {
+    // 스택 무결성 검사 및 복구 실행 (시간 경과 시 날아가지 않는 현상 완벽 해결)
+    ensureStackIntegrity();
+
     // 현재 가장 앞에 있는 카드 (real-flyer--front 클래스를 가진 카드)
     const frontCard = cards.find(c => c.classList.contains('real-flyer--front'));
     if (!frontCard) return;
@@ -2398,8 +2449,8 @@ section { position: relative; overflow: hidden; }
     frontCard.style.setProperty('--fly-x', vars.flyX);
     frontCard.style.setProperty('--fly-y', vars.flyY);
 
-    // 1-2. 비행 속도/시간 랜덤화 (2.2초 ~ 3.7초)
-    const durationMs = Math.floor(Math.random() * 1500 + 2200);
+    // 1-2. 비행 속도/시간 랜덤화 (2.7초 ~ 4.2초로 수정)
+    const durationMs = Math.floor(Math.random() * 1500 + 2700); // 2700ms ~ 4200ms
     frontCard.style.setProperty('--fly-duration', (durationMs / 1000).toFixed(2) + 's');
 
     // 2. 랜덤으로 우측/좌측 상단 말림 방향 선택
@@ -2411,19 +2462,21 @@ section { position: relative; overflow: hidden; }
       inner.classList.remove('curl-right', 'curl-left');
       inner.classList.add(curlRight ? 'curl-right' : 'curl-left');
 
-      // 회전 각도 및 축 랜덤화
-      const rotX = (curlRight ? -1 : 1) * (Math.random() * 0.4 + 0.8); // -0.8~-1.2 또는 0.8~1.2
-      const rotY = (Math.random() * 0.4 + 0.8); // 0.8~1.2
+      // 회전 각도 및 축 난수 범위를 대폭 축소하여 자연스럽게 회전하도록 수정
+      const rotX = (curlRight ? -1 : 1) * (Math.random() * 0.1 + 0.95); // 축 뒤틀림 감소
+      const rotY = (Math.random() * 0.1 + 0.95);
       
-      const finalRotDeg = Math.floor(Math.random() * 270 + 270); // 270deg ~ 540deg
+      // 1. 회전 속도를 이동 속도에 맞춰서 비행 거리에 비례하도록 계산 (250px일 때 125도, 350px일 때 175도)
+      const finalRotDeg = Math.floor(vars.distance * 0.5); 
       const rotDeg22 = Math.floor(finalRotDeg * 0.15) + 'deg';
       const rotDeg42 = Math.floor(finalRotDeg * 0.26) + 'deg';
       const rotDeg60 = Math.floor(finalRotDeg * 0.50) + 'deg';
       const rotDeg80 = Math.floor(finalRotDeg * 0.75) + 'deg';
       const rotDeg100 = finalRotDeg + 'deg';
       
-      const rotZ80 = (Math.random() * 50 - 25) + 'deg'; // -25deg ~ +25deg
-      const rotZ100 = (Math.random() * 140 - 70) + 'deg'; // -70deg ~ +70deg
+      // Z축 틸트 각도 제한 (좌우 흔들림을 차분하게 -15도 ~ 15도 내외로 억제)
+      const rotZ80 = (Math.random() * 16 - 8) + 'deg'; 
+      const rotZ100 = (Math.random() * 30 - 15) + 'deg'; 
       
       frontCard.style.setProperty('--rot-x', rotX.toFixed(2));
       frontCard.style.setProperty('--rot-y', rotY.toFixed(2));
@@ -2506,9 +2559,9 @@ section { position: relative; overflow: hidden; }
   // 첫 카드 즉시 날리기
   tossFrontCard();
 
-  // 대기 카드 토싱 주기를 1.2s ~ 2.4s 사이에서 매번 다르게 무작위로 예약
+  // 대기 카드 토싱 주기를 1.4s ~ 2.6s 사이에서 매번 다르게 무작위로 예약
   function scheduleNextToss() {
-    const nextInterval = Math.floor(Math.random() * 1200 + 1200); // 1200ms ~ 2400ms
+    const nextInterval = Math.floor(Math.random() * 1200 + 1400); // 1400ms ~ 2600ms
     setTimeout(function() {
       tossFrontCard();
       scheduleNextToss();
