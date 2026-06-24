@@ -623,25 +623,32 @@ section { position: relative; overflow: hidden; }
 
 /* S4 Pang Categories (Tabs) */
 .pang-categories {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 8px;
-  flex-wrap: wrap;
   margin: 32px 0 20px;
 }
 .pang-cat {
+  grid-column: span 2;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 50px;
-  padding: 10px 18px;
+  padding: 10px 4px;
   cursor: pointer;
   transition: all 0.25s ease;
   font-size: 13px;
   font-weight: 700;
   color: var(--text-secondary);
+}
+.pang-cat:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+.pang-cat:nth-child(5) {
+  grid-column: 4 / span 2;
 }
 .pang-cat i {
   font-size: 16px;
@@ -1444,7 +1451,7 @@ section { position: relative; overflow: hidden; }
   box-shadow: none !important;
   border-radius: 4px;
   transition: none !important;
-  animation: flyAwayTrajectory 3.5s ease-out forwards;
+  animation: flyAwayTrajectory var(--fly-duration, 3.5s) ease-out forwards;
 }
 
 /* ── 비행 궤적 (translate + opacity) ── */
@@ -1456,12 +1463,12 @@ section { position: relative; overflow: hidden; }
 
 /* ── 우측 상단에서 자연스럽게 말림 ── */
 .real-flyer.is-flying .real-flyer__inner.curl-right {
-  animation: paperCurlRight 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: paperCurlRight var(--fly-duration, 3.5s) cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 /* ── 좌측 상단에서 자연스럽게 말림 ── */
 .real-flyer.is-flying .real-flyer__inner.curl-left {
-  animation: paperCurlLeft 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: paperCurlLeft var(--fly-duration, 3.5s) cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 /*
@@ -1476,25 +1483,25 @@ section { position: relative; overflow: hidden; }
   }
   /* 모서리가 깊게 말리며 부드럽게 감기는 강도 보정 */
   22% {
-    transform: rotate3d(-1, 1, 0, 55deg) scale3d(1.08, 1.08, 1.08);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-22, 55deg)) scale3d(1.08, 1.08, 1.08);
     box-shadow: -12px 18px 30px rgba(0,0,0,0.3);
   }
   /* 말림 피크 시점 안정화 */
   42% {
-    transform: rotate3d(-1, 1, 0, 95deg) scale3d(0.95, 0.95, 0.95);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-42, 95deg)) scale3d(0.95, 0.95, 0.95);
     box-shadow: -18px 26px 45px rgba(0,0,0,0.35);
   }
   /* 부드러운 회전 뒤집힘 및 그림자 이동 */
   60% {
-    transform: rotate3d(-1, 1, 0, 180deg) scale3d(0.85, 0.85, 0.85);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-60, 180deg)) scale3d(0.85, 0.85, 0.85);
     box-shadow: -10px 14px 26px rgba(0,0,0,0.25);
   }
   80% {
-    transform: rotate3d(-1, 1, 0, 270deg) rotateZ(18deg) scale3d(0.65, 0.65, 0.65);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-80, 270deg)) rotateZ(var(--rot-z-80, 18deg)) scale3d(0.65, 0.65, 0.65);
     box-shadow: -5px 10px 18px rgba(0,0,0,0.18);
   }
   100% {
-    transform: rotate3d(-1, 1, 0, 360deg) rotateZ(40deg) scale3d(0.15, 0.15, 0.15);
+    transform: rotate3d(var(--rot-x, -1), var(--rot-y, 1), 0, var(--rot-deg-100, 360deg)) rotateZ(var(--rot-z-100, 40deg)) scale3d(0.15, 0.15, 0.15);
     box-shadow: 0 0 0 rgba(0,0,0,0);
   }
 }
@@ -1505,23 +1512,23 @@ section { position: relative; overflow: hidden; }
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   }
   22% {
-    transform: rotate3d(1, 1, 0, 55deg) scale3d(1.08, 1.08, 1.08);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-22, 55deg)) scale3d(1.08, 1.08, 1.08);
     box-shadow: 12px 18px 30px rgba(0,0,0,0.3);
   }
   42% {
-    transform: rotate3d(1, 1, 0, 95deg) scale3d(0.95, 0.95, 0.95);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-42, 95deg)) scale3d(0.95, 0.95, 0.95);
     box-shadow: 18px 26px 45px rgba(0,0,0,0.35);
   }
   60% {
-    transform: rotate3d(1, 1, 0, 180deg) scale3d(0.85, 0.85, 0.85);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-60, 180deg)) scale3d(0.85, 0.85, 0.85);
     box-shadow: 10px 14px 26px rgba(0,0,0,0.25);
   }
   80% {
-    transform: rotate3d(1, 1, 0, 270deg) rotateZ(-18deg) scale3d(0.65, 0.65, 0.65);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-80, 270deg)) rotateZ(var(--rot-z-80, -18deg)) scale3d(0.65, 0.65, 0.65);
     box-shadow: 5px 10px 18px rgba(0,0,0,0.18);
   }
   100% {
-    transform: rotate3d(1, 1, 0, 360deg) rotateZ(-40deg) scale3d(0.15, 0.15, 0.15);
+    transform: rotate3d(var(--rot-x, 1), var(--rot-y, 1), 0, var(--rot-deg-100, 360deg)) rotateZ(var(--rot-z-100, -40deg)) scale3d(0.15, 0.15, 0.15);
     box-shadow: 0 0 0 rgba(0,0,0,0);
   }
 }
@@ -1544,6 +1551,17 @@ section { position: relative; overflow: hidden; }
 @keyframes bounce {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50%       { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ── Scroll Reveal Animation ── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ══════════════════════════════════════════
@@ -1662,7 +1680,7 @@ section { position: relative; overflow: hidden; }
 <section class="pain-s" id="pain">
   <div class="container">
 
-    <h2 class="section-title">이런 <em>경험</em> 있으시죠?</h2>
+    <h2 class="section-title scroll-reveal">이런 <em>경험</em> 있으시죠?</h2>
 
     <div class="pain-list">
       <div class="pain-card" data-delay="0">
@@ -1697,7 +1715,7 @@ section { position: relative; overflow: hidden; }
 <section class="trend-s" id="trend">
   <div class="container">
 
-    <h2 class="section-title">지금은<br><em>숏폼의 시대</em>입니다</h2>
+    <h2 class="section-title scroll-reveal">지금은<br><em>숏폼의 시대</em>입니다</h2>
 
     <div class="platform-row">
       <div class="platform-badge">
@@ -1732,9 +1750,9 @@ section { position: relative; overflow: hidden; }
 <section class="solution-s" id="solution">
   <div class="container">
 
-    <h2 class="section-title">더팡이<br><em>30초로</em> 터뜨립니다</h2>
+    <h2 class="section-title scroll-reveal">더팡이<br><em>30초로</em> 터뜨립니다</h2>
 
-    <div class="pang-categories">
+    <div class="pang-categories scroll-reveal" data-delay="150">
       <div class="pang-cat active" data-cat="meok">
         <i class="ri-restaurant-2-line"></i>먹팡
       </div>
@@ -1752,7 +1770,7 @@ section { position: relative; overflow: hidden; }
       </div>
     </div>
 
-    <div class="pang-card-list">
+    <div class="pang-card-list scroll-reveal" data-delay="300">
       <!-- 먹팡 -->
       <div class="pang-card active" data-cat="meok">
         <div class="pang-card__header">
@@ -1825,7 +1843,7 @@ section { position: relative; overflow: hidden; }
 <section class="feature-s" id="features">
   <div class="container">
 
-    <h2 class="section-title">왜 <em>더팡</em>인가요?</h2>
+    <h2 class="section-title scroll-reveal">왜 <em>더팡</em>인가요?</h2>
 
     <div class="feature-list">
       <div class="feature-card" data-delay="0">
@@ -1880,7 +1898,7 @@ section { position: relative; overflow: hidden; }
 <section class="process-s" id="process">
   <div class="container">
 
-    <h2 class="section-title">이렇게 <em>진행</em>됩니다</h2>
+    <h2 class="section-title scroll-reveal">이렇게 <em>진행</em>됩니다</h2>
 
     <div class="process-list">
       <div class="process-item" data-delay="0">
@@ -1919,7 +1937,7 @@ section { position: relative; overflow: hidden; }
 <section class="review-s" id="reviews">
   <div class="container">
 
-    <h2 class="section-title">사장님들의 실제 <em>후기</em></h2>
+    <h2 class="section-title scroll-reveal">사장님들의 실제 <em>후기</em></h2>
 
     <div class="review-list">
       <div class="review-card" data-delay="0">
@@ -1975,9 +1993,9 @@ section { position: relative; overflow: hidden; }
 <section class="faq-mini-s" id="faq">
   <div class="container">
 
-    <h2 class="section-title">자주 묻는 <em>질문</em></h2>
+    <h2 class="section-title scroll-reveal">자주 묻는 <em>질문</em></h2>
 
-    <div class="faq-mini-list">
+    <div class="faq-mini-list scroll-reveal" data-delay="150">
       <div class="faq-mini-item">
         <button class="faq-mini-q">
           <span>기획부터 제작까지 얼마나 걸리나요?</span>
@@ -2022,10 +2040,10 @@ section { position: relative; overflow: hidden; }
 <section class="cta-s" id="cta">
   <div class="container">
 
-    <h2 class="section-title" style="position:relative;z-index:1;">지금 <em>한 방</em><br>내볼까요?</h2>
+    <h2 class="section-title scroll-reveal" style="position:relative;z-index:1;">지금 <em>한 방</em><br>내볼까요?</h2>
 
 
-    <div class="cta-buttons">
+    <div class="cta-buttons scroll-reveal" data-delay="150">
       <a href="https://더팡.store" target="_blank" class="btn-primary">
         <i class="ri-rocket-line"></i> 견적 신청하기
       </a>
@@ -2033,7 +2051,7 @@ section { position: relative; overflow: hidden; }
         <i class="ri-kakao-talk-fill"></i> 카톡으로 문의
       </a>
     </div>
-    <p class="cta-s__note">📌 상담은 무료이며, 부담 없이 문의 가능합니다</p>
+    <p class="cta-s__note scroll-reveal" data-delay="300">📌 상담은 무료이며, 부담 없이 문의 가능합니다</p>
   </div>
 </section>
 
@@ -2232,7 +2250,7 @@ section { position: relative; overflow: hidden; }
   }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 
   document.querySelectorAll(
-    '.pain-card, .stat-item, .process-item, .review-card'
+    '.pain-card, .stat-item, .process-item, .review-card, .scroll-reveal'
   ).forEach(function (el) { observer.observe(el); });
 
   /* ── Feature Card 전용 Observer (threshold:0 — -110vw 슬라이드인) ── */
@@ -2354,14 +2372,18 @@ section { position: relative; overflow: hidden; }
 
   function getFlightVariables() {
     const isMobile = window.innerWidth < 480;
-    // 모바일 환경에서 화면 바깥 이탈로 인한 전체 레이아웃 튐 및 스크롤바/fixed 엘리먼트 흔들림 방지
-    const flyX = isMobile 
-      ? (Math.random() * 160 - 80) + 'px'    // 좌우 -80px ~ +80px
-      : (Math.random() * 400 - 200) + 'px'; // 좌우 -200px ~ +200px
+    
+    // 비행 방향 및 각도 난수화 (30도 ~ 150도 범위로 주로 위 방향이지만 좌우 편차가 크도록)
+    const angleDeg = Math.random() * 120 + 30; // 30deg ~ 150deg
+    const angleRad = angleDeg * Math.PI / 180;
+    
+    // 날아가는 거리 랜덤화
+    const distance = isMobile 
+      ? (Math.random() * 120 + 160) // 160px ~ 280px
+      : (Math.random() * 250 + 350); // 350px ~ 600px
       
-    const flyY = isMobile
-      ? -(Math.random() * 100 + 150) + 'px'   // 위 -150px ~ -250px
-      : -(Math.random() * 200 + 300) + 'px'; // 위 -300px ~ -500px
+    const flyX = (Math.cos(angleRad) * distance).toFixed(1) + 'px';
+    const flyY = (-Math.sin(angleRad) * distance).toFixed(1) + 'px'; // 항상 음수로 위 방향 비행
       
     return { flyX, flyY };
   }
@@ -2371,10 +2393,14 @@ section { position: relative; overflow: hidden; }
     const frontCard = cards.find(c => c.classList.contains('real-flyer--front'));
     if (!frontCard) return;
 
-    // 1. 비행 난수값 주입
+    // 1-1. 비행 궤적 난수값 주입
     const vars = getFlightVariables();
     frontCard.style.setProperty('--fly-x', vars.flyX);
     frontCard.style.setProperty('--fly-y', vars.flyY);
+
+    // 1-2. 비행 속도/시간 랜덤화 (2.2초 ~ 3.7초)
+    const durationMs = Math.floor(Math.random() * 1500 + 2200);
+    frontCard.style.setProperty('--fly-duration', (durationMs / 1000).toFixed(2) + 's');
 
     // 2. 랜덤으로 우측/좌측 상단 말림 방향 선택
     const curlRight = Math.random() > 0.5;
@@ -2384,6 +2410,30 @@ section { position: relative; overflow: hidden; }
       inner.style.transformOrigin = curlRight ? 'top right' : 'top left';
       inner.classList.remove('curl-right', 'curl-left');
       inner.classList.add(curlRight ? 'curl-right' : 'curl-left');
+
+      // 회전 각도 및 축 랜덤화
+      const rotX = (curlRight ? -1 : 1) * (Math.random() * 0.4 + 0.8); // -0.8~-1.2 또는 0.8~1.2
+      const rotY = (Math.random() * 0.4 + 0.8); // 0.8~1.2
+      
+      const finalRotDeg = Math.floor(Math.random() * 270 + 270); // 270deg ~ 540deg
+      const rotDeg22 = Math.floor(finalRotDeg * 0.15) + 'deg';
+      const rotDeg42 = Math.floor(finalRotDeg * 0.26) + 'deg';
+      const rotDeg60 = Math.floor(finalRotDeg * 0.50) + 'deg';
+      const rotDeg80 = Math.floor(finalRotDeg * 0.75) + 'deg';
+      const rotDeg100 = finalRotDeg + 'deg';
+      
+      const rotZ80 = (Math.random() * 50 - 25) + 'deg'; // -25deg ~ +25deg
+      const rotZ100 = (Math.random() * 140 - 70) + 'deg'; // -70deg ~ +70deg
+      
+      frontCard.style.setProperty('--rot-x', rotX.toFixed(2));
+      frontCard.style.setProperty('--rot-y', rotY.toFixed(2));
+      frontCard.style.setProperty('--rot-deg-22', rotDeg22);
+      frontCard.style.setProperty('--rot-deg-42', rotDeg42);
+      frontCard.style.setProperty('--rot-deg-60', rotDeg60);
+      frontCard.style.setProperty('--rot-deg-80', rotDeg80);
+      frontCard.style.setProperty('--rot-deg-100', rotDeg100);
+      frontCard.style.setProperty('--rot-z-80', rotZ80);
+      frontCard.style.setProperty('--rot-z-100', rotZ100);
     }
 
     // 3. 날리기 동작 트리거 (스택 클래스인 --front는 즉시 제거하여 스택에서 제외)
@@ -2419,7 +2469,7 @@ section { position: relative; overflow: hidden; }
       }
     }, 1000);
 
-    // 5. 날아간 카드가 충분히 비행을 마치면(4.5초) 대기 상태로 회수 및 리셋
+    // 5. 날아간 카드가 충분히 비행을 마치면 대기 상태로 회수 및 리셋
     setTimeout(function() {
       frontCard.classList.remove('is-flying');
 
@@ -2427,7 +2477,22 @@ section { position: relative; overflow: hidden; }
       if (inner) {
         inner.classList.remove('curl-right', 'curl-left');
         inner.style.transformOrigin = '';
+        
+        // 커스텀 스타일 속성 일괄 제거
+        frontCard.style.removeProperty('--rot-x');
+        frontCard.style.removeProperty('--rot-y');
+        frontCard.style.removeProperty('--rot-deg-22');
+        frontCard.style.removeProperty('--rot-deg-42');
+        frontCard.style.removeProperty('--rot-deg-60');
+        frontCard.style.removeProperty('--rot-deg-80');
+        frontCard.style.removeProperty('--rot-deg-100');
+        frontCard.style.removeProperty('--rot-z-80');
+        frontCard.style.removeProperty('--rot-z-100');
       }
+      
+      frontCard.style.removeProperty('--fly-x');
+      frontCard.style.removeProperty('--fly-y');
+      frontCard.style.removeProperty('--fly-duration');
 
       // 이미지 변경 (1~12 순환)
       const imgEl = frontCard.querySelector('img');
@@ -2435,12 +2500,21 @@ section { position: relative; overflow: hidden; }
         imgEl.src = 'images/' + nextImgNum + '.webp';
       }
       nextImgNum = (nextImgNum % 12) + 1;
-    }, 3500);
+    }, durationMs);
   }
 
-  // 즉시 첫 카드 날리기 실행 후 1.5초 마다 새로운 카드 날리기
+  // 첫 카드 즉시 날리기
   tossFrontCard();
-  setInterval(tossFrontCard, 1500);
+
+  // 대기 카드 토싱 주기를 1.2s ~ 2.4s 사이에서 매번 다르게 무작위로 예약
+  function scheduleNextToss() {
+    const nextInterval = Math.floor(Math.random() * 1200 + 1200); // 1200ms ~ 2400ms
+    setTimeout(function() {
+      tossFrontCard();
+      scheduleNextToss();
+    }, nextInterval);
+  }
+  scheduleNextToss();
 
 })();
 </script>
